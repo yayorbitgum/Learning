@@ -25,7 +25,7 @@ phone_regex = re.compile(r'(\d{3}|\(\d{3}\))?'            # Group 0: Area Code (
 # Expression to grab email addresses.
 email_regex = re.compile(r'('                       # Start regex group 0.
                          r'[a-zA-Z0-9._%+-]+'       # Username [One or more+ characters that can be any shown here.]
-                         r'@'                       # The @ symbol that's probably going to be present.
+                         r'@'                       # The @ symbol that's hopefully going to be present.
                          r'[a-zA-Z0-9.-]+'          # Domain name [similar to username matching], but happens after @.
                          r'(\.[a-zA-Z]{2,4})'       # dot (.), then 2-4 letters a through z: com, org, .etc
                          r')'                       # End regex group 0.
