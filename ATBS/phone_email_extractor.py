@@ -102,15 +102,13 @@ def find_email_matches(user_clipboard):
         email_matches.append(email[0])
 
 
-def copy_results_to_clipboard():
+def copy_results():
     """
-    Reveal results and copy them to user clipboard, if there are any,
-    then reset/clear the lists for next use.
+    Copy all results to the user's clipboard, if there are any.
     """
 
     # If either matches list is not empty:
     if len(email_matches) > 0 or len(phone_matches) > 0:
-
         # Join each result in the matches lists, to a string, with a new line \n.
         # We do this so we don't give the user the raw list format with brackets and everything.
         # .join() actually iterates! I didn't know that.
@@ -119,28 +117,42 @@ def copy_results_to_clipboard():
         # Combine and copy these results to the user's clipboard.
         pyperclip.copy(f"{ph_results}\n{em_results}")
 
-        # Show us results were copied to the clipboard, for feedback.
-        print(f"\nPhone Results:")
-        for number in phone_matches:
-            print(number)
-
-        print(f"\nEmail Results:")
-        for email in email_matches:
-            print(email)
-
-        print(f"\nCopied {len(email_matches)+len(phone_matches)} results to your clipboard.\n"
-              f"Now you can paste it wherever you want.\n"
-              f"---------------------------------------------------------------------------\n")
-
-        # Finally, empty the lists to be re-used, so clipboard doesn't multiply with multiple runs.
-        del email_matches[:]
-        del phone_matches[:]
+        # Since we've copied the results to the clipboard, we'll always then want to
+        #   - Show results for feedback so the user isn't confused about if anything even happened.
+        #   - Clear the lists so we can run this as much as we want after.
+        show_results()
+        clear_matches()
 
     # If neither regex found any matches, then the lengths will be zero, so we come here.
     else:
         print("///////////////////////////////////////////////////////////////////////"
               "\nNo phone number or email address was found in your clipboard content.\n"
               "///////////////////////////////////////////////////////////////////////")
+
+
+def show_results():
+    """
+    Show us results were copied to the clipboard, for feedback.
+    """
+    print(f"\nPhone Results:")
+    for number in phone_matches:
+        print(number)
+
+    print(f"\nEmail Results:")
+    for email in email_matches:
+        print(email)
+
+    print(f"\nCopied {len(email_matches)+len(phone_matches)} results to your clipboard.\n"
+          f"Now you can paste it wherever you want.\n"
+          f"---------------------------------------------------------------------------\n")
+
+
+def clear_matches():
+    """
+    Empty the lists to be re-used, so clipboard doesn't multiply with multiple runs.
+    """
+    del email_matches[:]
+    del phone_matches[:]
 
 
 def press_play():
@@ -160,7 +172,7 @@ def press_play():
             pasted_clipboard = str(pyperclip.paste())
             # Toss it into check_for_matches function.
             check_for_matches(pasted_clipboard)
-            copy_results_to_clipboard()
+            copy_results()
         else:
             break
 
