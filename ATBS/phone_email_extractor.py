@@ -11,16 +11,17 @@ import re
 
 # //////////////////////////////////////// Regular Expressions ////////////////////
 # Expression to grab phone numbers.
-# Example: (555) 555-5555 ext 1234
-phone_regex = re.compile(r'(\d{3}|\(\d{3}\))?'            # Group 0: Area Code (optional): 555 or (555).
-                         r'(\s|\.|-)?'                    # Group 1: Separator (optional): Spaces, periods or dashes.
-                         r'(\d{3})'                       # Group 2: Prefix: 555. 
-                         r'(\s|\.|-)'                     # Group 3: Separator.
-                         r'(\d{4})'                       # Group 4: Line: 5555.
-                         r'(,?\s*?'                       # Opening Group 5: Whole Extension (optional): ext. 55555
-                         r'(ext|x|ext.|extension|ex)\s*'    # Sub-group 6: Extension prefix and spaces.
-                         r'(\d{2,5})'                       # Sub-group 7: The extension numbers.
-                         r')?'                            # Closing Group 5.
+# Example: +1 (555) 555-5555 ext 1234
+phone_regex = re.compile(r'(\+\s*?\d{1,3})?\s*?'            # Group 0: Country code (optional): +1, + 23, etc.
+                         r'(\d{3}|\(\d{3}\))?'            # Group 1: Area Code (optional): 555 or (555).
+                         r'(\s|\.|-)?'                    # Group 2: Separator (optional): Spaces, periods or dashes.
+                         r'(\d{3})'                       # Group 3: Prefix: 555. 
+                         r'(\s|\.|-)'                     # Group 4: Separator.
+                         r'(\d{4})'                       # Group 5: Line: 5555.
+                         r'(,?\s*?'                       # Opening Group 6: Whole Extension (optional): ext. 55555
+                         r'(ext|x|ext.|extension|ex)\s*'    # Sub-group 7: Extension prefix and spaces.
+                         r'(\d{2,5})'                       # Sub-group 8: The extension numbers.
+                         r')?'                            # Closing Group 6.
                          )
 
 # Expression to grab email addresses.
@@ -61,15 +62,33 @@ def find_phone_matches(user_clipboard):
 
     # For each phone number found with the regex scanning the clipboard content coming in:
     for phone in phone_regex.findall(user_clipboard):
-        # If we have an extension indicator, ie regex group 6 isn't blank:
-        if phone[6] != '':
-            # Format and append to list, eg: 555.555.5555 ext 55555
-            phone_num = f"{phone[0]}.{phone[2]}.{phone[4]}, ext {phone[7]}"
-            phone_matches.append(phone_num)
+        # The way I format based on optional extensions and country codes seems really messy.
+        # Feels too much like "choose your own adventure" here.
+        # Not sure how to approach fixing that.
+
+        # If there's a country code present:
+        if phone[0] != '':
+            # And if we have an extension indicator, ie regex group 7 isn't blank:
+            if phone[7] != '':
+                # Format and append to list, eg: +1 555.555.5555 ext 55555
+                phone_num = f"{phone[0]} {phone[1]}.{phone[3]}.{phone[5]} ext {phone[8]}"
+                phone_matches.append(phone_num)
+            else:
+                # Otherwise format and add to list, without extension.
+                phone_num = f"{phone[0]} {phone[1]}.{phone[3]}.{phone[5]}"
+                phone_matches.append(phone_num)
+
+        # Otherwise if there's no country code:
         else:
-            # Otherwise format and add to list, without extension.
-            phone_num = f"{phone[0]}.{phone[2]}.{phone[4]}"
-            phone_matches.append(phone_num)
+            # And if we have an extension indicator, ie regex group 7 isn't blank:
+            if phone[7] != '':
+                # Format and append to list, eg: 555.555.5555 ext 55555
+                phone_num = f"{phone[1]}.{phone[3]}.{phone[5]} ext {phone[8]}"
+                phone_matches.append(phone_num)
+            else:
+                # Otherwise format and add to list, without extension.
+                phone_num = f"{phone[1]}.{phone[3]}.{phone[5]}"
+                phone_matches.append(phone_num)
 
 
 def find_email_matches(user_clipboard):
@@ -110,7 +129,8 @@ def copy_results_to_clipboard():
             print(email)
 
         print(f"\nCopied {len(email_matches)+len(phone_matches)} results to your clipboard.\n"
-              f"Now you can paste it wherever you want.\n")
+              f"Now you can paste it wherever you want.\n"
+              f"---------------------------------------------------------------------------\n")
 
         # Finally, empty the lists to be re-used, so clipboard doesn't multiply with multiple runs.
         del email_matches[:]
