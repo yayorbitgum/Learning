@@ -11,6 +11,7 @@ import re
 
 # //////////////////////////////////////// Regular Expressions ////////////////////
 # Expression to grab phone numbers.
+# Example: (555) 555-5555 ext 1234
 phone_regex = re.compile(r'(\d{3}|\(\d{3}\))?'            # Group 0: Area Code (optional): 555 or (555).
                          r'(\s|\.|-)?'                    # Group 1: Separator (optional): Spaces, periods or dashes.
                          r'(\d{3})'                       # Group 2: Prefix: 555. 
@@ -23,6 +24,7 @@ phone_regex = re.compile(r'(\d{3}|\(\d{3}\))?'            # Group 0: Area Code (
                          )
 
 # Expression to grab email addresses.
+# Example: johnruththehangman@wowee.gov
 email_regex = re.compile(r'('                       # Start regex group 0.
                          r'[a-zA-Z0-9._%+-]+'       # Username [One or more+ characters that can be any shown here.]
                          r'@'                       # The @ symbol that's hopefully going to be present.
