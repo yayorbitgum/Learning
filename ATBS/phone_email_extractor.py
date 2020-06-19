@@ -12,7 +12,7 @@ import re
 # //////////////////////////////////////// Regular Expressions ////////////////////
 # Expression to grab phone numbers.
 # Example: +1 (555) 555-5555 ext 1234
-phone_regex = re.compile(r'(\+\s*?\d{1,3})?\s*?'            # Group 0: Country code (optional): +1, + 23, etc.
+phone_regex = re.compile(r'(\+\s*?\d{1,3})?\s*?'          # Group 0: Country code (optional): +1, + 23, etc.
                          r'(\d{3}|\(\d{3}\))?'            # Group 1: Area Code (optional): 555 or (555).
                          r'(\s|\.|-)?'                    # Group 2: Separator (optional): Spaces, periods or dashes.
                          r'(\d{3})'                       # Group 3: Prefix: 555. 
