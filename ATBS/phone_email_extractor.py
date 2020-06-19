@@ -101,10 +101,9 @@ def find_email_matches(user_clipboard):
 
 def remove_dupes(clean_me):
     """
-    This should remove any duplicate entries in the matches we pass in as the clean_me argument.
+    This should remove any duplicate entries in the matches lists we pass in as the clean_me argument.
     Since we can't have duplicate keys in a dictionary, we convert the list to dictionary keys,
     then back to a list.
-    I end up pasting this function a lot below. I hope this is the best way to approach this.
     """
     cleaned = list(dict.fromkeys(clean_me))
     return cleaned
@@ -182,7 +181,7 @@ def clear_matches():
 
 
 def paste_clipboard():
-    """Paste out current clipboard and return it!"""
+    """Paste out current clipboard and return it."""
     pasted_clipboard = str(pyperclip.paste())
     return pasted_clipboard
 
