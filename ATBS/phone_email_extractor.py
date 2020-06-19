@@ -211,7 +211,7 @@ def press_play():
     while True:
         user_input = input("\nCopy the text you want to scan into your clipboard (CTRL+C). "
                            "\nIf it's already copied, hit enter to continue."
-                           "\nYou can also enter q to quit.\n")
+                           "\nYou can also enter q to quit.\n").strip()
 
         if user_input != 'q':
             # Check for matches in our pyperclip pasted clipboard.
