@@ -62,32 +62,37 @@ def find_phone_matches(user_clipboard):
     # For each phone number found with the regex scanning the clipboard content coming in,
     # after first removing duplicates from that list:
     for phone in remove_dupes(phone_regex.findall(user_clipboard)):
-        # The way I format based on optional extensions and country codes seems really messy.
-        # Feels too much like "choose your own adventure" here.
-        # Not sure how to approach fixing that.
+        # Originally I was just formatting with regex groups, but assigning variables
+        # made it easier for me to read below.
+        country = phone[0]
+        area = phone[1]
+        prefix = phone[3]
+        line = phone[5]
+        ext_indicator = phone[7]
+        extension = phone[8]
 
         # If there's a country code present:
-        if phone[0] != '':
+        if country != '':
             # And if we have an extension indicator, ie regex group 7 isn't blank:
-            if phone[7] != '':
-                # Format and append to list, eg: +1 555.555.5555 ext 55555
-                phone_num = f"{phone[0]} {phone[1]}.{phone[3]}.{phone[5]} ext {phone[8]}"
+            if ext_indicator != '':
+                # Format and append to list.
+                phone_num = f"{country} {area}.{prefix}.{line} ext {extension}"
                 phone_matches.append(phone_num)
             else:
                 # Otherwise format and add to list, without extension.
-                phone_num = f"{phone[0]} {phone[1]}.{phone[3]}.{phone[5]}"
+                phone_num = f"{country} {area}.{prefix}.{line}"
                 phone_matches.append(phone_num)
 
         # Otherwise if there's no country code:
         else:
             # And if we have an extension indicator, ie regex group 7 isn't blank:
-            if phone[7] != '':
-                # Format and append to list, eg: 555.555.5555 ext 55555
-                phone_num = f"{phone[1]}.{phone[3]}.{phone[5]} ext {phone[8]}"
+            if ext_indicator != '':
+                # Format and append to list.
+                phone_num = f"{area}.{prefix}.{line} ext {extension}"
                 phone_matches.append(phone_num)
             else:
                 # Otherwise format and add to list, without extension.
-                phone_num = f"{phone[1]}.{phone[3]}.{phone[5]}"
+                phone_num = f"{area}.{prefix}.{line}"
                 phone_matches.append(phone_num)
 
 
