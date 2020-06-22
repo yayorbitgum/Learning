@@ -74,17 +74,32 @@ def check_distance_smart():
     # If the distance between the center of my sky, and the ISS is less than 400 miles:
     # 400 miles is about the length of Oklahoma, because why not.
     if current_distance < 400:
-        print(f"\nThe ISS is flying over Oklahoma right now, just about!")
-        print(f"Currently the ISS is about {current_distance} miles from the center of your sky.")
+        print(f"The ISS is flying over Oklahoma right now, just about!")
+        print(f"Currently the ISS is about {current_distance} miles from the center of your sky.\n")
 
     else:
-        print(f"\nThe ISS is {current_distance:,} miles away from OKC.")
+        print(f"The ISS is {current_distance:,} miles away from OKC.")
         # Maybe later I could have it show what location it's above based on coordinates.
-        print(f"It's current coordinates are {longitude} degrees N/S by {latitude} degrees E/W.")
+        print(f"It's current coordinates are {longitude} degrees N/S by {latitude} degrees E/W.\n")
+
+
+def get_rate_and_start():
+    try:
+        rate = float(input("Please enter your preferred update rate in seconds, "
+                           "then hit enter to start tracking:\n"))
+        print(f"Your update rate is set to once per {rate} seconds.\n")
+        return rate
+
+    except ValueError:
+        print("\nWell, since you didn't enter a number, I'll just set it to 1 second.\n")
+        pause(3)
+        return 1
 
 
 # //////////////////////////////////////////// Requests/Program ////////////////////////////////////////////
-input("This program will keep running until you close it. Hit enter to start tracking...")
+print("This program will keep running until you close it.")
+update_rate = get_rate_and_start()
+
 
 # My current location, roughly. I'm sure I could automate this later for custom input.
 # Someone somewhere has a list of coordinates you can pull for cities/countries, surely.
@@ -104,24 +119,30 @@ while True:
     # Then we can work with the dictionary more easily, with dictionary functions.
     iss_dict = dict(iss_json)
 
-    # Now we pick apart the nested dictionaries to get the positions we want.
-    # We can see Longitude and Latitude are nested inside "iss_position" dictionary.
-    # So let's get that one first. I forgot how to get keys from dictionaries, so I Googled.
-    # https://www.geeksforgeeks.org/get-method-dictionaries-python/
-    iss_pos = iss_dict.get("iss_position")
+    status = iss_dict.get("message")
 
-    # Then from that, grab the values for these keys, and make them floats so we can use them as numbers.
-    # The strings need to be converted to floats because they're numbers like "32.9035".
-    longitude = float(iss_pos.get("longitude"))
-    latitude = float(iss_pos.get("latitude"))
+    if status == "success":
+        # Now we pick apart the nested dictionaries to get the positions we want.
+        # We can see Longitude and Latitude are nested inside "iss_position" dictionary.
+        # So let's get that one first. I forgot how to get keys from dictionaries, so I Googled.
+        # https://www.geeksforgeeks.org/get-method-dictionaries-python/
+        iss_pos = iss_dict.get("iss_position")
 
-    # Get the differences, ie how close the ISS is to being above OKC in degrees.
-    # The absolute value just means the value regardless whether it's negative or positive. Thanks Google.
-    # https://stackoverflow.com/questions/49180302/check-if-2-given-number-are-close-to-each-other-python
-    iss_longitude_vicinity = abs(longitude - okc_long)
-    iss_latitude_vicinity = abs(latitude - okc_lat)
+        # Then from that, grab the values for these keys, and make them floats so we can use them as numbers.
+        # The strings need to be converted to floats because they're numbers like "32.9035".
+        longitude = float(iss_pos.get("longitude"))
+        latitude = float(iss_pos.get("latitude"))
 
-    # Check and display the current distance.
-    check_distance_smart()
-    # Pause for 5 seconds before looping again.
-    pause(5)
+        # Get the differences, ie how close the ISS is to being above OKC in degrees.
+        # The absolute value just means the value regardless whether it's negative or positive. Thanks Google.
+        # https://stackoverflow.com/questions/49180302/check-if-2-given-number-are-close-to-each-other-python
+        iss_longitude_vicinity = abs(longitude - okc_long)
+        iss_latitude_vicinity = abs(latitude - okc_lat)
+
+        # Check and display the current distance.
+        check_distance_smart()
+        # Pause for 1 second before looping again.
+        pause(update_rate)
+
+    else:
+        print(f"Update failed! Received message: {status}. Retrying...")
