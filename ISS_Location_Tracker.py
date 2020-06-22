@@ -56,6 +56,12 @@ def check_distance_dumb():
     I just roughly guessed based on a map of the US that shows long/lat lines.
     """
 
+    # Get the differences, ie how close the ISS is to being above OKC in degrees.
+    # The absolute value just means the value regardless whether it's negative or positive. Thanks Google.
+    # https://stackoverflow.com/questions/49180302/check-if-2-given-number-are-close-to-each-other-python
+    iss_longitude_vicinity = abs(longitude - okc_long)
+    iss_latitude_vicinity = abs(latitude - okc_lat)
+
     # We can check to see if the ISS coordinates are within 10 degrees of my current location.
     # Looking at a map, longitude within 10-15 degrees is more or less straight above.
     # Latitude within 15-20 degrees is roughly about the same.
@@ -132,12 +138,6 @@ while True:
         # The strings need to be converted to floats because they're numbers like "32.9035".
         longitude = float(iss_pos.get("longitude"))
         latitude = float(iss_pos.get("latitude"))
-
-        # Get the differences, ie how close the ISS is to being above OKC in degrees.
-        # The absolute value just means the value regardless whether it's negative or positive. Thanks Google.
-        # https://stackoverflow.com/questions/49180302/check-if-2-given-number-are-close-to-each-other-python
-        iss_longitude_vicinity = abs(longitude - okc_long)
-        iss_latitude_vicinity = abs(latitude - okc_lat)
 
         # Check and display the current distance.
         check_distance_smart()
