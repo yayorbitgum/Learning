@@ -1,9 +1,23 @@
 # Keeps track of current International Space Station location, and checks to see if it's above me or nearby.
+#
 # Initially started as practicing requests but then I found a neat API for the ISS.
 # http://api.open-notify.org/
-# Still a work in progress!
+#
+# Every link and resource I come across is just the result of Googling.
+
 
 # //////////////////////////////////////////// Imports ////////////////////////////////////////////
+# For going through large data files very quickly without needing a server or ridiculous amounts of RAM.
+# https://github.com/vaexio/vaex
+# https://www.christopherlovell.co.uk/blog/2016/04/27/h5py-intro.html
+import os
+import glob
+from zipfile import ZipFile
+import numpy as np
+import pandas as pd
+import h5py
+import vaex
+# And then my stuff.
 import requests
 import math
 from time import sleep as pause
@@ -14,7 +28,7 @@ def get_distance_miles():
     """
     Can I find the actual distance between two coordinates?
     Maybe I could show how close the ISS is to me?
-    Well let's see what Google says and do what they say to do. Ala copy and paste.
+    Well let's see what Google says and do what they say to do. Learn and copy and paste.
     https://kite.com/python/answers/how-to-find-the-distance-between-two-lat-long-coordinates-in-python
     """
 
@@ -26,10 +40,8 @@ def get_distance_miles():
     iss_long_rad = math.radians(longitude)
     iss_lat_rad = math.radians(latitude)
 
-    # This is measured in Freedom Units (miles). We could always convert later lol.
-    # Since I'm entering the radius of the earth in miles, I'm assuming my distance result will be miles too.
-    # Hopefully.
-    radius_of_earth = 3958.8
+    # This is measured in kilometers.
+    radius_of_earth = 6378
 
     # Now get the difference between the coordinates.
     diff_long = iss_long_rad - okc_long_rad
@@ -102,6 +114,21 @@ def get_rate_and_start():
         return 1
 
 
+def get_current_iss_real_location():
+    """
+    I found some data for locations, ie tying coordinates to names/etc on the map.
+    For US locations:
+    https://www.usgs.gov/core-science-systems/ngp/board-on-geographic-names/download-gnis-data
+    For foreign locations:
+    https://geonames.nga.mil/gns/html/namefiles.html
+    These files are sort of big, so I need to learn how to work with them.
+    https://towardsdatascience.com/how-to-analyse-100s-of-gbs-of-data-on-your-laptop-with-python-f83363dda94
+    """
+    # TODO:
+    #  I still need to figure out how to convert these text files to hdf5, with h5py.
+    #  Check hdf5_conversion.py.
+
+
 # //////////////////////////////////////////// Requests/Program ////////////////////////////////////////////
 print("This program will keep running until you close it.")
 update_rate = get_rate_and_start()
@@ -117,10 +144,10 @@ while True:
     # Get the iss-now info response. Should be response 200 if all is well.
     # I found a nice big list of response codes here for debugging:
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-    response = requests.get("http://api.open-notify.org/iss-now.json")
+    iss_response = requests.get("http://api.open-notify.org/iss-now.json")
 
     # We can tell it's a json file in the URL, so convert the response to json object.
-    iss_json = response.json()
+    iss_json = iss_response.json()
     # Make a copy of the json object as a dictionary, since that's all it seems to be.
     # Then we can work with the dictionary more easily, with dictionary functions.
     iss_dict = dict(iss_json)
