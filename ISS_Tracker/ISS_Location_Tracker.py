@@ -11,7 +11,7 @@
 # https://github.com/vaexio/vaex
 # https://www.christopherlovell.co.uk/blog/2016/04/27/h5py-intro.html
 from zipfile import ZipFile
-import pandas as pd
+# import pandas as pd
 # import h5py
 # import vaex
 
