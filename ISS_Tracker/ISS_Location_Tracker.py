@@ -17,10 +17,18 @@ import numpy as np
 import pandas as pd
 import h5py
 import vaex
+
 # And then my stuff.
 import requests
 import math
 from time import sleep as pause
+
+
+# //////////////////////////////////////////// Variables and Values ////////////////////////////////////////////
+# My current location, roughly. I'm sure I could automate this later for custom input.
+# Someone somewhere has a list of coordinates you can pull for cities/countries, surely.
+okc_long = 35.4676
+okc_lat = 97.5164
 
 
 # //////////////////////////////////////////// Functions ////////////////////////////////////////////
@@ -54,7 +62,6 @@ def get_distance_miles():
     # "c" probably stands for circle. Again, not sure.
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     distance = radius_of_earth * c
-
     # That gave me a long number with a lot of decimals, so I'm gonna round it up.
     # https://www.geeksforgeeks.org/round-function-python/
     distance_clean = round(distance, 2)
@@ -62,46 +69,65 @@ def get_distance_miles():
     return distance_clean
 
 
-def check_distance_dumb():
+def format_lng_direction(longitude_input):
     """
-    This is some arbitrary means of seeing if ISS might be in view.
-    I just roughly guessed based on a map of the US that shows long/lat lines.
+    :param longitude_input: Take in the longitude and
+    :return: return the direction as a string; East, West, or right on the Prime Meridian.
     """
+    direction = ''
 
-    # Get the differences, ie how close the ISS is to being above OKC in degrees.
-    # The absolute value just means the value regardless whether it's negative or positive. Thanks Google.
-    # https://stackoverflow.com/questions/49180302/check-if-2-given-number-are-close-to-each-other-python
-    iss_longitude_vicinity = abs(longitude - okc_long)
-    iss_latitude_vicinity = abs(latitude - okc_lat)
+    if longitude_input > 0:
+        direction = 'East'
+    elif longitude_input < 0:
+        direction = 'West'
+    elif longitude_input == 0:
+        direction = 'on the Prime Meridian'
 
-    # We can check to see if the ISS coordinates are within 10 degrees of my current location.
-    # Looking at a map, longitude within 10-15 degrees is more or less straight above.
-    # Latitude within 15-20 degrees is roughly about the same.
-    if iss_longitude_vicinity < 15 and iss_latitude_vicinity < 20:
-        print("Hey the ISS is flying over you right now!")
-        print(f"It's currently about {abs(iss_latitude_vicinity - iss_longitude_vicinity)} degrees away!"
-              f"\nYea, that makes no sense I know. Just look at the sky somewhere.")
+    return direction
 
 
-def check_distance_smart():
+def format_lat_direction(latitude_input):
+    """
+    :param latitude_input: Take in the latitude and
+    :return: return the direction as a string; North, South, or right on the Equator.
+    """
+    direction = ''
+
+    if latitude_input > 0:
+        direction = 'North'
+    elif latitude_input < 0:
+        direction = 'South'
+    elif latitude_input == 0:
+        direction = 'on the Equator'
+
+    return direction
+
+
+def check_distance():
     """
     This one makes more sense.
     We'll use the get_distance_miles() that uses a real formula.
     """
     current_distance = get_distance_miles()
-    # If the distance between the center of my sky, and the ISS is less than 400 miles:
-    # 400 miles is about the length of Oklahoma, because why not.
-    if current_distance < 400:
+    # If the distance between the center of my sky, and the ISS is less than 1000 km:
+    # 600km is about the length of Oklahoma, so maybe 1000km is a nice round number for easy spotting.
+    if current_distance < 1000:
         print(f"The ISS is flying over Oklahoma right now, just about!")
-        print(f"Currently the ISS is about {current_distance} miles from the center of your sky.\n")
+        print(f"Currently the ISS is about {current_distance} kilometers from the center of your sky.\n")
 
     else:
-        print(f"The ISS is {current_distance:,} miles away from OKC.")
+        print(f"The ISS is {current_distance:,} kilometers away from OKC.")
         # Maybe later I could have it show what location it's above based on coordinates.
-        print(f"It's current coordinates are {longitude} degrees N/S by {latitude} degrees E/W.\n")
+        # Format North/South/East/West based on whether lng/lat are positive or negative.
+        print(f"Current coordinates: "
+              f"{longitude}° {format_lng_direction(longitude)} by "
+              f"{latitude}° {format_lat_direction(latitude)}.\n")
 
 
 def get_rate_and_start():
+    """
+    Takes user input, just for setting how often we ping for ISS location.
+    """
     try:
         rate = float(input("Please enter your preferred update rate in seconds, "
                            "then hit enter to start tracking:\n"))
@@ -114,8 +140,9 @@ def get_rate_and_start():
         return 1
 
 
-def get_current_iss_real_location(datafile):
+def get__iss_loc_name(datafile):
     """
+    This will get the name of the current location based on ISS coordinates.
     I found some data for locations, ie tying coordinates to names/etc on the map.
     For US locations:
     https://www.usgs.gov/core-science-systems/ngp/board-on-geographic-names/download-gnis-data
@@ -124,6 +151,7 @@ def get_current_iss_real_location(datafile):
     These files are sort of big, so I need to learn how to work with them.
     https://towardsdatascience.com/how-to-analyse-100s-of-gbs-of-data-on-your-laptop-with-python-f83363dda94
     """
+
     # TODO:
     #  I still need to figure out how to convert these text files to hdf5, with h5py.
     #  Check hdf5_conversion.py.
@@ -138,17 +166,12 @@ def read_zips(zip_name, file_name):
         # open the text file inside that zip file.
         with myzip.open(file_name) as text_file:
             # Pass that into our location function.
-            get_current_iss_real_location(text_file)
+            get__iss_loc_name(text_file)
 
 
 # //////////////////////////////////////////// Requests/Program ////////////////////////////////////////////
 print("This program will keep running until you close it.")
 update_rate = get_rate_and_start()
-
-# My current location, roughly. I'm sure I could automate this later for custom input.
-# Someone somewhere has a list of coordinates you can pull for cities/countries, surely.
-okc_long = 35.4676
-okc_lat = 97.5164
 
 while True:
     # Get the iss-now info response. Should be response 200 if all is well.
@@ -162,6 +185,7 @@ while True:
     # Then we can work with the dictionary more easily, with dictionary functions.
     iss_dict = dict(iss_json)
 
+    # I could also get the status code directly with "iss_response.status_code".
     status = iss_dict.get("message")
 
     if status == "success":
@@ -177,7 +201,7 @@ while True:
         latitude = float(iss_pos.get("latitude"))
 
         # Check and display the current distance.
-        check_distance_smart()
+        check_distance()
         # Pause for a bit before pinging again.
         pause(update_rate)
 
