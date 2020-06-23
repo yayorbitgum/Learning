@@ -9,6 +9,7 @@
 # //////////////////////////////////////////// Imports ////////////////////////////////////////////
 # For going through large data files very quickly without needing a server or ridiculous amounts of RAM.
 # https://github.com/vaexio/vaex
+# https://towardsdatascience.com/how-to-analyse-100s-of-gbs-of-data-on-your-laptop-with-python-f83363dda94
 # https://www.christopherlovell.co.uk/blog/2016/04/27/h5py-intro.html
 # from zipfile import ZipFile
 # import pandas as pd
@@ -20,7 +21,8 @@ import requests
 import math
 from time import sleep as pause
 from datetime import datetime as dt
-from geodata_parser import get_data_details as get_geodata
+from geodata_parser import get_national_details as get_geodata
+from geodata_parser import get_global_details as get_global_geodata
 import csv
 import mmap
 
@@ -91,6 +93,7 @@ class ISSTracking:
         self.current_time = None
         self.okc_long = 35.4676
         self.okc_lat = 97.5164
+        self.loc_scan_count = 0
 
     def elapsed_time(self):
         """
@@ -157,17 +160,26 @@ class ISSTracking:
         Get the geodata values.
         We'll pass in the opened reader file, and the coordinates.
         """
-        print("\nChecking location data. This might take a minute...")
-        location_data_result = get_geodata(reader, self.latitude, self.longitude)
+        self.loc_scan_count += 1
+
+        if self.loc_scan_count == 1:
+            print("\nLoading location data. This is the first scan, so this will take a minute...")
+        else:
+            print("\nChecking current location data...")
+
+        national_data_result = get_geodata(national_reader, self.latitude, self.longitude)
+        global_data_result = get_geodata(global_reader, self.latitude, self.longitude)
 
         # If location data coming back is not empty:
-        if location_data_result is not None:
-            print(f"\nThe ISS is currently flying over {location_data_result}!\n")
+        if national_data_result is not None:
+            # FIXME: Global data is getting passed to this printing line somehow.
+            print(f"\nThe ISS is currently flying over {national_data_result} (US Data).\n")
+
+        elif global_data_result is not None:
+            print(f"\nThe ISS is currently flying over {global_data_result} (Foreign Data).\n")
 
         else:
-            # Eventually we'll check the global data too.
-            print("\n The ISS is currently flying somewhere away from the US.\n"
-                  "----------------------------------------------------------\n")
+            print(f"\n The ISS is probably not flying directly over any populated regions right now.\n")
 
     def start_request_and_update(self):
         """
@@ -219,32 +231,36 @@ class ISSTracking:
             else:
                 print(f"Update failed! Received message: {status}. Retrying...")
 
-            # Once every 20 pings:
-            if ping_count % 20 == 0:
+            # Once every 10 pings:
+            if ping_count % 10 == 0:
                 # Show current time and time elapsed since we started.
                 print(f"/////////////// Time elapsed: {self.elapsed_time()}\n"
                       f"/////////////// Current datetime: {dt.now()}\n")
 
                 # This is where we'll show the current location name.
                 # At least be in range of the length of the entire US before we check the big USA list haha.
-                if self.get_distance() < 4313:
-                    iss.get_iss_loc_name()
+                # if self.get_distance() < 4313:
+                iss.get_iss_loc_name()
 
 
 # //////////////////////////////////////////// Program ////////////////////////////////////////////
+# The data set paths.
+national_file_path = 'GeoLocationInfo/NationalFile_20200501.txt'
+global_file_path = 'GeoLocationInfo/Countries_populatedplaces_p.txt'
 
-# For now, we'll just work with the US-based data set.
-national_file = 'GeoLocationInfo/NationalFile_20200501.txt'
 # Had to set encoding to utf-8, probably because they're text files. I ran into this on my Word Counter project.
-# We'll leave the file open..
-file = open(national_file, encoding='utf-8')
-# And map it to memory, ie store it all in RAM. 0 means the whole file into memory, in reading mode. I hope.
-# https://stackoverflow.com/questions/11159077/python-load-2gb-of-text-file-to-memory
-file_mapped = mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ)
-# Make the csv reader object.
-# Since the delimiters are | instead of commas, I can set that here in the reader.
-# https://realpython.com/python-csv/#optional-python-csv-reader-parameters
-reader = csv.reader(file_mapped, delimiter='|')
+# We'll leave this particular file open and let the OS clean it up upon exit.
+# If we leave these open, subsequent scans are instant. This will have to do until I figure out memory mapping.
+national_file = open(national_file_path, encoding='utf-8')
+global_file = open(global_file_path, encoding='utf-8')
 
+# Make the csv reader object.
+# Since the delimiters are | and tabs instead of commas, I can set that here in the reader.
+# https://realpython.com/python-csv/#optional-python-csv-reader-parameters
+national_reader = csv.reader(national_file, delimiter='|')
+global_reader = csv.reader(global_file, delimiter='\t')
+
+# Instantiate.
 iss = ISSTracking()
+# Let's start!
 iss.start_request_and_update()
