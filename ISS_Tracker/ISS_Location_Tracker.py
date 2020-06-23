@@ -114,7 +114,7 @@ def get_rate_and_start():
         return 1
 
 
-def get_current_iss_real_location():
+def get_current_iss_real_location(datafile):
     """
     I found some data for locations, ie tying coordinates to names/etc on the map.
     For US locations:
@@ -127,18 +127,28 @@ def get_current_iss_real_location():
     # TODO:
     #  I still need to figure out how to convert these text files to hdf5, with h5py.
     #  Check hdf5_conversion.py.
+    #  Do stuff with pandas to analyze data, either that or vaex. Maybe pandas will be fine for these files.
+
+
+def read_zips(zip_name, file_name):
+    """
+    Open the text files inside the zip files.
+    """
+    with ZipFile(zip_name) as myzip:
+        # open the text file inside that zip file.
+        with myzip.open(file_name) as text_file:
+            # Pass that into our location function.
+            get_current_iss_real_location(text_file)
 
 
 # //////////////////////////////////////////// Requests/Program ////////////////////////////////////////////
 print("This program will keep running until you close it.")
 update_rate = get_rate_and_start()
 
-
 # My current location, roughly. I'm sure I could automate this later for custom input.
 # Someone somewhere has a list of coordinates you can pull for cities/countries, surely.
 okc_long = 35.4676
 okc_lat = 97.5164
-
 
 while True:
     # Get the iss-now info response. Should be response 200 if all is well.
