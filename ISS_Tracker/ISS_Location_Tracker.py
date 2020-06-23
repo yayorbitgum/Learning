@@ -102,8 +102,7 @@ def format_lat_direction(latitude_input):
 
 def check_distance():
     """
-    This one makes more sense.
-    We'll use the get_distance_miles() that uses a real formula.
+    We'll use the get_distance_miles(), and check the distance each tick.
     """
     current_distance = get_distance_miles()
     # If the distance between the center of my sky, and the ISS is less than 1000 km:
@@ -141,19 +140,21 @@ def get_rate_and_start():
 def get_iss_loc_name(datafile):
     """
     This will get the name of the current location based on ISS coordinates.
-    I found some data for locations, ie tying coordinates to names/etc on the map.
+    I found some data for locations, which should allow me to tie coordinates to real location names and other things.
     For US locations:
     https://www.usgs.gov/core-science-systems/ngp/board-on-geographic-names/download-gnis-data
     For foreign locations:
     https://geonames.nga.mil/gns/html/namefiles.html
-    These files are sort of big, so I need to learn how to work with them.
+    These files are sort of big (2-3gb), so I need to learn how to work with them.
+    They aren't so big that they won't fit in RAM, but at the same time I'm sure performance won't be great
+    unless I figure out the tools listed in this page:
     https://towardsdatascience.com/how-to-analyse-100s-of-gbs-of-data-on-your-laptop-with-python-f83363dda94
     """
 
     # TODO:
     #  I still need to figure out how to convert these text files to hdf5, with h5py.
     #  Check hdf5_conversion.py.
-    #  Do stuff with pandas to analyze data, either that or vaex. Maybe pandas will be fine for these files.
+    #  And/or do stuff with pandas to analyze data, either that or vaex. Maybe pandas will be fine for these files.
 
 
 def read_zips(zip_name, file_name):
