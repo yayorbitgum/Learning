@@ -10,7 +10,7 @@
 # For going through large data files very quickly without needing a server or ridiculous amounts of RAM.
 # https://github.com/vaexio/vaex
 # https://www.christopherlovell.co.uk/blog/2016/04/27/h5py-intro.html
-from zipfile import ZipFile
+# from zipfile import ZipFile
 # import pandas as pd
 # import h5py
 # import vaex
@@ -20,13 +20,9 @@ import requests
 import math
 from time import sleep as pause
 from datetime import datetime as dt
-
-
-# //////////////////////////////////////////// Variables and Values ////////////////////////////////////////////
-# My current location, roughly. I'm sure I could automate this later for custom input.
-# Someone somewhere has a list of coordinates you can pull for cities/countries, surely.
-okc_long = 35.4676
-okc_lat = 97.5164
+from geodata_parser import get_data_details as get_geodata
+import csv
+import mmap
 
 
 # //////////////////////////////////////////// Static Functions ////////////////////////////////////////////
@@ -93,6 +89,8 @@ class ISSTracking:
         self.latitude = 0
         self.start_time = None
         self.current_time = None
+        self.okc_long = 35.4676
+        self.okc_lat = 97.5164
 
     def elapsed_time(self):
         """
@@ -112,8 +110,8 @@ class ISSTracking:
         # Radians are the angle made when a radius is wrapped around a circle.
         # The earth is round (for the most part), so this should work.
         # https://www.mathsisfun.com/geometry/radians.html
-        okc_long_rad = math.radians(okc_long)
-        okc_lat_rad = math.radians(okc_lat)
+        okc_long_rad = math.radians(self.okc_long)
+        okc_lat_rad = math.radians(self.okc_lat)
         iss_long_rad = math.radians(self.longitude)
         iss_lat_rad = math.radians(self.latitude)
 
@@ -154,36 +152,22 @@ class ISSTracking:
                   f"{self.latitude}° {format_lat_direction(self.latitude)} by "
                   f"{self.longitude}° {format_lng_direction(self.longitude)}.\n")
 
-    def get_iss_loc_name(self, datafile):
+    def get_iss_loc_name(self):
         """
-        This will get the name of the current location based on ISS coordinates.
-        I found some data for locations, which should allow me to tie coordinates to real location names and
-            other things.
-        For US locations:
-            https://www.usgs.gov/core-science-systems/ngp/board-on-geographic-names/download-gnis-data
-        For foreign locations:
-            https://geonames.nga.mil/gns/html/namefiles.html
-        These files are sort of big (2-3gb), so I need to learn how to work with them.
-        They aren't so big that they won't fit in RAM, but at the same time I'm sure performance won't be great
-            unless I figure out the tools listed in this page:
-            https://towardsdatascience.com/how-to-analyse-100s-of-gbs-of-data-on-your-laptop-with-python-f83363dda94
-        Either way, I also need to learn pandas..
-            https://www.learndatasci.com/tutorials/python-pandas-tutorial-complete-introduction-for-beginners/
+        Get the geodata values.
+        We'll pass in the opened reader file, and the coordinates.
         """
-        # TODO:
-        #  I still need to figure out how to convert these text files to hdf5, with h5py.
-        #  Check hdf5_conversion.py.
-        #  And/or do stuff with pandas to analyze data, either that or vaex. Maybe pandas will be fine for these files.
+        print("\nChecking location data. This might take a minute...")
+        location_data_result = get_geodata(reader, self.latitude, self.longitude)
 
-    def read_zips(self, zip_name, file_name):
-        """
-        Open the text files inside the zip files.
-        """
-        with ZipFile(zip_name) as myzip:
-            # open the text file inside that zip file.
-            with myzip.open(file_name) as text_file:
-                # Pass that into our location function, while we have this file open.
-                self.get_iss_loc_name(text_file)
+        # If location data coming back is not empty:
+        if location_data_result is not None:
+            print(f"\nThe ISS is currently flying over {location_data_result}!\n")
+
+        else:
+            # Eventually we'll check the global data too.
+            print("\n The ISS is currently flying somewhere away from the US.\n"
+                  "----------------------------------------------------------\n")
 
     def start_request_and_update(self):
         """
@@ -237,10 +221,30 @@ class ISSTracking:
 
             # Once every 20 pings:
             if ping_count % 20 == 0:
+                # Show current time and time elapsed since we started.
                 print(f"/////////////// Time elapsed: {self.elapsed_time()}\n"
                       f"/////////////// Current datetime: {dt.now()}\n")
 
+                # This is where we'll show the current location name.
+                # At least be in range of the length of the entire US before we check the big USA list haha.
+                if self.get_distance() < 4313:
+                    iss.get_iss_loc_name()
+
 
 # //////////////////////////////////////////// Program ////////////////////////////////////////////
+
+# For now, we'll just work with the US-based data set.
+national_file = 'GeoLocationInfo/NationalFile_20200501.txt'
+# Had to set encoding to utf-8, probably because they're text files. I ran into this on my Word Counter project.
+# We'll leave the file open..
+file = open(national_file, encoding='utf-8')
+# And map it to memory, ie store it all in RAM. 0 means the whole file into memory, in reading mode. I hope.
+# https://stackoverflow.com/questions/11159077/python-load-2gb-of-text-file-to-memory
+file_mapped = mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ)
+# Make the csv reader object.
+# Since the delimiters are | instead of commas, I can set that here in the reader.
+# https://realpython.com/python-csv/#optional-python-csv-reader-parameters
+reader = csv.reader(file_mapped, delimiter='|')
+
 iss = ISSTracking()
 iss.start_request_and_update()
