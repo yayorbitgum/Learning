@@ -138,7 +138,7 @@ def get_rate_and_start():
         return 1
 
 
-def get__iss_loc_name(datafile):
+def get_iss_loc_name(datafile):
     """
     This will get the name of the current location based on ISS coordinates.
     I found some data for locations, ie tying coordinates to names/etc on the map.
@@ -164,7 +164,7 @@ def read_zips(zip_name, file_name):
         # open the text file inside that zip file.
         with myzip.open(file_name) as text_file:
             # Pass that into our location function.
-            get__iss_loc_name(text_file)
+            get_iss_loc_name(text_file)
 
 
 # //////////////////////////////////////////// Requests/Program ////////////////////////////////////////////
