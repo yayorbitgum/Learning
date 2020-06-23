@@ -178,7 +178,7 @@ while True:
 
         # Check and display the current distance.
         check_distance_smart()
-        # Pause for 1 second before looping again.
+        # Pause for a bit before pinging again.
         pause(update_rate)
 
     else:
