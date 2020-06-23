@@ -10,13 +10,13 @@
 # For going through large data files very quickly without needing a server or ridiculous amounts of RAM.
 # https://github.com/vaexio/vaex
 # https://www.christopherlovell.co.uk/blog/2016/04/27/h5py-intro.html
-import os
-import glob
 from zipfile import ZipFile
-import numpy as np
+# import os
+# import glob
+# import numpy as np
 import pandas as pd
-import h5py
-import vaex
+# import h5py
+# import vaex
 
 # And then my stuff.
 import requests
@@ -56,10 +56,7 @@ def get_distance_miles():
     diff_lat = iss_lat_rad - okc_lat_rad
 
     # Now we copy and paste the Haversine Formula that I don't understand at all, and input our coordinates.
-    # I think "a" stands for arc, but not sure.
-    # I'm confused why we use the two latitudes, but only the longitude difference. But again I don't understand this.
     a = math.sin(diff_lat / 2) ** 2 + math.cos(okc_lat_rad) * math.cos(iss_lat_rad) * math.sin(diff_long / 2) ** 2
-    # "c" probably stands for circle. Again, not sure.
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     distance = radius_of_earth * c
     # That gave me a long number with a lot of decimals, so I'm gonna round it up.
@@ -119,9 +116,10 @@ def check_distance():
         print(f"The ISS is {current_distance:,} kilometers away from OKC.")
         # Maybe later I could have it show what location it's above based on coordinates.
         # Format North/South/East/West based on whether lng/lat are positive or negative.
+        # Example: "Current coordinates: 10° North by 80° East".
         print(f"Current coordinates: "
-              f"{longitude}° {format_lng_direction(longitude)} by "
-              f"{latitude}° {format_lat_direction(latitude)}.\n")
+              f"{latitude}° {format_lat_direction(latitude)} by "
+              f"{longitude}° {format_lng_direction(longitude)}.\n")
 
 
 def get_rate_and_start():
