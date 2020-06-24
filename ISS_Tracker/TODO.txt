@@ -1,0 +1,5 @@
+# To Do
+Now that I've managed to make a script to convert our data files to hdf5, 
+it's time to rewrite the two other .py scripts with the location trackers 
+with vaex instead of csv, and use that to be able to check ISS geographical
+locations every single tick, with no lag.
