@@ -12,3 +12,5 @@ Databases that I use for checking coordinates vs known locations (after converti
 
 - US locations (National File): https://www.usgs.gov/core-science-systems/ngp/board-on-geographic-names/download-gnis-data
 - Global locations (separated by feature class): https://geonames.nga.mil/gns/html/namefiles.html
+
+Note that you won't be able to run this program, unless you download those databases, unzip them into GeoLocationInfo folder, then use the hdf5_converter script to convert them into hdf5 files. Maybe eventually I can just host these databases online somewhere and make requests instead.
