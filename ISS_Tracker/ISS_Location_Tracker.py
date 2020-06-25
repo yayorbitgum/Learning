@@ -7,24 +7,27 @@
 
 
 # //////////////////////////////////////////// Imports ////////////////////////////////////////////
-# For going through large data files very quickly without needing a server or ridiculous amounts of RAM.
-# https://github.com/vaexio/vaex
-# https://towardsdatascience.com/how-to-analyse-100s-of-gbs-of-data-on-your-laptop-with-python-f83363dda94
-# https://www.christopherlovell.co.uk/blog/2016/04/27/h5py-intro.html
-# from zipfile import ZipFile
-# import pandas as pd
-# import h5py
-# import vaex
-
-# And then my stuff.
 import requests
 import math
 from time import sleep as pause
 from datetime import datetime as dt
-from geodata_parser import get_national_details as get_geodata
-from geodata_parser import get_global_details as get_global_geodata
-import csv
-import mmap
+import geodata_parser as gp
+
+
+# //////////////////////////////////////////// Variables ////////////////////////////////////////////
+folder_name = 'GeoLocationInfo/hdf5/'
+national_file_path = f'{folder_name}NationalFile_20200501.hdf5'
+
+global_files_list = [f'{folder_name}Countries_administrative_a.hdf5',
+                     f'{folder_name}Countries_hydrographic_h.hdf5',
+                     f'{folder_name}Countries_hypsographic_t.hdf5',
+                     f'{folder_name}Countries_localities_l.hdf5',
+                     f'{folder_name}Countries_populatedplaces_p.hdf5',
+                     f'{folder_name}Countries_spot_s.hdf5',
+                     f'{folder_name}Countries_transportation_r.hdf5',
+                     f'{folder_name}Countries_undersea_u.hdf5',
+                     f'{folder_name}Countries_vegetation_v.hdf5'
+                     ]
 
 
 # //////////////////////////////////////////// Static Functions ////////////////////////////////////////////
@@ -157,29 +160,35 @@ class ISSTracking:
 
     def get_iss_loc_name(self):
         """
-        Get the geodata values.
-        We'll pass in the opened reader file, and the coordinates.
+        Get the geodata values so we can see what place the ISS is above.
+        We'll pass in the current coordinates.
+        The dataframes are opened and scanned in geodata_parser.py.
         """
-        self.loc_scan_count += 1
 
-        if self.loc_scan_count == 1:
-            print("\nLoading location data. This is the first scan, so this will take a minute...")
-        else:
-            print("\nChecking current location data...")
+        # This is where we pass in the dataframes to geodata_parser.py (gp), along with the current ISS coordinates.
+        usa_results = gp.scan_usa_df(self.latitude, self.longitude)
+        global_pop_results = gp.scan_global_pop_df(self.latitude, self.longitude)
 
-        national_data_result = get_geodata(national_reader, self.latitude, self.longitude)
-        global_data_result = get_geodata(global_reader, self.latitude, self.longitude)
+        if usa_results is not None:
+            # scan_usa_df() returns a list of three things: feature, state, and elevation.
+            usa_feature = usa_results[0]
+            usa_state = usa_results[1]
+            usa_elevation = usa_results[2]
+            # And print it!
+            print(f"The ISS is currently flying over {usa_feature} in {usa_state}. "
+                  f"The local elevation is {usa_elevation}.\n")
 
-        # If location data coming back is not empty:
-        if national_data_result is not None:
-            # FIXME: Global data is getting passed to this printing line somehow.
-            print(f"\nThe ISS is currently flying over {national_data_result} (US Data).\n")
+        elif usa_results is None:
+            # So if USA scan got us nothing, now we check the next databases.
+            if global_pop_results is not None:
+                pop_feature = global_pop_results[0]
+                pop_elevation = global_pop_results[1]
+                print(f"The ISS is flying over {pop_feature}! "
+                      f"The local elevation is {pop_elevation}.\n")
 
-        elif global_data_result is not None:
-            print(f"\nThe ISS is currently flying over {global_data_result} (Foreign Data).\n")
-
-        else:
-            print(f"\n The ISS is probably not flying directly over any populated regions right now.\n")
+            elif global_pop_results is None:
+                # TODO: Expand this to cover the other databases, unless I can combine them somehow.
+                print("The ISS is currently flying over unpopulated areas of the Earth.")
 
     def start_request_and_update(self):
         """
@@ -231,36 +240,19 @@ class ISSTracking:
             else:
                 print(f"Update failed! Received message: {status}. Retrying...")
 
+            # This is where we'll show the current location name.
+            iss.get_iss_loc_name()
+
             # Once every 10 pings:
             if ping_count % 10 == 0:
                 # Show current time and time elapsed since we started.
                 print(f"/////////////// Time elapsed: {self.elapsed_time()}\n"
                       f"/////////////// Current datetime: {dt.now()}\n")
 
-                # This is where we'll show the current location name.
-                # At least be in range of the length of the entire US before we check the big USA list haha.
-                # if self.get_distance() < 4313:
-                iss.get_iss_loc_name()
-
 
 # //////////////////////////////////////////// Program ////////////////////////////////////////////
-# The data set paths.
-national_file_path = 'GeoLocationInfo/NationalFile_20200501.txt'
-global_file_path = 'GeoLocationInfo/Countries_populatedplaces_p.txt'
-
-# Had to set encoding to utf-8, probably because they're text files. I ran into this on my Word Counter project.
-# We'll leave this particular file open and let the OS clean it up upon exit.
-# If we leave these open, subsequent scans are instant. This will have to do until I figure out memory mapping.
-national_file = open(national_file_path, encoding='utf-8')
-global_file = open(global_file_path, encoding='utf-8')
-
-# Make the csv reader object.
-# Since the delimiters are | and tabs instead of commas, I can set that here in the reader.
-# https://realpython.com/python-csv/#optional-python-csv-reader-parameters
-national_reader = csv.reader(national_file, delimiter='|')
-global_reader = csv.reader(global_file, delimiter='\t')
-
 # Instantiate.
 iss = ISSTracking()
-# Let's start!
+# Start!
+print("Complete! Starting program..")
 iss.start_request_and_update()
