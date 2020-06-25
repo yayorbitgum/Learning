@@ -34,7 +34,7 @@ global_files_list = [f'{folder_name}Countries_administrative_a.hdf5',   # 0
                      f'{folder_name}Countries_hydrographic_h.hdf5',     # 1
                      f'{folder_name}Countries_hypsographic_t.hdf5',     # 2
                      f'{folder_name}Countries_localities_l.hdf5',       # 3
-                     f'{folder_name}Countries_populatedplaces_p.hdf5',  # 4
+                     f'{folder_name}Countries_populatedplaces_p.hdf5',  # 4 - Done.
                      f'{folder_name}Countries_spot_s.hdf5',             # 5
                      f'{folder_name}Countries_transportation_r.hdf5',   # 6
                      f'{folder_name}Countries_undersea_u.hdf5',         # 7
@@ -56,7 +56,7 @@ print(f"Loading global geographical data..")
 print(f"Loading populated places. This will take a moment..")
 
 populated_df = pd.read_hdf(global_files_list[4])
-populated_df_relevant = populated_df[['LAT', 'LONG', 'GENERIC', 'ELEV']]
+populated_df_relevant = populated_df[['LAT', 'LONG', 'FULL_NAME_RO']]
 
 print("Global populated locations loaded!\n")
 print(f"{populated_df_relevant}\n")
@@ -125,11 +125,10 @@ def scan_global_pop_df(iss_latitude, iss_longitude):
         # We can grab a specific value in a cell with result_df.iloc[index]['column name']
         # So the index is the length of result_df divided by 2, ie the average/median, converted to integer.
         #                                  [    middle index       ][  column ]
-        result_pop_feature = result_df.iloc[int(len(result_df) / 2)]['GENERIC']
-        result_pop_elevation = result_df.iloc[int(len(result_df) / 2)]['ELEV']
+        result_pop_feature = result_df.iloc[int(len(result_df) / 2)]['FULL_NAME_RO']
 
-        # Return both results as a list we can pick apart later.
-        return [result_pop_feature, result_pop_elevation]
+        # Return the location name.
+        return result_pop_feature
 
     # Otherwise if it is empty, return None.
     elif len(result_df) == 0:
