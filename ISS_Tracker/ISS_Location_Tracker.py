@@ -11,7 +11,7 @@ import requests
 import math
 from time import sleep as pause
 from datetime import datetime as dt
-import geodata_parser as gp
+import geodata_scanner as geo_scan
 
 
 # //////////////////////////////////////////// Variables ////////////////////////////////////////////
@@ -162,12 +162,13 @@ class ISSTracking:
         """
         Get the geodata values so we can see what place the ISS is above.
         We'll pass in the current coordinates.
-        The dataframes are opened and scanned in geodata_parser.py.
+        The dataframes are opened and scanned in geodata_scanner.py.
         """
 
-        # This is where we pass in the dataframes to geodata_parser.py (gp), along with the current ISS coordinates.
-        usa_results = gp.scan_usa_df(self.latitude, self.longitude)
-        global_pop_results = gp.scan_global_pop_df(self.latitude, self.longitude)
+        # This is where we pass in the dataframes to geodata_scanner.py (geo_scan),
+        # along with the current ISS coordinates.
+        usa_results = geo_scan.scan_usa_df(self.latitude, self.longitude)
+        global_pop_results = geo_scan.scan_global_pop_df(self.latitude, self.longitude)
 
         if usa_results is not None:
             # scan_usa_df() returns a list of three things: feature, state, and elevation.
