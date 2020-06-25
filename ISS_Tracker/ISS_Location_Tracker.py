@@ -86,8 +86,8 @@ class ISSTracking:
     """
     This class will track the ISS with requests from external API,
     check distance between ISS and OKC,
-    format updates automatically and print,
-    TODO: show the current geographical location of the ISS based on current coordinates.
+    format updates automatically and print, and
+    show the current geographical location of the ISS based on current coordinates.
     """
     def __init__(self):
         self.longitude = 0
