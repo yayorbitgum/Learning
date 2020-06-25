@@ -165,8 +165,8 @@ class ISSTracking:
         The dataframes are opened and scanned in geodata_scanner.py.
         """
 
-        # This is where we pass in the dataframes to geodata_scanner.py (geo_scan),
-        # along with the current ISS coordinates.
+        # This is where we pass in the current ISS coordinates to be checked against the
+        # location dataframes we've set up and converted.
         usa_results = geo_scan.scan_usa_df(self.latitude, self.longitude)
         global_pop_result = geo_scan.scan_global_pop_df(self.latitude, self.longitude)
 
