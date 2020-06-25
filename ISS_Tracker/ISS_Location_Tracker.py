@@ -76,9 +76,9 @@ def set_update_rate():
         return rate
 
     except ValueError:
-        print("\nWell, since you didn't enter a number, I'll just set it to 1 second.\n")
-        pause(3)
-        return 1
+        print("\nWell, since you didn't enter a number, I'll just set it to 5 seconds.\n")
+        pause(1)
+        return 5
 
 
 # //////////////////////////////////////////// Classes ////////////////////////////////////////////
