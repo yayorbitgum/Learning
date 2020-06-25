@@ -1,4 +1,4 @@
-# This is where I'm placing my data files locally, ie 
+# This is where you place your data files locally, ie 
   - NationalFile_20200501.txt containing all US-based geographical data, or
   - Countries_populatedplaces_p.txt containing all geographical data of populated locations on the entire planet, 
 but they're way too large to upload to github!
