@@ -25,7 +25,8 @@ import pandas as pd
 
 # //////////////////////////////////////////// Variables ////////////////////////////////////////////
 # Set acceptable degree difference here for returning coordinate matches.
-tolerance = 0.02
+# 1 degree of latitude/longitude = ~111 kilometers
+tolerance = 2
 # The data set paths, freshly converted to mappable hdf5.
 folder_name = 'GeoLocationInfo/hdf5/'
 national_file_path = f'{folder_name}NationalFile_20200501.hdf5'
