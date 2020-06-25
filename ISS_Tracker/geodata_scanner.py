@@ -71,13 +71,13 @@ def scan_usa_df(iss_latitude, iss_longitude):
     """
 
     # https://thispointer.com/python-pandas-select-rows-in-dataframe-by-conditions-on-multiple-columns/
-    # So first we'll get a frame of the closest latitudes +- 0.02 degrees.
+    # So first we'll get a frame of the closest latitudes +- some degrees of tolerance we set earlier.
     closest_lat_df = us_df_relevant[
         (us_df_relevant['PRIM_LAT_DEC'] >= (iss_latitude - tolerance)) &
         (us_df_relevant['PRIM_LAT_DEC'] <= (iss_latitude + tolerance))
         ]
 
-    # Then from those closest latitudes, we'll search for the closest longitude +- 0.02 degrees.
+    # Then from those closest latitudes, we'll search for the closest longitude +- some degrees.
     # This should be our results of the closest locations with some room for imprecision.
     result_df = closest_lat_df[
         (closest_lat_df['PRIM_LONG_DEC'] >= (iss_longitude - tolerance)) &
