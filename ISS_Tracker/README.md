@@ -7,7 +7,7 @@ WIP features:
 - Check current ISS coordinates and showing if it's flying over any and all global features, including ocean and underwater locations.. Assuming they're in these databases.
 - Input current location to check distance from wherever, not just OKC.
 - Interface, visual map representation.
-- Plotting of ISS course (would be interesting to see it line up with NASA data)
+- Plotting of ISS course (would be interesting to see it line up with NASA data).
 
 # Installation instructions (for now):
 - Install the modules listed in requirements.txt.
