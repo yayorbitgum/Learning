@@ -150,7 +150,7 @@ class ISSTracking:
             print(f"Currently the ISS is about {current_distance} kilometers from the center of your sky.\n")
 
         else:
-            print(f"The ISS is {current_distance:,} kilometers away from OKC.")
+            print(f"The ISS is {current_distance:,} kilometers away from your location.")
             # Maybe later I could have it show what location it's above based on coordinates.
             # Format North/South/East/West based on whether lng/lat are positive or negative.
             # Example: "Current coordinates: 10° North by 80° East".
@@ -168,7 +168,7 @@ class ISSTracking:
         # This is where we pass in the dataframes to geodata_scanner.py (geo_scan),
         # along with the current ISS coordinates.
         usa_results = geo_scan.scan_usa_df(self.latitude, self.longitude)
-        global_pop_results = geo_scan.scan_global_pop_df(self.latitude, self.longitude)
+        global_pop_result = geo_scan.scan_global_pop_df(self.latitude, self.longitude)
 
         if usa_results is not None:
             # scan_usa_df() returns a list of three things: feature, state, and elevation.
@@ -181,13 +181,10 @@ class ISSTracking:
 
         elif usa_results is None:
             # So if USA scan got us nothing, now we check the next databases.
-            if global_pop_results is not None:
-                pop_feature = global_pop_results[0]
-                pop_elevation = global_pop_results[1]
-                print(f"The ISS is flying over {pop_feature}! "
-                      f"The local elevation is {pop_elevation}.\n")
+            if global_pop_result is not None:
+                print(f"The ISS is flying over {global_pop_result}! ")
 
-            elif global_pop_results is None:
+            elif global_pop_result is None:
                 # TODO: Expand this to cover the other databases, unless I can combine them somehow.
                 print("The ISS is currently flying over unpopulated areas of the Earth.")
 
@@ -244,10 +241,10 @@ class ISSTracking:
             # This is where we'll show the current location name.
             iss.get_iss_loc_name()
 
-            # Once every 10 pings:
-            if ping_count % 10 == 0:
+            # Once every 20 pings:
+            if ping_count % 20 == 0:
                 # Show current time and time elapsed since we started.
-                print(f"/////////////// Time elapsed: {self.elapsed_time()}\n"
+                print(f"\n/////////////// Time elapsed: {self.elapsed_time()}\n"
                       f"/////////////// Current datetime: {dt.now()}\n")
 
 
