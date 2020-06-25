@@ -1,4 +1,5 @@
-# This is where you place your data files locally, ie 
+# This is where you place your data files locally..
+For example:
   - NationalFile_20200501.txt containing all US-based geographical data, or
   - Countries_populatedplaces_p.txt containing all geographical data of populated locations on the entire planet, 
 but they're way too large to upload to github!
@@ -11,5 +12,6 @@ If you want to follow along, you can always grab the files for yourself from:
   - https://geonames.nga.mil/gns/html/namefiles.html
  
  Unzip them, and place them in this folder.
- For the hdf5 converter, the list names are based on "National File (all features in one file)",
- and "Entire country files dataset separated by feature class (Approximately 459MB compressed/2.37GB uncompressed) - Dated 2020-06-22".
+ For the hdf5 converter, the list names are based on 
+ - "National File (all features in one file)", and 
+ - "Entire country files dataset separated by feature class (Approximately 459MB compressed/2.37GB uncompressed) - Dated 2020-06-22".
