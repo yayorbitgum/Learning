@@ -16,7 +16,7 @@ WIP features:
   - Global locations (separated by feature class): https://geonames.nga.mil/gns/html/namefiles.html
 - Use the hdf5_converter.py script I made to convert the unzipped text files to hdf5 format for fast reading.
   - You may need to make sure a folder named "hdf5" is inside the GeoLocationInfo folder, but it might create it for you.
-  - You can also convert these files yourself if you'd like to! It was done with pandas.
+  - You can also convert these files yourself if you'd like to! It was done with pandas, with errors, so you may be able to do a much better conversion than I did.
     - The National File has uses | as a delimiter.
     - The global files use \t as a delimiter.
 - Run ISS_Location_Tracker.py!
