@@ -8,9 +8,11 @@ WIP features:
 - Input current location to check distance from wherever, not just OKC.
 - Interface, visual map representation.
 
-Databases that I use for checking coordinates vs known locations (after converting to hdf5 format):
-
-- US locations (National File): https://www.usgs.gov/core-science-systems/ngp/board-on-geographic-names/download-gnis-data
-- Global locations (separated by feature class): https://geonames.nga.mil/gns/html/namefiles.html
-
-Note that you won't be able to run this program, unless you download those databases, unzip them into GeoLocationInfo folder, then use the hdf5_converter script to convert them into hdf5 files. Maybe eventually I can just host these databases online somewhere and make requests instead.
+# Installation instructions (for now):
+- Install the modules listed in requirements.txt.
+- Download two database csv text files (around 655mb zipped, ~3gb unzipped) and unzip them into the GeoLocationInfo folder, as shown in here on github.
+  - US locations (National File): https://www.usgs.gov/core-science-systems/ngp/board-on-geographic-names/download-gnis-data
+  - Global locations (separated by feature class): https://geonames.nga.mil/gns/html/namefiles.html
+- Use the hdf5_converter.py script I made to convert the unzipped text files to hdf5 format for fast reading.
+  - You may need to make sure a folder named "hdf5" is inside the GeoLocationInfo folder, but it might create it for you.
+- Run ISS_Location_Tracker.py!
