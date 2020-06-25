@@ -1,5 +1,4 @@
-# Here I'm doing my best to write a script that converts these data text csv files to hdf5 files
-# that we can use with vaex later.
+# Here I'm doing my best to write a script that converts these data text csv files to hdf5 files.
 #
 # For now this only works with the files I needed to convert specifically for the ISS project.
 # In the future, especially as I learn databases, data types, and pandas more,
@@ -28,7 +27,7 @@ us_file_name = 'GeoLocationInfo/NationalFile_20200501.txt'
 # 0: ï»¿FEATURE_ID
 # 1: FEATURE_NAME       <- Usable Name for City or Land Feature.
 # 2: FEATURE_CLASS
-# 3: STATE_ALPHA        <- State abbreviation.
+# 3: STATE_ALPHA        <- State Abbreviation.
 # 4: STATE_NUMERIC
 # 5: COUNTY_NAME
 # 6: COUNTY_NUMERIC
@@ -54,7 +53,7 @@ global_files_list = ['Countries_administrative_a.txt',
                      'Countries_spot_s.txt',
                      'Countries_transportation_r.txt',
                      'Countries_undersea_u.txt',
-                     'Countries_vegetation_v.txt'
+                     'Countries_vegetation_v.txt',
                      ]
 # All global text data sets have the same header, so we can use this for all those Countries files.
 # Index: 0. Column Header: RC.
@@ -98,10 +97,7 @@ global_files_list = ['Countries_administrative_a.txt',
 # ///////////////////////////// Functions /////////////////////////////
 # Our data is in text files, in csv format, with different seperators/delimiters.
 # National US file is separated by | and the international files are separated by \t.
-# This is all to work towards having data that Vaex can work with quickly, ie hdf5.
-# https://docs.vaex.io/en/latest/example_io.html
-# https://vaex.readthedocs.io/en/latest/api.html#vaex.from_csv
-# https://datascience.stackexchange.com/questions/53125/file-converter-from-csv-to-hdf5
+# This is all to work towards having data that can be worked with quickly, memory mappable.
 
 
 def national_csv_to_hdf5():
@@ -110,15 +106,42 @@ def national_csv_to_hdf5():
     output_name = 'GeoLocationInfo/hdf5/NationalFile_20200501.hdf5'
 
     # Read text file into dataframe object.
-    print(f"Reading {us_file_name} as csv with pandas..\n")
-    us_df = pd.read_csv(us_file_name, delimiter=separator)
+    print(f"Reading {us_file_name} as csv with pandas..")
+    us_df = pd.read_csv(us_file_name,
+                        delimiter=separator,
+                        # I had to set all of this manually after performance warnings.
+                        # Everything was an object type, more or less.
+                        dtype={'FEATURE_NAME': str,
+                               'FEATURE_CLASS': str,
+                               'STATE_ALPHA': str,
+                               'STATE_NUMERIC': str,
+                               'COUNTY_NAME': str,
+                               'COUNTY_NUMERIC': str,
+                               'PRIMARY_LAT_DMS': str,
+                               'PRIM_LONG_DMS': str,
+                               'PRIM_LAT_DEC': float,
+                               'PRIM_LONG_DEC': float,
+                               'SOURCE_LAT_DMS': str,
+                               'SOURCE_LONG_DMS': str,
+                               'SOURCE_LAT_DEC': float,
+                               'SOURCE_LONG_DEC': float,
+                               'ELEV_IN_M': float,
+                               'ELEV_IN_FT': float,
+                               'MAP_NAME': str,
+                               'DATE_CREATED': str,
+                               'DATE_EDITED': str}
+                        )
 
     # Save to HDF5 file in the hdf5 folder.
-    print(f"Converting to hdf5 format and saving as {output_name}..\n")
-    us_df.to_hdf(output_name, 'data', mode='w', format='fixed')
+    pd.DataFrame.to_hdf(us_df,
+                        path_or_buf=output_name,
+                        mode='w',
+                        format='fixed',
+                        key='nat',
+                        )
 
     # Clear this object from memory after conversion is done!
-    print("Clearing memory..\n")
+    print("Clearing memory..")
     del us_df
     # Let us know we're finished!
     print("All done!\n")
@@ -137,10 +160,10 @@ def global_csv_to_hdf5():
         # Increment the count for log.
         counter += 1
         # this will make sure each save has a unique name.
-        path_name = f"{output_folder_path}/{current_file}.hdf5"
+        path_name = f"{output_folder_path}/{current_file.rstrip('.txt')}.hdf5"
 
         # Read the current file in the list.
-        print(f"{counter} of {count}: Reading {current_file} as csv with pandas..\n")
+        print(f"{counter} of {count}: Reading {current_file} as csv with pandas..")
         # Some of these data files have mixed types in their columns as we see above in the notes,
         # so we'll make them explicitly one type.
         # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.errors.DtypeWarning.html
@@ -158,14 +181,16 @@ def global_csv_to_hdf5():
                                         }
                                  )
 
-        # Save to HDF5 file with the path_name we created earlier.
-        print(f"{counter} of {count}: Converting to hdf5 format and saving as {path_name}..\n")
-        # Format type "tables" was giving errors before. Swapping to "fixed" format fixed it lol.
-        # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_hdf.html
-        current_df.to_hdf(path_name, 'data', mode='w', format='fixed')
+        # Save to HDF5 file in the hdf5 folder.
+        print(f"{counter} of {count}: Converting to hdf5 format and saving as {path_name}..")
+        pd.DataFrame.to_hdf(current_df,
+                            path_or_buf=path_name,
+                            mode='w',
+                            format='fixed',
+                            key='earth')
 
         # Clear this object from memory after conversion is done.
-        print(f"{counter} of {count}: Clearing dataframe file {current_file} from memory..\n")
+        print(f"{counter} of {count}: Clearing dataframe from memory..")
         del current_df
 
         # Let us know we're finished.
