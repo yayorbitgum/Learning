@@ -1,311 +1,180 @@
-# Keeps track of current International Space Station location, and checks to see if it's above me or nearby.
-#
-# Initially started as practicing requests but then I found a neat API for the ISS.
-# http://api.open-notify.org/
-#
-# Every link and resource I come across is just the result of Googling.
+"""
+This will get the name of the current location based on ISS coordinates.
+
+I found some data for locations, which should allow me to tie coordinates to real location names and
+    other things.
+For US locations:
+    https://www.usgs.gov/core-science-systems/ngp/board-on-geographic-names/download-gnis-data
+For foreign locations:
+    https://geonames.nga.mil/gns/html/namefiles.html
+
+These files are sort of big (2-3gb), so I worked on learning to convert them to hdf5 for memory mapping,
+    so that this module called Vaex can read them nearly instantly. But I couldn't get vaex to export hdf5.
+    It provided no error when exporting, simply hangs and does not proceed after a certain point.
+    So I did pandas hdf5 exports instead, and since Vaex can't read pandas-made hdf5, I'll just
+    use pandas for this task and we'll try Vaex in the future.
+
+I found out about Vaex by coming across this article.
+https://towardsdatascience.com/how-to-analyse-100s-of-gbs-of-data-on-your-laptop-with-python-f83363dda94
+"""
 
 
 # //////////////////////////////////////////// Imports ////////////////////////////////////////////
-import requests
-import math
-import pyfiglet
-from time import sleep as pause
-from datetime import datetime as dt
-from geodata_scanner import LocationLove
+import pandas as pd
+import re
+import os
 
 
-# //////////////////////////////////////////// Variables ////////////////////////////////////////////
+# //////////////////////////////////////////// Variables and File Structure ////////////////////////////////////////////
+# Set acceptable degree difference here for returning coordinate matches.
+# 1.0 degree of latitude/longitude = ~111 kilometers
+tolerance = 0.5
+# The data set paths for our hdf5 files.
 folder_name = 'GeoLocationInfo/hdf5/'
-national_file_path = f'{folder_name}NationalFile_20200501.hdf5'
+# This regex should help us load any NationalFile version that we might use.
+# https://regex101.com/
+national_regex = re.compile('(NationalFile)(_)?(\d*)?(\.hdf5)')
+# Now we locate the national file.
+for findme in os.listdir('GeoLocationInfo/hdf5'):
+    if national_regex.match(findme):
+        national_file_path = f'{folder_name}{findme}'
 
-global_files_list = [f'{folder_name}Countries_administrative_a.hdf5',
-                     f'{folder_name}Countries_hydrographic_h.hdf5',
-                     f'{folder_name}Countries_hypsographic_t.hdf5',
-                     f'{folder_name}Countries_localities_l.hdf5',
-                     f'{folder_name}Countries_populatedplaces_p.hdf5',
-                     f'{folder_name}Countries_spot_s.hdf5',
-                     f'{folder_name}Countries_transportation_r.hdf5',
-                     f'{folder_name}Countries_undersea_u.hdf5',
-                     f'{folder_name}Countries_vegetation_v.hdf5'
+global_files_list = [f'{folder_name}Countries_administrative_a.hdf5',   # 0
+                     f'{folder_name}Countries_hydrographic_h.hdf5',     # 1
+                     f'{folder_name}Countries_hypsographic_.hdf5',      # 2
+                     f'{folder_name}Countries_localities_l.hdf5',       # 3
+                     f'{folder_name}Countries_populatedplaces_p.hdf5',  # 4
+                     f'{folder_name}Countries_spot_s.hdf5',             # 5
+                     f'{folder_name}Countries_transportation_r.hdf5',   # 6
+                     f'{folder_name}Countries_undersea_u.hdf5',         # 7
+                     f'{folder_name}Countries_vegetation_v.hdf5'        # 8
                      ]
 
 
-# //////////////////////////////////////////// Static Functions ////////////////////////////////////////////
-def format_lng_direction(longitude_input):
-    """
-    :param longitude_input: Take in the longitude and
-    :return: return the direction as a string; East, West, or right on the Prime Meridian.
-    """
-    direction = ''
+# //////////////////////////////////////////// Classes/Methods ////////////////////////////////////////////
+class LocationLove:
+    def __init__(self, iss_latitude, iss_longitude):
+        self.iss_latitude = iss_latitude
+        self.iss_longitude = iss_longitude
+        self.us_df = None
+        self.global_df = None
 
-    if longitude_input > 0:
-        direction = 'East'
-    elif longitude_input < 0:
-        direction = 'West'
-    elif longitude_input == 0:
-        direction = 'on the Prime Meridian'
+    def startup_load(self):
+        """Loads all hdf5 files into dataframes to be used for searching."""
+        global_df_list = []
+        count = 0
+        print(f"Loading US geographical data..")
 
-    return direction
+        # Read us-based data file.
+        national_df = pd.read_hdf(national_file_path)
+        # Only grab the columns we care about (I should probably save this as another file and skip this step).
+        self.us_df = national_df[['FEATURE_NAME',
+                                  'STATE_ALPHA',
+                                  'PRIM_LAT_DEC',
+                                  'PRIM_LONG_DEC',
+                                  'ELEV_IN_M']]
+        print("US geographical data loaded!\n")
+        # Show a sample to confirm.
+        print(f"{self.us_df}\n")
 
+        # We'll loop through our list of global files, add each dataframe to a list, then
+        # concatenate those dataframes together with pd.concat.
+        print(f"Loading all global geographical data. This will take a moment..")
+        for index, file in enumerate(global_files_list):
+            count += 1
+            # Show current step, file and how many more to go.
+            print(f"{count} of {len(global_files_list)}: Reading {file.lstrip(folder_name)}..")
+            # Read the current file into dataframe.
+            this_full_df = pd.read_hdf(file)
+            # Grab the columns we want. Most of the other data is empty or useless unfortunately.
+            this_df = this_full_df[['LAT', 'LONG', 'FULL_NAME_ND_RG']]
+            global_df_list.append(this_df)
 
-def format_lat_direction(latitude_input):
-    """
-    :param latitude_input: Take in the latitude and
-    :return: return the direction as a string; North, South, or right on the Equator.
-    """
-    direction = ''
+        # https://pandas.pydata.org/pandas-docs/stable/user_guide/merging.html
+        print("Merging global dataframes..\n")
+        # If I set the keys, I can actually locate (df.loc[]) based on the original data categories too.
+        self.global_df = pd.concat(global_df_list,
+                                   ignore_index=True,
+                                   keys=['administrative',
+                                         'hydrographic',
+                                         'hypsographic',
+                                         'localities',
+                                         'populated places',
+                                         'spot locations',
+                                         'transportation',
+                                         'undersea',
+                                         'vegetation'])
 
-    if latitude_input > 0:
-        direction = 'North'
-    elif latitude_input < 0:
-        direction = 'South'
-    elif latitude_input == 0:
-        direction = 'on the Equator'
+        # Show a sample to confirm.
+        print(f"{self.global_df}\n")
+        print("Complete!\n")
 
-    return direction
-
-
-def set_update_rate():
-    """
-    Takes user input, just for setting how often we ping for ISS location.
-    """
-    try:
-        rate = float(input("Please enter your preferred update rate in seconds, "
-                           "then hit enter to start tracking:\n"))
-        print(f"Your update rate is set to once per {rate} seconds.\n")
-        return rate
-
-    except ValueError:
-        print("\nWell, since you didn't enter a number, I'll just set it to 5 seconds.\n")
-        pause(1)
-        return 5
-
-
-# //////////////////////////////////////////// Classes ////////////////////////////////////////////
-class ISSTracking:
-    """
-    This class will track the ISS with requests from external API,
-    check distance between ISS and OKC,
-    format updates automatically and print, and
-    show the current geographical location of the ISS based on current coordinates.
-    """
-    def __init__(self):
-        self.latitude = 0
-        self.longitude = 0
-        self.start_time = None
-        self.current_time = None
-        self.my_long = 0.0
-        self.my_lat = 0.0
-        self.loc_scan_count = 0
-        self.LL = LocationLove(self.latitude, self.longitude)
-
-    def get_location_input(self):
-        """ Have the user input their own coordinates for distance tracking."""
-
-        try:
-            self.my_lat = float(input("Enter the latitude for your current location (in decimal form):\n").strip())
-            self.my_long = float(input("Enter your longitude too (in decimal form):\n").strip())
-
-        except (TypeError, ValueError):
-            # Reset the values and try again.
-            self.my_lat = 0.0
-            self.my_long = 0.0
-            print("That didn't work.. "
-                  "Make sure you enter a number for your longitude or latitude. "
-                  "For example: 34.5003\n")
-            self.get_location_input()
-
-        # If that didn't give us an error, let's keep going.
-        print(f"Great! Your input coordinates are "
-              f"{self.my_lat}° {format_lat_direction(self.my_lat)} by "
-              f"{self.my_long}° {format_lng_direction(self.my_long)}.\n")
-        pause(0.5)
-        # Now we try to show the user where they say they are, based on the database matches.
-        self.get_user_loc_name()
-        pause(1.5)
-
-    def elapsed_time(self):
+    def scan_usa_df(self, iss_latitude, iss_longitude):
         """
-        Returns the time elapsed since we started tracking.
-        """
-        elapsed = dt.now() - self.start_time
-        return elapsed
-
-    def get_distance(self):
-        """
-        Can I find the actual distance between two coordinates?
-        Maybe I could show how close the ISS is to me?
-        Well let's see what Google says and do what they say to do. Learn and copy and paste.
-        https://kite.com/python/answers/how-to-find-the-distance-between-two-lat-long-coordinates-in-python
+        Take in ISS coordinates, and check for the closest locations in our US geographical dataframe.
+        Returns 3 location values if not empty, otherwise returns None if it is empty.
         """
 
-        # Radians are the angle made when a radius is wrapped around a circle.
-        # The earth is round (for the most part), so this should work.
-        # https://www.mathsisfun.com/geometry/radians.html
-        okc_long_rad = math.radians(self.my_long)
-        okc_lat_rad = math.radians(self.my_lat)
-        iss_long_rad = math.radians(self.longitude)
-        iss_lat_rad = math.radians(self.latitude)
+        # https://thispointer.com/python-pandas-select-rows-in-dataframe-by-conditions-on-multiple-columns/
+        # So first we'll get a frame of the closest latitudes +- some degrees of tolerance we set earlier.
+        closest_lat_df = self.us_df[
+            (self.us_df['PRIM_LAT_DEC'] >= (iss_latitude - tolerance)) &
+            (self.us_df['PRIM_LAT_DEC'] <= (iss_latitude + tolerance))
+            ]
 
-        # This is measured in kilometers.
-        radius_of_earth = 6378
+        # Then from those closest latitudes, we'll search for the closest longitude +- some degrees.
+        # This should be our results of the closest locations with some room for imprecision.
+        result_df = closest_lat_df[
+            (closest_lat_df['PRIM_LONG_DEC'] >= (iss_longitude - tolerance)) &
+            (closest_lat_df['PRIM_LONG_DEC'] <= (iss_longitude + tolerance))
+            ]
 
-        # Now get the difference between the coordinates.
-        diff_long = iss_long_rad - okc_long_rad
-        diff_lat = iss_lat_rad - okc_lat_rad
+        # If the result isn't nothing:
+        if len(result_df) != 0:
+            # We can grab a specific value in a cell with result_df.iloc[index]['column name']
+            # So the index is the length of result_df divided by 2, ie the average/median, converted to integer.
+            #                                 [    middle index       ][  column name ]
+            result_us_feature = result_df.iloc[int(len(result_df) / 2)]['FEATURE_NAME']
+            result_us_state = result_df.iloc[int(len(result_df) / 2)]['STATE_ALPHA']
+            result_us_elevation = result_df.iloc[int(len(result_df) / 2)]['ELEV_IN_M']
 
-        # Now we copy and paste the Haversine Formula that I don't understand at all, and input our coordinates.
-        a = math.sin(diff_lat / 2) ** 2 + math.cos(okc_lat_rad) * math.cos(iss_lat_rad) * math.sin(diff_long / 2) ** 2
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-        distance = radius_of_earth * c
-        # That gave me a long number with a lot of decimals, so I'm gonna round it up.
-        # https://www.geeksforgeeks.org/round-function-python/
-        distance_clean = round(distance, 2)
-        # Now we return the distance.
-        return distance_clean
+            # Return all three results as a list we can pick apart later.
+            return [result_us_feature, result_us_state, result_us_elevation]
 
-    def check_distance(self):
+        # Otherwise if it is, return None.
+        elif len(result_df) == 0:
+            return None
+
+    def scan_global_pop_df(self, iss_latitude, iss_longitude):
         """
-        We'll use the get_distance_miles(), and check the distance each tick, and timestamp it.
-        """
-        current_distance = self.get_distance()
-        # If the distance between the center of my sky, and the ISS is less than 1000 km:
-        if current_distance < 1000:
-            print(f"The ISS is flying over you right now, just about!")
-            print(f"Currently it's about {current_distance} kilometers from the center of your sky.\n")
-
-        else:
-            print(f"The ISS is {current_distance:,} kilometers away from your location.")
-            # Maybe later I could have it show what location it's above based on coordinates.
-            # Format North/South/East/West based on whether lng/lat are positive or negative.
-            # Example: "Current coordinates: 10° North by 80° East".
-            print(f"Current coordinates: "
-                  f"{self.latitude}° {format_lat_direction(self.latitude)} by "
-                  f"{self.longitude}° {format_lng_direction(self.longitude)}.\n")
-
-    def get_user_loc_name(self):
-        """
-        Get the geodata values so we can see what place the user has input.
-        We'll pass in the user input coordinates.
-        The dataframes are opened and scanned in geodata_scanner.py.
-        """
-        usa_results = self.LL.scan_usa_df(self.my_lat, self.my_long)
-        global_pop_result = self.LL.scan_global_pop_df(self.my_lat, self.my_long)
-
-        if usa_results is not None:
-            usa_feature = usa_results[0]
-            usa_state = usa_results[1]
-            usa_elevation = usa_results[2]
-            print(f"Based on your coordinates, "
-                  f"you should be at or near {usa_feature} in {usa_state}, "
-                  f"with an elevation of {usa_elevation}m.\n")
-
-        elif usa_results is None:
-            # So if USA scan got us nothing, now we check the global dataframe.
-            if global_pop_result is not None:
-                print(f"Based on your coordinates, you should be at or near {global_pop_result}.\n")
-
-        else:
-            print("Well, to be honest I'm not sure where that is, but hey let's"
-                  " start trackin!\n")
-
-    def get_iss_loc_name(self):
-        """
-        Get the geodata values so we can see what place the ISS is above.
-        We'll pass in the current coordinates.
-        The dataframes are opened and scanned in geodata_scanner.py.
+        Take in ISS coordinates, and check for the closest locations in our
+        global populated areas geographical dataframe.
+        Returns 2 location values if not empty, otherwise returns None if it is empty.
         """
 
-        # This is where we pass in the current ISS coordinates to be checked against the
-        # location dataframes we've set up and converted.
-        usa_results = self.LL.scan_usa_df(self.latitude, self.longitude)
-        global_pop_result = self.LL.scan_global_pop_df(self.latitude, self.longitude)
+        # So first we'll get a frame of the closest latitudes +- 0.02 degrees.
+        closest_lat_df = self.global_df[
+            (self.global_df['LAT'] >= (iss_latitude - tolerance)) &
+            (self.global_df['LAT'] <= (iss_latitude + tolerance))
+            ]
 
-        if usa_results is not None:
-            # scan_usa_df() returns a list of three things: feature, state, and elevation.
-            usa_feature = usa_results[0]
-            usa_state = usa_results[1]
-            usa_elevation = usa_results[2]
-            # And print it!
-            print(f"The ISS is flying over {usa_feature} in {usa_state}. "
-                  f"The local elevation is {usa_elevation}.\n")
+        # Then from those closest latitudes, we'll search for the closest longitude +- 0.02 degrees.
+        # This should be our results of the closest locations with some room for imprecision.
+        result_df = closest_lat_df[
+            (closest_lat_df['LONG'] >= (iss_longitude - tolerance)) &
+            (closest_lat_df['LONG'] <= (iss_longitude + tolerance))
+            ]
 
-        elif usa_results is None:
-            # So if USA scan got us nothing, now we check the global dataframe.
-            if global_pop_result is not None:
-                print(f"The ISS is flying over {global_pop_result}.")
+        # If the result isn't nothing:
+        if len(result_df) != 0:
+            # We can grab a specific value in a cell with result_df.iloc[index]['column name']
+            # So the index is the length of result_df divided by 2, ie the average/median, converted to integer.
+            #                                  [    middle index       ][     column      ]
+            result_pop_feature = result_df.iloc[int(len(result_df) / 2)]['FULL_NAME_ND_RG']
 
-    def start_request_and_update(self):
-        """
-        Start geodata scanner and load up our hdf5 dataframes,
-        set update rate, set starting date-timestamp, and then run requests loop until we quit.
-        """
-        print(pyfiglet.figlet_format("ISS Tracker", font='alligator2'))
-        # Start process of loading our hdf5 files into dataframes.
-        self.LL.startup_load()
-        # Make sure we only get input after loading the databases.
-        self.get_location_input()
+            # Return the location name.
+            return result_pop_feature
 
-        # Continue after.
-        print("This program will keep running until you close it.")
-
-        # Set how fast we want to update. I don't think the API updates any faster than 0.5s.
-        update_rate = set_update_rate()
-        # Set the current time as the start_time timestamp as soon as we start requesting.
-        self.start_time = dt.now()
-        # Establish ping count for notifying user with time elapsed later.
-        ping_count = 0
-
-        while True:
-            # Get the iss-now info response. Should be response 200 if all is well.
-            # I found a nice big list of response codes here for debugging:
-            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-            iss_response = requests.get("http://api.open-notify.org/iss-now.json")
-
-            # We can tell it's a json file in the URL, so convert the response to json object.
-            iss_json = iss_response.json()
-            # Make a copy of the json object as a dictionary, since that's all it seems to be.
-            # Then we can work with the dictionary more easily, with dictionary functions.
-            iss_dict = dict(iss_json)
-
-            # I could also get the status code directly with "iss_response.status_code".
-            status = iss_dict.get("message")
-
-            if status == "success":
-                # Now we pick apart the nested dictionaries to get the positions we want.
-                # We can see Longitude and Latitude are nested inside "iss_position" dictionary.
-                # So let's get that one first. I forgot how to get keys from dictionaries, so I Googled.
-                # https://www.geeksforgeeks.org/get-method-dictionaries-python/
-                iss_pos = iss_dict.get("iss_position")
-
-                # Then from that, grab the values for these keys, and make them floats so we can use them as numbers.
-                # The strings need to be converted to floats because they're numbers like "32.9035".
-                self.longitude = float(iss_pos.get("longitude"))
-                self.latitude = float(iss_pos.get("latitude"))
-
-                # Check and display the current distance.
-                self.check_distance()
-                # Update ping counter.
-                ping_count += 1
-                # Pause for a bit before pinging again.
-                pause(update_rate)
-
-            else:
-                print(f"Update failed! Received message: {status}. Retrying...")
-
-            # This is where we'll show the current location name.
-            iss.get_iss_loc_name()
-
-            # Once every 20 pings:
-            if ping_count % 20 == 0:
-                # Show current time and time elapsed since we started.
-                print(f"\n/////////////// Time elapsed: {self.elapsed_time()}\n"
-                      f"/////////////// Current datetime: {dt.now()}\n")
-
-
-# //////////////////////////////////////////// Program ////////////////////////////////////////////
-# Instantiate.
-iss = ISSTracking()
-# Start!
-iss.start_request_and_update()
+        # Otherwise if it is empty, return None.
+        elif len(result_df) == 0:
+            return None
