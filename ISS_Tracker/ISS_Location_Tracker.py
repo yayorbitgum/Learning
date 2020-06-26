@@ -1,17 +1,22 @@
-# Keeps track of current International Space Station location, and checks to see if it's above me or nearby.
+# Keeps track of current International Space Station location,
+# and checks to see if it's above me or nearby.
 #
-# Initially started as practicing requests but then I found a neat API for the ISS.
+# Initially started as practicing requests but then I found
+# a neat API for the ISS.
 # http://api.open-notify.org/
 #
-# Every link and resource I come across is just the result of Googling.
+# Every link and resource I come across is just the result
+# of Googling and exploring related documentation,
+# every single time.
 
 
 # //////////////////////////////////////////// Imports ////////////////////////////////////////////
 import requests
 import math
+import pyfiglet
 from time import sleep as pause
 from datetime import datetime as dt
-import geodata_scanner as geo_scan
+from geodata_scanner import LocationLove
 
 
 # //////////////////////////////////////////// Variables ////////////////////////////////////////////
@@ -90,13 +95,39 @@ class ISSTracking:
     show the current geographical location of the ISS based on current coordinates.
     """
     def __init__(self):
-        self.longitude = 0
         self.latitude = 0
+        self.longitude = 0
         self.start_time = None
         self.current_time = None
-        self.okc_long = 35.4676
-        self.okc_lat = 97.5164
+        self.my_long = 0.0
+        self.my_lat = 0.0
         self.loc_scan_count = 0
+        self.LL = LocationLove(self.latitude, self.longitude)
+
+    def get_location_input(self):
+        """ Have the user input their own coordinates for distance tracking."""
+
+        try:
+            self.my_lat = float(input("Enter the latitude for your current location (in decimal form):\n").strip())
+            self.my_long = float(input("Enter your longitude too (in decimal form):\n").strip())
+
+        except (TypeError, ValueError):
+            # Reset the values and try again.
+            self.my_lat = 0.0
+            self.my_long = 0.0
+            print("That didn't work.. "
+                  "Make sure you enter a number for your longitude or latitude. "
+                  "For example: 34.5003\n")
+            self.get_location_input()
+
+        # If that didn't give us an error, let's keep going.
+        print(f"Great! Your input coordinates are "
+              f"{self.my_lat}° {format_lat_direction(self.my_lat)} by "
+              f"{self.my_long}° {format_lng_direction(self.my_long)}.\n")
+        pause(0.5)
+        # Now we try to show the user where they say they are, based on the database matches.
+        self.get_user_loc_name()
+        pause(1.5)
 
     def elapsed_time(self):
         """
@@ -116,8 +147,8 @@ class ISSTracking:
         # Radians are the angle made when a radius is wrapped around a circle.
         # The earth is round (for the most part), so this should work.
         # https://www.mathsisfun.com/geometry/radians.html
-        okc_long_rad = math.radians(self.okc_long)
-        okc_lat_rad = math.radians(self.okc_lat)
+        okc_long_rad = math.radians(self.my_long)
+        okc_lat_rad = math.radians(self.my_lat)
         iss_long_rad = math.radians(self.longitude)
         iss_lat_rad = math.radians(self.latitude)
 
@@ -144,10 +175,9 @@ class ISSTracking:
         """
         current_distance = self.get_distance()
         # If the distance between the center of my sky, and the ISS is less than 1000 km:
-        # 600km is about the length of Oklahoma, so maybe 1000km is a nice round number for easy spotting.
         if current_distance < 1000:
-            print(f"The ISS is flying over Oklahoma right now, just about!")
-            print(f"Currently the ISS is about {current_distance} kilometers from the center of your sky.\n")
+            print(f"The ISS is flying over you right now, just about!")
+            print(f"Currently it's about {current_distance} kilometers from the center of your sky.\n")
 
         else:
             print(f"The ISS is {current_distance:,} kilometers away from your location.")
@@ -158,6 +188,32 @@ class ISSTracking:
                   f"{self.latitude}° {format_lat_direction(self.latitude)} by "
                   f"{self.longitude}° {format_lng_direction(self.longitude)}.\n")
 
+    def get_user_loc_name(self):
+        """
+        Get the geodata values so we can see what place the user has input.
+        We'll pass in the user input coordinates.
+        The dataframes are opened and scanned in geodata_scanner.py.
+        """
+        usa_results = self.LL.scan_usa_df(self.my_lat, self.my_long)
+        global_pop_result = self.LL.scan_global_pop_df(self.my_lat, self.my_long)
+
+        if usa_results is not None:
+            usa_feature = usa_results[0]
+            usa_state = usa_results[1]
+            usa_elevation = usa_results[2]
+            print(f"Based on your coordinates, "
+                  f"you should be at or near {usa_feature} in {usa_state}, "
+                  f"with an elevation of {usa_elevation}m.\n")
+
+        elif usa_results is None:
+            # So if USA scan got us nothing, now we check the global dataframe.
+            if global_pop_result is not None:
+                print(f"Based on your coordinates, you should be at or near {global_pop_result}.\n")
+
+        else:
+            print("Well, to be honest I'm not sure where that is, but hey let's"
+                  " start trackin!\n")
+
     def get_iss_loc_name(self):
         """
         Get the geodata values so we can see what place the ISS is above.
@@ -167,8 +223,8 @@ class ISSTracking:
 
         # This is where we pass in the current ISS coordinates to be checked against the
         # location dataframes we've set up and converted.
-        usa_results = geo_scan.scan_usa_df(self.latitude, self.longitude)
-        global_pop_result = geo_scan.scan_global_pop_df(self.latitude, self.longitude)
+        usa_results = self.LL.scan_usa_df(self.latitude, self.longitude)
+        global_pop_result = self.LL.scan_global_pop_df(self.latitude, self.longitude)
 
         if usa_results is not None:
             # scan_usa_df() returns a list of three things: feature, state, and elevation.
@@ -176,22 +232,26 @@ class ISSTracking:
             usa_state = usa_results[1]
             usa_elevation = usa_results[2]
             # And print it!
-            print(f"The ISS is currently flying over {usa_feature} in {usa_state}. "
+            print(f"The ISS is flying over {usa_feature} in {usa_state}. "
                   f"The local elevation is {usa_elevation}.\n")
 
         elif usa_results is None:
-            # So if USA scan got us nothing, now we check the next databases.
+            # So if USA scan got us nothing, now we check the global dataframe.
             if global_pop_result is not None:
-                print(f"The ISS is flying over {global_pop_result}! ")
-
-            elif global_pop_result is None:
-                # TODO: Expand this to cover the other databases, unless I can combine them somehow.
-                print("The ISS is currently flying over unpopulated areas of the Earth.")
+                print(f"The ISS is flying over {global_pop_result}.")
 
     def start_request_and_update(self):
         """
-        Set update rate, set starting date-timestamp, and then run requests loop until we quit.
+        Start geodata scanner and load up our hdf5 dataframes,
+        set update rate, set starting date-timestamp, and then run requests loop until we quit.
         """
+        print(pyfiglet.figlet_format("ISS Tracker", font='alligator2'))
+        # Start process of loading our hdf5 files into dataframes.
+        self.LL.startup_load()
+        # Make sure we only get input after loading the databases.
+        self.get_location_input()
+
+        # Continue after.
         print("This program will keep running until you close it.")
 
         # Set how fast we want to update. I don't think the API updates any faster than 0.5s.
@@ -252,5 +312,4 @@ class ISSTracking:
 # Instantiate.
 iss = ISSTracking()
 # Start!
-print("Complete! Starting program..")
 iss.start_request_and_update()
