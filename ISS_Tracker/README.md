@@ -2,11 +2,6 @@
 
 Keeps track of current International Space Station location using API from http://api.open-notify.org/, checks to see if it's above your input coordinates or nearby, and displays the current distance away from the center of your sky. Also displays the name of geographical locations the ISS is flying over.
 
-Wishlist:
-
-- Interface/GUI, visual map representation
-- Plotting of ISS course (would be interesting to see it line up with NASA data)
-
 # Installation instructions (if you want to try it yourself):
 - Install the modules listed in requirements.txt.
     - pip install -r requirements.txt
@@ -19,3 +14,12 @@ Wishlist:
         - The National File uses | as a delimiter.
         - The global files use \t as a delimiter.
 - Run ISS_Location_Tracker.py!
+
+# TODO:
+
+- Make some coordinate ranges that correspond to giant empty oceans we can check, so we know at least which oceans the ISS is flying over when it's too far away for any other results.
+- Make an actual interface, so the changing info is easier to take in than lines in the console. Web-based interface would be nice.
+    - Add ability to stop program at any time.
+    - Add ability to adjust update rate at any time.
+    - Add ability to adjust coordinate match tolerance range at any time.
+- Plotting of ISS course on a world map (would be interesting to see it line up with NASA data).
