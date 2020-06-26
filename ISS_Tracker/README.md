@@ -2,10 +2,10 @@
 
 Keeps track of current International Space Station location using API from http://api.open-notify.org/, checks to see if it's above your input coordinates or nearby, and displays the current distance away from the center of your sky. Also displays the name of geographical locations the ISS is flying over.
 
-WIP features:
+Wishlist:
 
-- Interface, visual map representation.
-- Plotting of ISS course (would be interesting to see it line up with NASA data).
+- Interface/GUI, visual map representation
+- Plotting of ISS course (would be interesting to see it line up with NASA data)
 
 # Installation instructions (if you want to try it yourself):
 - Install the modules listed in requirements.txt.
