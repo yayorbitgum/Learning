@@ -11,6 +11,7 @@ WIP features:
 
 # Installation instructions (for now):
 - Install the modules listed in requirements.txt.
+  - pip install -r requirements.txt
 - Download two database csv text files (around 655mb zipped, ~3gb unzipped) and unzip them into the GeoLocationInfo folder, as shown in here on github. These are required for showing current geographical locations that the ISS is flying directly above within a certain tolerance of degrees/kilometers.
   - US locations (National File): https://www.usgs.gov/core-science-systems/ngp/board-on-geographic-names/download-gnis-data
   - Global locations (separated by feature class): https://geonames.nga.mil/gns/html/namefiles.html
