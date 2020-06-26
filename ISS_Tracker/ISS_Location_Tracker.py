@@ -90,7 +90,7 @@ def set_update_rate():
 class ISSTracking:
     """
     This class will track the ISS with requests from external API,
-    check distance between ISS and OKC,
+    check distance between ISS and our user input location,
     format updates automatically and print, and
     show the current geographical location of the ISS based on current coordinates.
     """
