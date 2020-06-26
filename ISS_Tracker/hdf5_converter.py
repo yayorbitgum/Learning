@@ -5,11 +5,12 @@
 # I think I could modify this to accept any data file and output hdf5 as a result.
 
 # ///////////////////////////// Imports /////////////////////////////
+
 import os
 import pandas as pd
-# While I'm not using "tables" module here, pandas is dependent on it for what we're doing
-#   as I got an error before.
-#       "pip install tables"
+import re
+# While I'm not using "tables" module, pandas is dependent on it for what we're doing
+#   as I got an error before. I added it to requirements.txt.
 
 # Pandas uses numexpr. I can set my max threads for doing logic.
 # I found this out through warnings it was giving me on initial tests.
@@ -19,11 +20,9 @@ import pandas as pd
 os.environ['NUMEXPR_MAX_THREADS'] = '12'
 
 
-# ///////////////////////////// Variables /////////////////////////////
-# Set our file path names.
+# ///////////////////////////// Header Reference /////////////////////////////
 
-us_file_name = 'GeoLocationInfo/NationalFile_20200501.txt'
-# Header Results for NationalFile_20200501.txt
+# Header info for National text file.
 # 0: ï»¿FEATURE_ID
 # 1: FEATURE_NAME       <- Usable Name for City or Land Feature.
 # 2: FEATURE_CLASS
@@ -45,16 +44,6 @@ us_file_name = 'GeoLocationInfo/NationalFile_20200501.txt'
 # 18: DATE_CREATED
 # 19: DATE_EDITED
 
-global_files_list = ['Countries_administrative_a.txt',
-                     'Countries_hydrographic_h.txt',
-                     'Countries_hypsographic_t.txt',
-                     'Countries_localities_l.txt',
-                     'Countries_populatedplaces_p.txt',
-                     'Countries_spot_s.txt',
-                     'Countries_transportation_r.txt',
-                     'Countries_undersea_u.txt',
-                     'Countries_vegetation_v.txt',
-                     ]
 # All global text data sets have the same header, so we can use this for all those Countries files.
 # Index: 0. Column Header: RC.
 # Index: 1. Column Header: UFI.
@@ -80,12 +69,12 @@ global_files_list = ['Countries_administrative_a.txt',
 # Index: 21. Column Header: SORT_NAME_RO.
 # Index: 22. Column Header: FULL_NAME_RO.       <- Usable Name.
 # Index: 23. Column Header: FULL_NAME_ND_RO.    <- Usable Name.
-# Index: 24. Column Header: SORT_NAME_RG.
-# Index: 25. Column Header: FULL_NAME_RG.
-# Index: 26. Column Header: FULL_NAME_ND_RG.
+# Index: 24. Column Header: SORT_NAME_RG.       <- Usable Name.
+# Index: 25. Column Header: FULL_NAME_RG.       <- Usable Name.
+# Index: 26. Column Header: FULL_NAME_ND_RG.    <- Usable Name.
 # Index: 27. Column Header: NOTE.               ! Contains mixed types.
 # Index: 28. Column Header: MODIFY_DATE.
-# Index: 29. Column Header: DISPLAY.
+# Index: 29. Column Header: DISPLAY.            <- Best name?
 # Index: 30. Column Header: NAME_RANK.
 # Index: 31. Column Header: NAME_LINK.
 # Index: 32. Column Header: TRANSL_CD.          ! Contains mixed types.
@@ -94,45 +83,79 @@ global_files_list = ['Countries_administrative_a.txt',
 # Index: 35. Column Header: F_TERM_DT.          ! Contains mixed types.
 
 
+# ///////////////////////////// Variables /////////////////////////////
+
+# Set our file path names.
+folder_name = 'GeoLocationInfo'
+global_files_list = ['Countries_administrative_a.txt',
+                     'Countries_hydrographic_h.txt',
+                     'Countries_hypsographic_t.txt',
+                     'Countries_localities_l.txt',
+                     'Countries_populatedplaces_p.txt',
+                     'Countries_spot_s.txt',
+                     'Countries_transportation_r.txt',
+                     'Countries_undersea_u.txt',
+                     'Countries_vegetation_v.txt',
+                     ]
+
+
 # ///////////////////////////// Functions /////////////////////////////
-# Our data is in text files, in csv format, with different seperators/delimiters.
+
+# Our data is in text files, in csv format, with different separators/delimiters.
 # National US file is separated by | and the international files are separated by \t.
 # This is all to work towards having data that can be worked with quickly, memory mappable.
+
+def find_national_file():
+    """
+    Since the national file has a different name depending on the date they updated it on
+    the website we downloaded it from, I need to make sure we catch whatever version the
+    person running this program ends up downloading.
+    """
+    # This regex should help us load any NationalFile version that we might use.
+    # https://regex101.com/
+    national_regex = re.compile('((NationalFile)(_)?(\d*)?(\.txt))')
+    # Now we locate the national text file.
+    print("Searching for national file..")
+    for file in os.listdir(folder_name):
+        # Skip subfolders to avoid errors.
+        # https://stackoverflow.com/questions/22207936/python-how-to-find-files-and-skip-directories-in-os-listdir
+        path = os.path.join(folder_name, file)
+        if os.path.isdir(path):
+            print(f"Skipping {path}..")
+            continue
+
+        # If current file matches our regex:
+        # https://stackoverflow.com/questions/39293968/python-how-do-i-search-directories-and-find-files-that-match-regex
+        elif national_regex.match(file):
+            print(f"Found {file}!")
+            # Return it.
+            return file
 
 
 def national_csv_to_hdf5():
     """Convert our national text file to hdf5 format, and save it to disk."""
+    us_file_name = find_national_file()
     separator = '|'
-    output_name = 'GeoLocationInfo/hdf5/NationalFile_20200501.hdf5'
+    output_name = f'{folder_name}/hdf5/{us_file_name.rstrip(".txt")}.hdf5'
 
     # Read text file into dataframe object.
-    print(f"Reading {us_file_name} as csv with pandas..")
-    us_df = pd.read_csv(us_file_name,
+    print(f"Reading {us_file_name} with pandas..")
+    us_df = pd.read_csv(f'{folder_name}/{us_file_name}',
                         delimiter=separator,
-                        # I had to set all of this manually after performance warnings.
-                        # Everything was an object type, more or less.
-                        dtype={'FEATURE_NAME': str,
-                               'FEATURE_CLASS': str,
-                               'STATE_ALPHA': str,
-                               'STATE_NUMERIC': str,
-                               'COUNTY_NAME': str,
-                               'COUNTY_NUMERIC': str,
-                               'PRIMARY_LAT_DMS': str,
-                               'PRIM_LONG_DMS': str,
-                               'PRIM_LAT_DEC': float,
-                               'PRIM_LONG_DEC': float,
-                               'SOURCE_LAT_DMS': str,
-                               'SOURCE_LONG_DMS': str,
-                               'SOURCE_LAT_DEC': float,
-                               'SOURCE_LONG_DEC': float,
-                               'ELEV_IN_M': float,
-                               'ELEV_IN_FT': float,
-                               'MAP_NAME': str,
-                               'DATE_CREATED': str,
-                               'DATE_EDITED': str}
                         )
+    print("\nComplete!")
 
-    # Save to HDF5 file in the hdf5 folder.
+    # An attempt to resolve performance warnings I was getting before.
+    # https://stackoverflow.com/questions/22998859/hdfstore-with-string-columns-gives-issues
+    columns = ['FEATURE_NAME', 'FEATURE_CLASS', 'STATE_ALPHA', 'STATE_NUMERIC', 'COUNTY_NAME',
+               'COUNTY_NUMERIC', 'PRIMARY_LAT_DMS', 'PRIM_LONG_DMS', 'SOURCE_LAT_DMS', 'SOURCE_LONG_DMS',
+               'MAP_NAME', 'DATE_CREATED', 'DATE_EDITED']
+    # We locate all our columns listed, then apply string type to every column.
+    # Now they'll be fast strings instead of slow objects.
+    us_df.loc[:, columns] = us_df[columns].applymap(str)
+
+    # Now we this save this dataframe to HDF5 file in the hdf5 folder.
+    print(f"Converting {us_file_name} to hdf5 format...")
     pd.DataFrame.to_hdf(us_df,
                         path_or_buf=output_name,
                         mode='w',
@@ -163,7 +186,7 @@ def global_csv_to_hdf5():
         path_name = f"{output_folder_path}/{current_file.rstrip('.txt')}.hdf5"
 
         # Read the current file in the list.
-        print(f"{counter} of {count}: Reading {current_file} as csv with pandas..")
+        print(f"{counter} of {count}: Reading {current_file} with pandas..")
         # Some of these data files have mixed types in their columns as we see above in the notes,
         # so we'll make them explicitly one type.
         # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.errors.DtypeWarning.html
@@ -181,7 +204,17 @@ def global_csv_to_hdf5():
                                         }
                                  )
 
-        # Save to HDF5 file in the hdf5 folder.
+        # An attempt to resolve performance warnings I was getting before.
+        # https://stackoverflow.com/questions/22998859/hdfstore-with-string-columns-gives-issues
+        columns = ['MGRS', 'JOG', 'FC', 'DSG', 'CC1', 'ADM1', 'CC2', 'NT', 'LC', 'SHORT_FORM', 'GENERIC',
+                   'SORT_NAME_RO', 'FULL_NAME_RO', 'FULL_NAME_ND_RO', 'SORT_NAME_RG', 'FULL_NAME_RG',
+                   'FULL_NAME_ND_RG', 'NOTE', 'MODIFY_DATE', 'DISPLAY', 'TRANSL_CD', 'NM_MODIFY_DATE',
+                   'F_EFCTV_DT', 'F_TERM_DT', 'DMS_LAT', 'DMS_LONG']
+        # We locate all our columns listed, then apply string type to every column.
+        # Now they'll be fast strings instead of slow objects.
+        current_df.loc[:, columns] = current_df[columns].applymap(str)
+
+        # Save this dataframe to HDF5 file in the hdf5 folder.
         print(f"{counter} of {count}: Converting to hdf5 format and saving as {path_name}..")
         pd.DataFrame.to_hdf(current_df,
                             path_or_buf=path_name,
