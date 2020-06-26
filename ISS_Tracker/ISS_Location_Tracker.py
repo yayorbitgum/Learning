@@ -90,7 +90,7 @@ def set_update_rate():
 class ISSTracking:
     """
     This class will track the ISS with requests from external API,
-    check distance between ISS and our user input location,
+    ccheck distance between ISS and our user input location,
     format updates automatically and print, and
     show the current geographical location of the ISS based on current coordinates.
     """
@@ -147,8 +147,8 @@ class ISSTracking:
         # Radians are the angle made when a radius is wrapped around a circle.
         # The earth is round (for the most part), so this should work.
         # https://www.mathsisfun.com/geometry/radians.html
-        okc_long_rad = math.radians(self.my_long)
-        okc_lat_rad = math.radians(self.my_lat)
+        my_long_rad = math.radians(self.my_long)
+        my_lat_rad = math.radians(self.my_lat)
         iss_long_rad = math.radians(self.longitude)
         iss_lat_rad = math.radians(self.latitude)
 
@@ -156,11 +156,11 @@ class ISSTracking:
         radius_of_earth = 6378
 
         # Now get the difference between the coordinates.
-        diff_long = iss_long_rad - okc_long_rad
-        diff_lat = iss_lat_rad - okc_lat_rad
+        diff_long = iss_long_rad - my_long_rad
+        diff_lat = iss_lat_rad - my_lat_rad
 
         # Now we copy and paste the Haversine Formula that I don't understand at all, and input our coordinates.
-        a = math.sin(diff_lat / 2) ** 2 + math.cos(okc_lat_rad) * math.cos(iss_lat_rad) * math.sin(diff_long / 2) ** 2
+        a = math.sin(diff_lat / 2) ** 2 + math.cos(my_lat_rad) * math.cos(iss_lat_rad) * math.sin(diff_long / 2) ** 2
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         distance = radius_of_earth * c
         # That gave me a long number with a lot of decimals, so I'm gonna round it up.
