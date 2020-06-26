@@ -19,7 +19,7 @@ Keeps track of current International Space Station location using API from http:
 
 - Add easier user input.
     - Ability to enter any location text.
-    - Ability to enter both coordinates at the same time.
+    - Ability to enter both coordinates at the same time, or copy/paste from common sources and formats.
 - Make some coordinate ranges that correspond to giant empty oceans we can check, so we know at least which oceans the ISS is flying over when it's too far away for any other results.
 - Make an actual interface, so the changing info is easier to take in than lines in the console. Web-based interface would be nice.
     - Add ability to stop program at any time.
