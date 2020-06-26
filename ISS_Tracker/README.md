@@ -1,11 +1,9 @@
 # ISS Location Tracker
 
-Keeps track of current International Space Station location using API from http://api.open-notify.org/, checks to see if it's above me in OKC or nearby, and displays the current distance away from the center of my sky. Also displays information about geographical locations the ISS is flying over, if they're in the US or in populated areas on the globe.
+Keeps track of current International Space Station location using API from http://api.open-notify.org/, checks to see if it's above your input coordinates or nearby, and displays the current distance away from the center of your sky. Also displays the name of geographical locations the ISS is flying over.
 
 WIP features:
 
-- Check current ISS coordinates and showing if it's flying over any and all global features, including ocean and underwater locations.. Assuming they're in these databases.
-- Input current location to check distance from wherever, not just OKC.
 - Interface, visual map representation.
 - Plotting of ISS course (would be interesting to see it line up with NASA data).
 
