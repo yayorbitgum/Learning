@@ -183,4 +183,4 @@ crash_course = PDFAnalyzer(
 
 # Pass in instances to function that runs all the methods I wanna run.
 # TODO: Automatically create list/dict of instances that passes into this.
-run_extracts(crash_course)
+run_extracts(crash_course, meeting_minutes, automate_boring)
