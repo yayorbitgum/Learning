@@ -18,6 +18,7 @@ Keeps track of current International Space Station location using API from http:
 
 # TODO:
 
+- Fully implement FuzzyWuzzy (still need to learn it).
 - Add easier user input.
     - Ability to enter any location text.
     - Ability to enter both coordinates at the same time, or copy/paste from common sources and formats.
