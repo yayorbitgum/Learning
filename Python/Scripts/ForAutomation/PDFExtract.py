@@ -228,6 +228,7 @@ class PDFAnalyzer:
         TODO:
             Find text in extracted or provided images and extract it
             using PyTesseract.
+            https://github.com/madmaze/pytesseract
         """
         pass
 
