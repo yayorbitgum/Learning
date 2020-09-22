@@ -9,8 +9,20 @@
 import ezgmail
 from playsound import playsound
 
+print("Watching for messages from EVGA.. ")
+count = 0
+
 while True:
     unread_threads = ezgmail.unread()
+    count += 1
+
+    if count % 2 == 0:
+        print('beep boop..')
+    else:
+        print('boop beep!')
+
+    if count % 10 == 0:
+        print("Watching for messages from EVGA.. ")
 
     # For every gmail thread..
     for thread in unread_threads:
