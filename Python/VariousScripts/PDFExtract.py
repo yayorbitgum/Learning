@@ -8,24 +8,38 @@
 # https://pymupdf.readthedocs.io/en/latest/faq.html#how-to-extract-images-pdf-documents
 # https://stackoverflow.com/questions/56494070/how-to-use-pdfminer-six-with-python-3/56530666#56530666
 #
-# PyPDF2 sucks. Doesn't work for every PDF even with basic text. Works for some.
-# Need to try replacements and refactor eventually.
+# PyPDF2 isn't maintained anymore and it shows.
+# Doesn't work for every PDF even with basic text. Works for some.
+# TODO Need to try replacement modules and refactor.
 
+
+# Imports ----------------------------------------------------------------------
 import PyPDF2
 import fitz
 import os
 import logging
+import datetime
 # from PIL import Image
 # import pytesseract
 
-# There's a lot of fast console spam, so let's make a log! -----------------
+
+# Logging ----------------------------------------------------------------------
+# The console spam is way too fast and inconvenient for me to review. ----------
 # https://stackoverflow.com/a/17682520/13627106
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger()
-# Shadowing print here is intentional, so all prints below are replaced with logging.
+# Shadowing print here is intentional so all prints are replaced with logging.
 print = logger.info
+log_folder = f'{os.getcwd()}/output_logs'
+logger.addHandler(logging.FileHandler(f'{log_folder}/PDFExtract_log.txt', 'w'))
+
+try:
+    os.makedirs(log_folder)
+except FileExistsError:
+    pass
 
 
+# Classes ----------------------------------------------------------------------
 class PDFAnalyzer:
     """
     This class can extract text, images, and text from images in PDFs.
@@ -41,7 +55,6 @@ class PDFAnalyzer:
         self.page_number = page_number
         self.page_amt = 0
         # Logging file.
-        logger.addHandler(logging.FileHandler(f'{self.directory}/{file_name}_log.txt', 'w'))
 
     def image_extract(self):
         """
@@ -106,8 +119,11 @@ class PDFAnalyzer:
                 extracted_text = page.extractText()
 
                 # Save text extracts to txt files.
-                with open(f"{text_folder_path}/{self.file_name[:-4]}_page{p}.txt", "w", encoding="utf-8") as text_page:
-                    print(f"Creating text file of page {p} of {reader.numPages} to {self.file_name[:-4]}_page{p}.txt.")
+                with open(f"{text_folder_path}/{self.file_name[:-4]}_page{p}.txt",
+                          "w", encoding="utf-8") as text_page:
+
+                    print(f"Creating text file of page {p} of {reader.numPages} "
+                          f"to {self.file_name[:-4]}_page{p}.txt.")
                     text_page.write(extracted_text)
 
     def text_extract_combined(self):
@@ -135,8 +151,11 @@ class PDFAnalyzer:
                 extracted_text = page.extractText()
 
                 # Save text extracts to text file, append.
-                with open(f"{text_folder_path}/{self.file_name[:-4]}_full.txt", "a", encoding="utf-8") as text_page:
-                    print(f"Adding text from page {p} of {reader.numPages} to {self.file_name[:-4]}_full.txt.")
+                with open(f"{text_folder_path}/{self.file_name[:-4]}_full.txt",
+                          "a", encoding="utf-8") as text_page:
+
+                    print(f"Adding text from page {p} of {reader.numPages} "
+                          f"to {self.file_name[:-4]}_full.txt.")
                     text_page.write(extracted_text)
 
     def tesseract_extract(self):
@@ -148,7 +167,7 @@ class PDFAnalyzer:
         pass
 
 
-# Program ----------------------------------------------------------------------
+# Functions --------------------------------------------------------------------
 def run_extracts(*pdfa_instances):
     """
     Take in pdf class instances and run each method I want.
@@ -160,9 +179,9 @@ def run_extracts(*pdfa_instances):
         instance.text_extract_combined()
         instance.image_extract()
         instance.tesseract_extract()
-        print(f"Complete! Check log files at {instance.directory}.")
 
 
+# Instancing -------------------------------------------------------------------
 # Instantiate. Enter PDF folder/paths and file names here.
 # TODO: User picks folder or drive. Crawl through drive for all PDF files.
 # TODO: Display list of PDF results. Confirm extraction with user.
@@ -181,6 +200,9 @@ crash_course = PDFAnalyzer(
     'Python Crash Course, 2nd Edition.pdf'
 )
 
+
+# Start ------------------------------------------------------------------------
 # Pass in instances to function that runs all the methods I wanna run.
 # TODO: Automatically create list/dict of instances that passes into this.
 run_extracts(crash_course, meeting_minutes, automate_boring)
+print(f"Complete! Check log files at {log_folder}.")
