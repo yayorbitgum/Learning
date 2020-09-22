@@ -3,11 +3,15 @@
 # This program should be able to grab most phone numbers and emails from the clipboard,
 # display the results, and copy the neatly formatted results to the clipboard too.
 
+# TODO:
+#      This whole thing needs to be refactored into classes/methods.
+#      Right now I see functions pointing to other functions pointing to other functions.
+#      Would be very hard to adjust if I ever came back to expand on this.
+
 
 # //////////////////////////////////////// Imports ////////////////////
 import pyperclip
 import re
-
 
 # //////////////////////////////////////// Regular Expressions ////////////////////
 # Expression to grab phone numbers.
@@ -36,7 +40,6 @@ email_regex = re.compile(r'('                       # Start regex group 0.
 # The format for email addresses has a lot of weird rules.
 # The above regular expression won’t match every possible valid email address,
 # but it’ll match almost any typical email address you’ll encounter.
-
 
 # //////////////////////////////////////// Lists ////////////////////
 phone_matches = []
