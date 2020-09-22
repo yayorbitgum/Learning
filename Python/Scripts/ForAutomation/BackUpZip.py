@@ -20,22 +20,30 @@ def backup_to_zip(folder):
 
     # --------------------------------------------------------------------------
     # Making a timestamp so archiving is simpler.
-    # https://www.programiz.com/python-programming/datetime/timestamp-datetime
+    # Timestamp formatting is too messy to be used for file name:
+    #   (2020-09-19 18:00:50.263646), so I'll make my own.
+    # I'll also add zeros to ensure each slot is at least 2 digits long so that
+    #   sorting by file name works.
     now = datetime.now()
     timestamp = datetime.timestamp(now)
     time_format = datetime.fromtimestamp(timestamp)
 
-    # Timestamp formatting too messy for file name (2020-09-19 18:00:50.263646),
-    # so I'll make my own.
-    # https://docs.python.org/3/library/datetime.html#datetime.date.fromtimestamp
-    year    = time_format.year
-    month   = time_format.month
-    day     = time_format.day
-    hour    = time_format.hour
-    minute  = time_format.minute
-    second  = time_format.second
 
-    # My timestamp format. Will be good for sorting files by name!
+    def add_a_zero(number):
+        if len(str(number)) < 2:
+            number = f"0{number}"
+            return number
+        else:
+            return number
+
+
+    year   = time_format.year
+    month  = add_a_zero(time_format.month)
+    day    = add_a_zero(time_format.day)
+    hour   = add_a_zero(time_format.hour)
+    minute = add_a_zero(time_format.minute)
+    second = add_a_zero(time_format.second)
+
     time = f"{year}-{month}-{day} {hour}.{minute}.{second}"
 
     # Setting up the zip file name with an added timestamp.
