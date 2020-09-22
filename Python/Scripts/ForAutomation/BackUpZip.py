@@ -28,14 +28,12 @@ def backup_to_zip(folder):
     timestamp = datetime.timestamp(now)
     time_format = datetime.fromtimestamp(timestamp)
 
-
     def add_a_zero(number):
         if len(str(number)) < 2:
             number = f"0{number}"
             return number
         else:
             return number
-
 
     year   = time_format.year
     month  = add_a_zero(time_format.month)
@@ -62,7 +60,7 @@ def backup_to_zip(folder):
     #   for loop!
     for foldername, subfolders, filenames in os.walk(folder):
 
-        print(f"Starting process of adding files in {foldername} to {zip_name}...")
+        print(f"Adding files in {foldername} to {zip_name}...")
         # Add the current folder.
         backup_zip.write(foldername)
 
@@ -72,11 +70,11 @@ def backup_to_zip(folder):
 
             # Don't backup the backup files lol.
             if filename.startswith(new_base) and filename.endswith('.zip'):
-                print("Backup recursion successfully avoided.")
+                print("Backup recursion avoided.")
                 continue
 
             backup_zip.write(os.path.join(foldername, filename))
-            print(f"Successfully added {filename}  to {zip_name}..")
+            print(f"Added {filename} to {zip_name}..")
 
     # --------------------------------------------------------------------------
     # Close the file.
@@ -84,7 +82,7 @@ def backup_to_zip(folder):
     # Move the file from the root directory of this script to the location we zipped.
     shutil.move(zip_name, user_folder)
 
-    print(f"Zip complete! Check {folder}.")
+    print(f"\nZip complete! Check {folder}.\n")
     # Opens explorer here.
     os.startfile(folder)
 
@@ -95,7 +93,7 @@ def backup_to_zip(folder):
 # input if the user fucked up.
 # If they didn't fuck up, pass in the user's folder path into the zip function.
 while True:
-    user_folder = input('Enter folder path to backup: \n')
+    user_folder = input('\nEnter folder path to backup: \n')
 
     if os.path.exists(user_folder) is False:
         print(f"{user_folder} doesn't exist. "
@@ -104,4 +102,3 @@ while True:
         continue
 
     backup_to_zip(user_folder)
-    break
