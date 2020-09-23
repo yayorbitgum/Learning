@@ -6,7 +6,11 @@
       <sourceFolder url="file://$MODULE_DIR$/Python/Projects/ISS_Tracker" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Python/Scripts/ForAutomation" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Python/Scripts/ForFun" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Python/Scripts/ForAutomation/GmailScan" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Python/Scripts/ForFun/WordCounter" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Python/Scripts/ForAutomation/ScreenNav" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/Python/Scripts/ForAutomation/PDFExtract Logs" />
+      <excludeFolder url="file://$MODULE_DIR$/Python/Scripts/ForAutomation/ScreenNav/image_ref" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

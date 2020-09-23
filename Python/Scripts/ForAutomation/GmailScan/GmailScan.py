@@ -28,6 +28,12 @@ while True:
     for thread in unread_threads:
         # For every message in that thread..
         for message in thread.messages:
+            # messages[n] objects have the following attributes:
+            # .sender
+            # .recipient
+            # .subject
+            # .body
+            # .timestamp
             # If "EVGA" is anywhere in the body of that message:
             if "evga" in message.body.lower():
                 # Let me know!
