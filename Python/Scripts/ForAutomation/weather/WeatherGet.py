@@ -90,10 +90,17 @@ def main():
             cur_temperature = round(k_to_f(cur_temps['temp']), 1)
             cur_feels_like  = round(k_to_f(cur_temps['feels_like']), 1)
             fut_temperature = round(k_to_f(fut_temps['temp']), 1)
-            fut_feels_like  = round(k_to_f(fut_temps['feels_like']), 1)
+            # fut_feels_like  = round(k_to_f(fut_temps['feels_like']), 1)
 
             cur_humidity    = fut_temps['humidity']
             fut_humidity    = fut_temps['humidity']
+
+            # Makes forecast temp change easier to digest.
+            temp_adjust = round(fut_temperature - cur_temperature, 1)
+            if temp_adjust < 0:
+                fut_temp_text = f"{temp_adjust}° cooler at {fut_temperature}° F."
+            elif temp_adjust > 0:
+                fut_temp_text = f"{temp_adjust}° warmer at {fut_temperature}° F."
 
             # Pauses to add some motion to the data.
             print(f" ---------------- {city_name} --------------------------\n")
@@ -114,9 +121,7 @@ def main():
             sleep(delay)
             print(f"    {fut_humidity}% humidity.")
             sleep(delay)
-            print(f"    {fut_temperature}° F: temperature .")
-            sleep(delay)
-            print(f"    {fut_feels_like}° F: Will feel like this.")
+            print(f"    {fut_temp_text}")
             sleep(delay)
             print(f"  --------------------------------------------------------\n")
             sleep(delay)
