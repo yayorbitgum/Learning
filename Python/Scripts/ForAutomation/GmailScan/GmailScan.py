@@ -7,15 +7,23 @@
 # to first grab the credentials file, then to get token.pickle from Google.
 
 import ezgmail
+from googleapiclient.errors import HttpError
 from playsound import playsound
+from time import sleep
 
 print("Watching for messages from EVGA.. ")
 count = 0
 
 while True:
-    unread_threads = ezgmail.unread()
-    count += 1
+    try:
+        unread_threads = ezgmail.unread()
+    except HttpError:
+        print("HTTP Error occurred. Rate limit probably exceeded. "
+              "Waiting for some time.")
+        sleep(1800)
+        continue
 
+    count += 1
     if count % 2 == 0:
         print('beep boop..')
     else:
@@ -44,3 +52,5 @@ while True:
                       f"\n----\n"
                       f"Body: {message.body}")
                 playsound('G:\Ableton Exports\SoundEffects\smol_notify.mp3')
+
+    sleep(60)
