@@ -2,6 +2,9 @@
 # For now I'm testing out mouse clicks, locating buttons on screen via
 # image reference, and exploring options.
 
+# Run following in console for retrieving coord and color info on cursor:
+# pyautogui.mouseInfo()
+
 import pyautogui
 from time import sleep
 
@@ -20,6 +23,6 @@ if button_locs is not None:
     for button in button_locs:
         print(f"Located button at: {button}")
         pyautogui.moveTo(button)
-        sleep(3)
+        sleep(1)
 else:
     print("Unable to locate any matches on screen.")

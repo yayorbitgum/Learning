@@ -9,6 +9,7 @@
       <sourceFolder url="file://$MODULE_DIR$/Python/Scripts/ForAutomation/GmailScan" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Python/Scripts/ForFun/WordCounter" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Python/Scripts/ForAutomation/ScreenNav" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Python/Scripts/ForAutomation/weather" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/Python/Scripts/ForAutomation/PDFExtract Logs" />
       <excludeFolder url="file://$MODULE_DIR$/Python/Scripts/ForAutomation/ScreenNav/image_ref" />
     </content>
