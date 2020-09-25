@@ -3,8 +3,7 @@
 # take a peek at it every now and then get (somewhat) live updates without
 # needing to refresh or open or touch anything.
 # And it'll make me feel really cool and smart.
-# https://openweathermap.org/appid
-# https://openweathermap.org/api/weather-map-2
+# https://openweathermap.org/forecast5
 # Data is only updated once every 10 minutes on their servers.
 
 
@@ -23,8 +22,7 @@ from time import sleep
 # You can pass in coordinates and other parameters, but IDs are more precise.
 city_id = 4544349
 file_name = f'{city_id}_weather.json'
-delay = 0.25
-# Setting to 60 seconds for testing, but don't need faster than 600.
+delay = 1
 sleepy_time = 600
 
 
@@ -69,39 +67,61 @@ def main():
         if response.status_code == 200:
             # Save the request so we don't have to pull from API over and over.
             save_json(response)
-            # Open the local save so we can view data.
+            # Open the local save so we can play with data.
             weather = open_json()
-            # After a lot of trial and error, I found where the info is stored.
-            # weather['list'][0]['main'] leads to:
-            #   'feels like'
-            #   'humidity'
-            #   'pressure'
-            #   'temp'
-            # and others.
-
             city_name   = weather['city']['name']
-            description = weather['list'][0]['weather'][0]['description']
-            tmps        = weather['list'][0]['main']
+            # ['list'][0] is current weather.
+            # ['list'][1], or [2], etc would be forecast.
+            # Each new list is 3 hours forecast ahead of last list. There are 40.
+            # TODO:
+            #  There's a lot of smelly code below. Gotta be better way to
+            #  automate different forecasts via classes/methods because
+            #  all the data is structured the same.
+
+            # Current: [0]
+            cur_description = weather['list'][0]['weather'][0]['description']
+            cur_temps       = weather['list'][0]['main']
+
+            # 3 hours from now: [1]
+            fut_description = weather['list'][1]['weather'][0]['description']
+            fut_temps       = weather['list'][1]['main']
 
             # Convert temps to F, then round up decimal points to 1.
-            temperature = round(k_to_f(tmps['temp']), 1)
-            feels_like  = round(k_to_f(tmps['feels_like']), 1)
-            humidity    = tmps['humidity']
+            cur_temperature = round(k_to_f(cur_temps['temp']), 1)
+            cur_feels_like  = round(k_to_f(cur_temps['feels_like']), 1)
+            fut_temperature = round(k_to_f(fut_temps['temp']), 1)
+            fut_feels_like  = round(k_to_f(fut_temps['feels_like']), 1)
+
+            cur_humidity    = fut_temps['humidity']
+            fut_humidity    = fut_temps['humidity']
 
             # Pauses to add some motion to the data.
-            print(f" ---------------- {city_name} --------------------------")
+            print(f" ---------------- {city_name} --------------------------\n")
             sleep(delay)
-            print(f"    {description.capitalize()}!")
+            print(f"    {cur_description.capitalize()}!")
             sleep(delay)
-            print(f"    {humidity}% humidity.")
+            print(f"    {cur_humidity}% humidity.")
             sleep(delay)
-            print(f"    {temperature}° F: Current temperature.")
+            print(f"    {cur_temperature}° F: Current temperature.")
             sleep(delay)
-            print(f"    {feels_like}° F: Feels like this.")
+            print(f"    {cur_feels_like}° F: Feels like this.\n")
             sleep(delay)
-            print(f"  --------------------------------------------------------")
+            print(f"  --------------------------------------------------------\n")
             sleep(delay)
-            print(f"\n\nWaiting {sleepy_time/60} minutes.\n\n")
+            print(f"Coming up in 3 hours..\n")
+            sleep(delay)
+            print(f"    {fut_description.capitalize()} soon!")
+            sleep(delay)
+            print(f"    {fut_humidity}% humidity.")
+            sleep(delay)
+            print(f"    {fut_temperature}° F: temperature .")
+            sleep(delay)
+            print(f"    {fut_feels_like}° F: Will feel like this.")
+            sleep(delay)
+            print(f"  --------------------------------------------------------\n")
+            sleep(delay)
+
+            print(f"Waiting {sleepy_time/60} minutes.\n\n")
 
         else:
             print(f"\n\n\nResponse code is {response.status_code}. \n\n\n")
