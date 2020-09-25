@@ -25,7 +25,7 @@ city_id = 4544349
 file_name = f'{city_id}_weather.json'
 delay = 0.25
 # Setting to 60 seconds for testing, but don't need faster than 600.
-sleepy_time = 60
+sleepy_time = 600
 
 
 # Functions --------------------------------------------------------------------
