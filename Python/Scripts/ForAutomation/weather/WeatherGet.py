@@ -101,7 +101,7 @@ def main():
             sleep(delay)
             print(f"  --------------------------------------------------------")
             sleep(delay)
-            print(f"\n\nWaiting {sleepy_time} seconds.\n\n")
+            print(f"\n\nWaiting {sleepy_time/60} minutes.\n\n")
 
         else:
             print(f"\n\n\nResponse code is {response.status_code}. \n\n\n")
