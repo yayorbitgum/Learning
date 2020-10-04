@@ -73,10 +73,6 @@ def main():
             # ['list'][0] is current weather.
             # ['list'][1], or [2], etc would be forecast.
             # Each new list is 3 hours forecast ahead of last list. There are 40.
-            # TODO:
-            #  There's a lot of smelly code below. Gotta be better way to
-            #  automate different forecasts via classes/methods because
-            #  all the data is structured the same.
 
             # Current: [0]
             cur_description = weather['list'][0]['weather'][0]['description']
@@ -113,7 +109,7 @@ def main():
             sleep(delay)
             print(f"    {cur_feels_like}° F: Feels like this.\n")
             sleep(delay)
-            print(f"  --------------------------------------------------------\n")
+            print(f"  ------------------------------------------------------\n")
             sleep(delay)
             print(f"Coming up in 3 hours..\n")
             sleep(delay)
@@ -123,7 +119,7 @@ def main():
             sleep(delay)
             print(f"    {fut_temp_text}")
             sleep(delay)
-            print(f"  --------------------------------------------------------\n")
+            print(f"  ------------------------------------------------------\n")
             sleep(delay)
 
             print(f"Waiting {sleepy_time/60} minutes.\n\n")

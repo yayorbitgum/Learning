@@ -14,14 +14,16 @@
 
 
 # Imports ----------------------------------------------------------------------
+# TODO: Replace PyPDF4 with something that actually works lol.
+import pdfminer3
 import PyPDF4
+import pytesseract
+from PIL import Image
+# Fitz however is working perfectly for images extracts.
 import fitz
 import os
 import logging
 from datetime import datetime
-import pdfminer3
-# from PIL import Image
-# import pytesseract
 
 
 # Timestamp for the log files. -------------------------------------------------
@@ -234,41 +236,49 @@ class PDFAnalyzer:
 
 
 # Functions --------------------------------------------------------------------
-def run_extracts(*pdfa_instances):
+def run_extracts(*pdfs):
     """
     Take in pdf class instances and run each method I want.
     This way I don't have to copy/paste calling methods over and over
     for every instance I make for each PDF I wanna analyze.
     """
-    for instance in pdfa_instances:
-        # instance.text_extract_separated()
-        instance.text_extract_combined()
-        instance.image_extract()
-        instance.tesseract_extract()
+    for pdf in pdfs:
+        # pdf.text_extract_separated()
+        try:
+            pdf.text_extract_combined()
+            pdf.image_extract()
+            pdf.tesseract_extract()
+        except PyPDF4.utils.PdfReadError:
+            print(f"PDF hasn't been decrypted according to PyPDF4.")
 
 
-# Instancing -------------------------------------------------------------------
-# Instantiate. Enter PDF folder/paths and file names here.
-# TODO: User picks folder or drive. Crawl through drive for all PDF files.
-# TODO: Display list of PDF results. Confirm extraction with user.
-# TODO: Make function to create class instances based on amount of PDFs.
-# TODO: Add paths and file names to said instancing.
-meeting_minutes = PDFAnalyzer(
-    'M:\Coding Content\PDFExtractProject\meetingminutes',
-    'meetingminutes.pdf'
-)
-automate_boring = PDFAnalyzer(
-    'M:\Coding Content\PDFExtractProject\ATBS',
-    'Automate the Boring Stuff with Python_ 2nd Edition - Al Sweigart.pdf'
-)
-crash_course = PDFAnalyzer(
-    'M:\Coding Content\PDFExtractProject\CrashCourse',
-    'Python Crash Course, 2nd Edition.pdf'
-)
+def find_pdfs(file_path):
+    """
+    Walk directory to find files that end with "pdf".
+    Instantiate PDFAnalyzer class.
+    """
+
+    for root, dirs, files in os.walk(file_path):
+        for file in files:
+            if file.endswith(".pdf"):
+                instance = PDFAnalyzer(root, file)
+                run_extracts(instance)
+
+
+def main():
+
+    while True:
+        try:
+            path = input("Enter path to search for and convert all PDFs. ")
+            find_pdfs(path)
+            break
+
+        except FileNotFoundError:
+            print("Couldn't find that folder! Did you enter it correctly?")
+            continue
+
+    print(f"\nComplete! Check log files at {log_folder}.\n")
 
 
 # Start ------------------------------------------------------------------------
-# Pass in instances to function that runs all the methods I wanna run.
-# TODO: Automatically create list/dict of instances that passes into this.
-run_extracts(meeting_minutes, automate_boring, crash_course)
-print(f"\nComplete! Check log files at {log_folder}.\n")
+main()

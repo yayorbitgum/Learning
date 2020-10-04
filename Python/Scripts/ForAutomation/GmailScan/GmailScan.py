@@ -53,4 +53,4 @@ while True:
                       f"Body: {message.body}")
                 playsound('G:\Ableton Exports\SoundEffects\smol_notify.mp3')
 
-    sleep(60)
+    sleep(180)
