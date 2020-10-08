@@ -7,14 +7,10 @@
 # https://stackoverflow.com/questions/2693820/extract-images-from-pdf-without-resampling-in-python
 # https://pymupdf.readthedocs.io/en/latest/faq.html#how-to-extract-images-pdf-documents
 # https://stackoverflow.com/questions/56494070/how-to-use-pdfminer-six-with-python-3/56530666#56530666
-#
-# PyPDF2 isn't maintained anymore and it shows.
-# Doesn't work for every PDF even with basic text. Works for some.
-# TODO Need to try replacement modules and refactor.
 
 
 # Imports ----------------------------------------------------------------------
-# TODO: Replace PyPDF4 with something that actually works lol.
+# TODO: Figure out why PyPDF4 text extract is a mess or find alternative.
 import pdfminer3
 import PyPDF4
 import pytesseract
@@ -75,12 +71,10 @@ logger.addHandler(logging.FileHandler(
 
 # Classes ----------------------------------------------------------------------
 class PDFAnalyzer:
-    """
-    This class can extract text, images, and text from images in PDFs.
-    directory: The folder the PDF is located in.
-    file_name: the PDF file name (including .pdf).
-    page_number (optional): Specify specific page number.
-    """
+    # This class can extract text, images, and text from images in PDFs.
+    # directory: The folder the PDF is located in.
+    # file_name: the PDF file name (including .pdf).
+    # page_number (optional): Specify specific page number.
 
     def __init__(self, directory, file_name, *page_number):
         self.file_name = file_name
@@ -91,9 +85,8 @@ class PDFAnalyzer:
         # Logging file.
 
     def image_extract(self):
-        """
-        Extract images from given PDF file, and save as PNGs in given folder.
-        """
+        # Extract images from given PDF file, and save as PNGs in given folder.
+
         pdf_doc = fitz.open(self.pdf_full_path)
         # New folder for extracted images.
         img_folder_path = f"{self.directory}/extracted images"
@@ -130,10 +123,8 @@ class PDFAnalyzer:
                 continue
 
     def text_extract_separated(self):
-        """
-        Extract text from all pages in a PDF,
-        and split it out to separate text files per page.
-        """
+        # Extract text from all pages in a PDF,
+        # and split it out to separate text files per page.
 
         # New folder for extracted pages.
         text_folder_path = f"{self.directory}/extracted text"
@@ -174,10 +165,8 @@ class PDFAnalyzer:
                                     f"{extracted_text}")
 
     def text_extract_combined(self):
-        """
-        Extract text from all pages in a PDF,
-        and combine it all into one text file.
-        """
+        # Extract text from all pages in a PDF,
+        # and combine it all into one text file.
 
         # New folder for extracted pages.
         text_folder_path = f"{self.directory}/extracted text"
@@ -226,37 +215,33 @@ class PDFAnalyzer:
                               f"in {self.file_name} did not generate any text.")
 
     def tesseract_extract(self):
-        """
-        TODO:
-            Find text in extracted or provided images and extract it
-            using PyTesseract.
-            https://github.com/madmaze/pytesseract
-        """
+        # TODO:
+        #     Find text in extracted or provided images and extract it
+        #     using PyTesseract.
+        #     https://github.com/madmaze/pytesseract
         pass
 
 
 # Functions --------------------------------------------------------------------
 def run_extracts(*pdfs):
-    """
-    Take in pdf class instances and run each method I want.
-    This way I don't have to copy/paste calling methods over and over
-    for every instance I make for each PDF I wanna analyze.
-    """
+    # Take in pdf class instances and run each method I want.
+    # This way I don't have to copy/paste calling methods over and over
+    # for every instance I make for each PDF I wanna analyze.
+
     for pdf in pdfs:
         # pdf.text_extract_separated()
         try:
             pdf.text_extract_combined()
             pdf.image_extract()
             pdf.tesseract_extract()
+
         except PyPDF4.utils.PdfReadError:
             print(f"PDF hasn't been decrypted according to PyPDF4.")
 
 
 def find_pdfs(file_path):
-    """
-    Walk directory to find files that end with "pdf".
-    Instantiate PDFAnalyzer class.
-    """
+    # Walk directory to find files that end with "pdf".
+    # Instantiate PDFAnalyzer class, then run our pdf methods.
 
     for root, dirs, files in os.walk(file_path):
         for file in files:

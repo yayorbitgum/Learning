@@ -6,3 +6,7 @@
 /Python/Scripts/ForAutomation/weather/city.list.json
 /Python/Scripts/ForAutomation/weather/4544349_weather.json
 Python/Scripts/ForAutomation/weather/__pycache__/config.cpython-38.pyc
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+.vs/LearningEverythingInPython/v16/.suo
+.vscode/settings.json
