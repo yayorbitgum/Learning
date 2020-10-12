@@ -94,10 +94,14 @@ while True:
         ch_count += 1
 
     elif req.status_code == 404:
+        print(f"Results! ------------------------------------------------------\n"
+              f"We have downloaded a total of {ch_count} chapters!\n\n")
         print(f"Unable to locate chapter {ch_num} of Shingeki at:")
         print(ch_url)
-        print(f"Does this chapter exist? "
-              f"If not, then we have downloaded them all for a total of {ch_count} chapters!\n"
-              f"If it does exist, check for differences in the URLs for this chapter.\n\n"
-              f"Shutting down program. Sayōnara! さようなら \n(*￣▽￣)b  *:･ﾟ✧")
+        print(f"Does that chapter exist yet?\n"
+              f"If it does exist, check for differences in the URLs for this chapter.")
+        print(f"Shutting down program. Sayōnara! さようなら \n(*￣▽￣)b  *:･ﾟ✧")
+
+        # Open folder in explorer to see results (only works in Windows)
+        os.startfile(root)
         break
