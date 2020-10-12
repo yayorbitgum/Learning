@@ -1,5 +1,5 @@
 #! python3
-# shingeki.py - Download every single shingeki no kyojin comic
+# shingeki.py - Download every single shingeki no kyojin comic.
 #
 # Dissecting HTML pages with BeautifulSoup:
 # https://www.crummy.com/software/BeautifulSoup/bs4/doc/
@@ -8,85 +8,96 @@
 # Saving image data to a file:
 # https://stackoverflow.com/questions/54338681/how-to-download-images-from-websites-using-beautiful-soup
 
+import os
 import requests
 from bs4 import BeautifulSoup
-import webbrowser
-import pyinputplus as pyip
 
-# url = 'https://ww7.readsnk.com/chapter/shingeki-no-kyojin-chapter-'
-#
-#
-# def chapter_request():
-#     chapter = input("Please enter the chapter number you would like to read (ex: 001 = chapter 1): ")
-#     newUrl = url + chapter
-#     return newUrl
-#
-#
-# def get_chapter():
-#     while True:
-#         user_choice = pyip.inputYesNo(prompt='Would you like to download this manga?: ')
-#         if user_choice == 'yes':
-#             res = requests.get(chapter_request())
-#             res.raise_for_status()
-#             playfile = open('shingekinokyojin.jpg', 'wb')
-#         else:
-#
-#             webbrowser.open(chapter_request())
-#
-#
-# chapter_request()
-# get_chapter()
+ch_num = 0
+ch_count = 0
+root = os.path.abspath(os.curdir)
 
 
 def format_check(chapter_or_page):
-    # Ensures the length of the chapter or page number is always 3 digits long,
-    # Because that's how the website formats their URL for each chapter.
-    ch_num_format = chapter_or_page
+    """Formats number to three digits."""
 
+    # https://ww7.readsnk.com/chapter/shingeki-no-kyojin-chapter-0/
+    # compared to...
+    # https://ww7.readsnk.com/chapter/shingeki-no-kyojin-chapter-001/
+    # So if it's chapter zero, don't format.
+    if chapter_or_page == 0:
+        return chapter_or_page
+
+    # Format all the others.
     if len(str(chapter_or_page)) == 1:
-        ch_num_format = f"00{chapter_or_page}"
+        chapter_or_page = f"00{chapter_or_page}"
 
     elif len(str(chapter_or_page)) == 2:
-        ch_num_format = f"0{chapter_or_page}"
+        chapter_or_page = f"0{chapter_or_page}"
 
-    return ch_num_format
+    return chapter_or_page
 
 
-# Setting our variables that will increase over time.
-ch_num = 0
-
-# Main loop. Should run once for each chapter.
+# Chapter loop.
 while True:
     # Reset page number and count for each chapter.
     page_number = 1
     count = 0
-    # Increase chapter number each loop.
-    ch_num += 1
 
-    # Get URL with requests.
-    req = requests.get(f'https://ww7.readsnk.com/chapter/shingeki-no-kyojin-chapter-{format_check(ch_num)}/')
+    # Get chapter URL.
+    ch_format = format_check(ch_num)
+    ch_url = f'https://ww7.readsnk.com/chapter/shingeki-no-kyojin-chapter-{ch_format}/'
+    req = requests.get(ch_url)
 
-    # Make the BeautifulSoup object (parse the html) from req so we can parse it.
-    soup = BeautifulSoup(req.content, 'html.parser')
+    # Don't run logic unless we get an "OK" response code.
+    if req.status_code == 200:
 
-    # Get all image tags in the page.
-    img_tags = soup.find_all('img')
+        soup = BeautifulSoup(req.content, 'html.parser')
+        # Each chapter will be separated with their own folders.
+        ch_path = f"{root}/shingeki/chapter{ch_format}"
+        try:
+            os.makedirs(ch_path)
+        except FileExistsError:
+            pass
 
-    for img in img_tags:
-        page_number += 1
-        # Filter out anything that isn't a manga page image.
-        # The manga img class just happens to equal this list.
-        if img['class'] == ['my-3', 'mx-auto', 'js-page']:
-            # Grab the image url from "src" tag in html.
-            url = img['src']
+        # Getting a rough chapter count from the dropdown menu on the first page.
+        list_of_chapters = []
+        for o in soup.find_all('option'):
+            if "chapter" in o['value']:
+                list_of_chapters.append(o)
 
-            # Format file name based on chapter and page numbers, open it.
-            with open(f"Shingeki_{format_check(ch_num)}_{format_check(page_number)}.png", 'wb') as file:
-                print(f"Downloading {url}...")
-                # Stream in image data.
-                image_response = requests.get(url, stream=True)
-                # Write the image content to the file.
-                file.write(image_response.content)
-                count += 1
+        # Remove duplicates.
+        list_of_chapters = (list(dict.fromkeys(list_of_chapters)))
+        input(f"There are ~{len(list_of_chapters)} chapters ready to download. Hit enter to proceed.")
 
-    print(f"Finished chapter {ch_num}. Saved {count} pages!")
+        img_tags = soup.find_all('img')
+
+        # Page/image loop.
+        for img in img_tags:
+            page_number += 1
+            # The img class for the manga pages seems to always be this type.
+            if img['class'] == ['my-3', 'mx-auto', 'js-page']:
+                # Grab the image url from "src" tag.
+                # For some reason, BS was pulling "\r" at the ends of URLs too.
+                # It was completely breaking my file saving.
+                url = img['src'].rstrip('\r')
+
+                pg_format = format_check(page_number)
+                # Write file and save image data.
+                with open(f"{ch_path}/Shingeki_{ch_format}_{pg_format}.png", 'wb') as file:
+                    print(f"Downloading {url}...")
+                    image_response = requests.get(url, stream=True)
+                    file.write(image_response.content)
+                    count += 1
+
+        print(f"Finished chapter {ch_num}. Saved {count} pages!")
+        ch_num += 1
+        ch_count += 1
+
+    elif req.status_code == 404:
+        print(f"Unable to locate chapter {ch_num} of Shingeki at:")
+        print(ch_url)
+        print(f"Does this chapter exist? "
+              f"If not, then we have downloaded them all for a total of {ch_count} chapters!\n"
+              f"If it does exist, check for differences in the URLs for this chapter.\n\n"
+              f"Shutting down program. Sayōnara! さようなら \n(*￣▽￣)b  *:･ﾟ✧")
+        break
