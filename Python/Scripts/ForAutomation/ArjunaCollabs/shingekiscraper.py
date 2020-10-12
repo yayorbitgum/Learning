@@ -77,7 +77,10 @@ while True:
 
         # Check to see if we've already asked this or not.
         if not confirmation:
-            input(f"There are ~{len(list_of_chapters)} chapters ready to download. Hit enter to proceed.")
+            # During tests, most chapters average between 20-25mb in folder size.
+            input(f"There are ~{len(list_of_chapters)} chapters ready to download. \n"
+                  f"Total download size may be around {(25 * len(list_of_chapters)) / 1000}GB."
+                  f"\nHit enter to proceed.")
             confirmation = True
 
         # Find and loop through all images. ------------------------------------
