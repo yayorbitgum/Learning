@@ -16,7 +16,7 @@ from bs4 import BeautifulSoup
 # Variables. -------------------------------------------------------------------
 from requests.exceptions import MissingSchema
 
-ch_num = 80
+ch_num = 0
 ch_count = 0
 confirmation = False
 root = os.path.abspath(os.curdir)
