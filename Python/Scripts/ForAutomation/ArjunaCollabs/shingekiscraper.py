@@ -8,16 +8,19 @@
 # Saving image data to a file:
 # https://stackoverflow.com/questions/54338681/how-to-download-images-from-websites-using-beautiful-soup
 
+# Imports/using. ---------------------------------------------------------------
 import os
 import requests
 from bs4 import BeautifulSoup
 
+# Variables. -------------------------------------------------------------------
 ch_num = 0
 ch_count = 0
 confirmation = False
 root = os.path.abspath(os.curdir)
 
 
+# Functions. -------------------------------------------------------------------
 def format_check(chapter_or_page):
     """Formats number to three digits."""
 
@@ -38,7 +41,7 @@ def format_check(chapter_or_page):
     return chapter_or_page
 
 
-# Chapter loop.
+# Chapter loop. ----------------------------------------------------------------
 while True:
     # Reset page number and count for each chapter.
     page_number = 1
@@ -49,7 +52,7 @@ while True:
     ch_url = f'https://ww7.readsnk.com/chapter/shingeki-no-kyojin-chapter-{ch_format}/'
     req = requests.get(ch_url)
 
-    # Don't run logic unless we get an "OK" response code.
+    # "OK" status confirm to start. --------------------------------------------
     if req.status_code == 200:
 
         soup = BeautifulSoup(req.content, 'html.parser')
@@ -60,6 +63,7 @@ while True:
         except FileExistsError:
             pass
 
+        # Total chapter count confirmation. ------------------------------------
         # Getting a rough chapter count from the dropdown menu on the first page.
         list_of_chapters = []
         for o in soup.find_all('option'):
@@ -74,10 +78,9 @@ while True:
             input(f"There are ~{len(list_of_chapters)} chapters ready to download. Hit enter to proceed.")
             confirmation = True
 
+        # Find and loop through all images. ------------------------------------
         # All manga pages are images.
         img_tags = soup.find_all('img')
-
-        # Page/image loop.
         for img in img_tags:
             page_number += 1
             # The img class for the manga pages seems to always be this type.
@@ -88,7 +91,7 @@ while True:
                 url = img['src'].rstrip('\r')
 
                 pg_format = format_check(page_number)
-                # Write file and save image data.
+                # Save manga page. ---------------------------------------------
                 with open(f"{ch_path}/Shingeki_{ch_format}_{pg_format}.png", 'wb') as file:
                     print(f"Downloading {url}...")
                     image_response = requests.get(url, stream=True)
@@ -99,6 +102,7 @@ while True:
         ch_num += 1
         ch_count += 1
 
+    # Else "Not found" (404) status. -------------------------------------------
     elif req.status_code == 404:
         print(f"Results! ------------------------------------------------------\n"
               f"We have downloaded a total of {ch_count} chapters!\n\n")
