@@ -14,7 +14,9 @@ import requests
 from bs4 import BeautifulSoup
 
 # Variables. -------------------------------------------------------------------
-ch_num = 0
+from requests.exceptions import MissingSchema
+
+ch_num = 80
 ch_count = 0
 confirmation = False
 root = os.path.abspath(os.curdir)
@@ -94,9 +96,13 @@ while True:
                 # Save manga page. ---------------------------------------------
                 with open(f"{ch_path}/Shingeki_{ch_format}_{pg_format}.png", 'wb') as file:
                     print(f"Downloading {url}...")
-                    image_response = requests.get(url, stream=True)
-                    file.write(image_response.content)
-                    count += 1
+                    try:
+                        image_response = requests.get(url, stream=True)
+                        file.write(image_response.content)
+                        count += 1
+                    except MissingSchema:
+                        print(f"(404) Unable to find that image.\nSkipping this page!\n")
+                        pass
 
         print(f"Finished chapter {ch_num}. Saved {count} pages!")
         ch_num += 1
