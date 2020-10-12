@@ -14,6 +14,7 @@ from bs4 import BeautifulSoup
 
 ch_num = 0
 ch_count = 0
+confirmation = False
 root = os.path.abspath(os.curdir)
 
 
@@ -67,8 +68,13 @@ while True:
 
         # Remove duplicates.
         list_of_chapters = (list(dict.fromkeys(list_of_chapters)))
-        input(f"There are ~{len(list_of_chapters)} chapters ready to download. Hit enter to proceed.")
 
+        # Check to see if we've already asked this or not.
+        if not confirmation:
+            input(f"There are ~{len(list_of_chapters)} chapters ready to download. Hit enter to proceed.")
+            confirmation = True
+
+        # All manga pages are images.
         img_tags = soup.find_all('img')
 
         # Page/image loop.
