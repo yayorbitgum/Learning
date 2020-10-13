@@ -72,7 +72,7 @@ while True:
             if "chapter" in o['value']:
                 list_of_chapters.append(o)
 
-        # Remove duplicates.
+        # Remove duplicates (multiple identical dropdown menus on the website).
         list_of_chapters = (list(dict.fromkeys(list_of_chapters)))
 
         # Check to see if we've already asked this or not.
@@ -114,7 +114,7 @@ while True:
             except KeyError:
                 # Log to console so we know it happened, just in case.
                 print(f"Skipping: {img['src']}")
-                break
+                pass
 
         print(f"Finished chapter {ch_num}. Saved {count} pages!")
         ch_num += 1
