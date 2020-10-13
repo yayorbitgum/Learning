@@ -1,6 +1,7 @@
 #! python3
 # shingeki.py - Download every single shingeki no kyojin comic.
 #
+# Personal notes/references. ---------------------------------------------------
 # Dissecting HTML pages with BeautifulSoup:
 # https://www.crummy.com/software/BeautifulSoup/bs4/doc/
 # Getting all images on a page:
@@ -12,10 +13,9 @@
 import os
 import requests
 from bs4 import BeautifulSoup
-
-# Variables. -------------------------------------------------------------------
 from requests.exceptions import MissingSchema
 
+# Variables. -------------------------------------------------------------------
 ch_num = 0
 ch_count = 0
 confirmation = False
@@ -77,35 +77,43 @@ while True:
 
         # Check to see if we've already asked this or not.
         if not confirmation:
-            # During tests, most chapters average between 20-25mb in folder size.
+            # During tests, most chapters average ~25-30mb in folder size.
             input(f"There are ~{len(list_of_chapters)} chapters ready to download. \n"
-                  f"Total download size may be around {(25 * len(list_of_chapters)) / 1000}GB."
+                  f"Total download size may be around {(30 * len(list_of_chapters)) / 1000}GB"
+                  f" or larger."
                   f"\nHit enter to proceed.")
             confirmation = True
 
-        # Find and loop through all images. ------------------------------------
+        # Manga page loop. -----------------------------------------------------
         # All manga pages are images.
         img_tags = soup.find_all('img')
         for img in img_tags:
             page_number += 1
-            # The img class for the manga pages seems to always be this type.
-            if img['class'] == ['my-3', 'mx-auto', 'js-page']:
-                # Grab the image url from "src" tag.
-                # For some reason, BS was pulling "\r" at the ends of URLs too.
-                # It was completely breaking my file saving.
-                url = img['src'].rstrip('\r')
+            try:
+                # The img class for the manga pages seems to always be this type.
+                if img['class'] == ['my-3', 'mx-auto', 'js-page']:
+                    # Grab the image url from "src" tag.
+                    # For some reason, BS was pulling "\r" at the ends of some URLs too.
+                    url = img['src'].rstrip('\r')
 
-                pg_format = format_check(page_number)
-                # Save manga page. ---------------------------------------------
-                with open(f"{ch_path}/Shingeki_{ch_format}_{pg_format}.png", 'wb') as file:
-                    print(f"Downloading {url}...")
-                    try:
-                        image_response = requests.get(url, stream=True)
-                        file.write(image_response.content)
-                        count += 1
-                    except MissingSchema:
-                        print(f"(404) Unable to find that image.\nSkipping this page!\n")
-                        pass
+                    pg_format = format_check(page_number)
+                    # Save manga page. ---------------------------------------------
+                    with open(f"{ch_path}/Shingeki_{ch_format}_{pg_format}.png", 'wb') as file:
+                        print(f"Downloading {url}...")
+                        try:
+                            image_response = requests.get(url, stream=True)
+                            file.write(image_response.content)
+                            count += 1
+                        except MissingSchema:
+                            print(f"(404) Unable to find that image.\nSkipping!\n")
+                            pass
+
+            # Very rarely, a chapter may contain an image that has no key 'class'.
+            # These are manually placed ads what from I can tell.
+            except KeyError:
+                # Log to console so we know it happened, just in case.
+                print(f"Skipping: {img['src']}")
+                break
 
         print(f"Finished chapter {ch_num}. Saved {count} pages!")
         ch_num += 1
@@ -119,7 +127,7 @@ while True:
         print(ch_url)
         print(f"Does that chapter exist yet?\n"
               f"If it does exist, check for differences in the URLs for this chapter.")
-        print(f"Shutting down program. Sayōnara! さようなら \n(*￣▽￣)b  *:･ﾟ✧")
+        print(f"Shutting down program. さようなら \n(*￣▽￣)b  *:･ﾟ✧")
 
         # Open folder in explorer to see results (only works in Windows)
         os.startfile(root)
