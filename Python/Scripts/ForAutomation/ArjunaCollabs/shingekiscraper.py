@@ -74,12 +74,13 @@ while True:
 
         # Remove duplicates.
         list_of_chapters = (list(dict.fromkeys(list_of_chapters)))
+        length = len(list_of_chapters)
 
         # Check to see if we've already asked this or not.
         if not confirmation:
             # During tests, most chapters average ~25-30mb in folder size.
-            input(f"There are ~{len(list_of_chapters)} chapters ready to download. \n"
-                  f"Total download size may be around {(30 * len(list_of_chapters)) / 1000}GB"
+            input(f"There are ~{length} chapters ready to download. \n"
+                  f"Total download size may be around {(30 * length) / 1000}GB"
                   f" or larger."
                   f"\nHit enter to proceed.")
             confirmation = True
