@@ -1,10 +1,15 @@
+# Credentials and stuff.
 /Python/Scripts/ForAutomation/GmailScan/credentials.json
 /Python/Scripts/ForAutomation/GmailScan/token.pickle
 /Python/Scripts/ForAutomation/GmailScan/token.json
-/Python/Scripts/ForAutomation/ScreenNav/image_ref/
 /Python/Scripts/ForAutomation/weather/config.py
+
+# Bulky generated files.
+/Python/Scripts/ForAutomation/ArjunaCollabs/shingeki/
+/Python/Scripts/ForAutomation/ScreenNav/image_ref/
 /Python/Scripts/ForAutomation/weather/city.list.json
 /Python/Scripts/ForAutomation/weather/4544349_weather.json
 Python/Scripts/ForAutomation/weather/__pycache__/config.cpython-38.pyc
+
+# Bulky/messy project files and notes while learning C Sharp from this book.
 /CSharp/CrossPlatformDevBook
-/Python/Scripts/ForAutomation/ArjunaCollabs/shingeki/
