@@ -97,12 +97,13 @@ while True:
                     # For some reason, BS was pulling "\r" at the ends of some URLs too.
                     url = img['src'].rstrip('\r')
 
+                    # Save manga page. -----------------------------------------
                     pg_format = format_check(page_number)
-                    # Save manga page. ---------------------------------------------
+
                     with open(f"{ch_path}/Shingeki_{ch_format}_{pg_format}.png", 'wb') as file:
                         print(f"Downloading {url}...")
                         try:
-                            image_response = requests.get(url, stream=True)
+                            image_response = requests.get(url)
                             file.write(image_response.content)
                             count += 1
                         except MissingSchema:
@@ -111,6 +112,8 @@ while True:
 
             # Very rarely, a chapter may contain an image that has no key 'class'.
             # These are manually placed ads what from I can tell.
+            # I didn't think returning a default value with .get() would help
+            # in this case, so we'll just catch this error.
             except KeyError:
                 # Log to console so we know it happened, just in case.
                 print(f"Skipping: {img['src']}")
