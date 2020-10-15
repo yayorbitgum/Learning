@@ -28,7 +28,6 @@ def solution(roman: str):
             next_value = values[next_index]
 
         except IndexError:
-            print("Index error")
             # If there is no next numeral, we're ready to just add and give result.
             conversion_output += this_value
             return conversion_output
