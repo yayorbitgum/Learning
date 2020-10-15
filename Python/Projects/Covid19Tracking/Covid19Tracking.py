@@ -9,15 +9,18 @@ url_current = 'https://api.covidtracking.com/v1/us/current.json'
 url_state_current = f'https://api.covidtracking.com/v1/states/{state}/current.json'
 url_state_historical = f'https://api.covidtracking.com/v1/states/{state}/daily.json'
 
-page = requests.get(url_state_current)
+page_c = requests.get(url_state_current)
+page_h = requests.get(url_state_historical)
 
 # We receive a single dictionary embedded in a list for some reason,
 # so let's take it out of the list with [0].
 # I'm also type-hinting here so pycharm helps with code completion.
-data_current: dict = page.json()[0]
+data_current: dict = page_c.json()[0]
+data_historical: dict = page_h.json()[0]
 
 # ///////////////////////////// Data Variables. ////////////////////////////////
 data_timestamp        = data_current['lastupdateEt']
+data_quality          = data_historical['dataQualityGrade']
 # Covid-19 Testing. ------------------------------------------------------------
 pending_tests         = data_current['pending']
 # Confirmed + probably cases.
