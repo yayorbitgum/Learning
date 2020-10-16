@@ -51,3 +51,5 @@ ventilator_lifetime   = data_current['onVentilatorCumulative']
 # data coming in, and the data is determined by the URL.
 # For example "current" and "historical" data points use the same names but give
 # different numbers of course.
+# TODO: Track data in meaningful way.
+# TODO: Display data in interactable, visual and meaningful way.
