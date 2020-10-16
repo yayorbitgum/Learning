@@ -38,7 +38,6 @@ def decrypt(encrypted_text, n):
     result = ""
     # This will initially be a float.
     half_length = len(encrypted_text)/2
-
     # Run this many times for our set encryption level.
     for x in range(0, n):
         # For our first run:
