@@ -46,3 +46,8 @@ ICU_current           = data_current['inIcuCurrently']
 ICU_lifetime          = data_current['inIcuCumulative']
 ventilator_current    = data_current['onVentilatorCurrently']
 ventilator_lifetime   = data_current['onVentilatorCumulative']
+
+# TODO: Make this a class since so many variables are the same for the
+# data coming in, and the data is determined by the URL.
+# For example "current" and "historical" data points use the same names but give
+# different numbers of course.
