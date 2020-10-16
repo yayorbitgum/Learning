@@ -15,18 +15,15 @@ def solution(roman: str):
     for i, ch in enumerate(roman_input):
         index = numerals.index(ch)
         this_value = values[index]
-
         # If the current numeral has already been processed by last numeral,
         # then skip adding it and start next loop.
         if axe_me:
             axe_me = False
             continue
-
         try:
             next_numeral = roman_input[i+1]
             next_index = numerals.index(next_numeral)
             next_value = values[next_index]
-
         except IndexError:
             # If there is no next numeral, we're ready to just add and give result.
             conversion_output += this_value
