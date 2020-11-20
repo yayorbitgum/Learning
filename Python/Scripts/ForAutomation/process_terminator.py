@@ -22,6 +22,8 @@ while True:
                 print(reassure)
 
             except ValueError:
+                # Debugging:
+                print(f"'{find_me}' produced a value error in:\n{line}\n")
                 continue
 
     sleep(1)
