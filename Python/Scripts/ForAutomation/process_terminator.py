@@ -1,3 +1,10 @@
+# Searches for a process by name using WMIC command, then kills said process.
+# Will continue to look for that process once every second.
+# https://psutil.readthedocs.io/en/latest/#processes
+# A simpler way to do this:
+# https://stackoverflow.com/a/4230226/13627106
+
+
 import psutil
 import os
 from time import sleep
