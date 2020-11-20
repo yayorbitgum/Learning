@@ -13,15 +13,15 @@ while True:
     for line in processes.splitlines():
         if find_me in line:
             try:
-                # Will remove the process name and the blank spaces so we can grab the PPID as an integer.
+                # Remove the process name and the blank spaces so we can grab the PPID as an integer.
                 ppid = int(line.strip(find_me).strip())
+                # Instantiating the "Process" class as "p".
+                p = psutil.Process(ppid)
+                p.kill()
+                print(f"Found {find_me} active as process {ppid} and terminated it.")
+                print(reassure)
+
             except ValueError:
                 continue
-
-            # Instantiating the "Process" class as "p".
-            p = psutil.Process(ppid)
-            p.kill()
-            print(f"Found {find_me} active as process {ppid} and terminated it.")
-            print(reassure)
 
     sleep(1)
