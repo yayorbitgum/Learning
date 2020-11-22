@@ -3,6 +3,7 @@ from random import randint
 import sys
 
 
+# ------------------------------------------------------------------------------
 def add_me_up(nums: list, total=0):
     """Adds up a list of integers recursively!
     Returns the sum of all the numbers in the provided list "nums"."""
@@ -14,6 +15,7 @@ def add_me_up(nums: list, total=0):
     return add_me_up(nums, running_total)
 
 
+# ------------------------------------------------------------------------------
 def run_tests(amount):
     """
     Runs the add_me_up() function "amount" of times and displays each result.
@@ -29,8 +31,10 @@ def run_tests(amount):
     print(f"{count} tests ran!")
 
 
-# For the sake of testing large number ranges that exceed 1000 (Python's default recursion depth limit),
-# I'm going to increase recursion limit.
+# ------------------------------------------------------------------------------
+# For the sake of testing large number ranges that exceed 1000,
+# Python's default recursion depth limit,
+# I'm going to increase that limit.
 sys.setrecursionlimit(2001)
 test_amount = randint(1000, 10000)
 run_tests(test_amount)
