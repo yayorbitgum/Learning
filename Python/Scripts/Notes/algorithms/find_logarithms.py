@@ -39,7 +39,6 @@ def find_logarithm(base, result):
         # For whole number logs.
         if base ** x == result:
             return x
-
         else:
             # Slow!
             x += 1
