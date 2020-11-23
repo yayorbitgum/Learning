@@ -1,2 +1,2 @@
-# Learning Everything In Python and C Sharp
-This is going to be a collection of all my various projects and scripts I make and notate as I continue to learn Python and C#.
+# Learning Python (and C Sharp later)
+This is going to be a collection of all my projects, scripts and notes as I continue to learn Python and C#.
