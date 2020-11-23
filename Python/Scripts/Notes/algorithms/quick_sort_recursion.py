@@ -3,29 +3,33 @@ import random
 
 
 # ------------------------------------------------------------------------------
-def quicksort(array: list):
-    """ Keep splitting "array" into smaller lists until they're sorted."""
-
+def quicksort(array: list, side='Initial') -> list:
+    """
+    Keep splitting "array" into smaller lists until they're sorted.
+    "side" is just used for visualization of sorting in console.
+    """
     if len(array) < 2:
-        # If this current array is 0 or 1 items then it's definitely
-        # as sorted as it can get.
+        # If current array is one thing or less, then it's definitely sorted. (base case)
         return array
 
     # Seems like it'd be best to split each part in the middle.
     midpoint = len(array) // 2
     # Pop out the pivot so we don't duplicate it as we keep splitting.
     pivot = array.pop(midpoint)
-    # Continually split lists into left/right for less/more, until they're
-    # smaller than 2 items, and thus sorted!
+    # Continually split lists into left/right until we reach base case.
     left = [item for item in array if item <= pivot]
     right = [item for item in array if item > pivot]
     # Visualization of splitting/sorting process.
-    print(f"{left} <--- {pivot} ---> {right}".center(80))
+    print(f"⮡ {side}: "
+          f"{left if left else '░░░'} "
+          f"<--- {pivot} ---> "
+          f"{right if right else '░░░'}".center(80))
 
-    return quicksort(left) + [pivot] + quicksort(right)
+    # Recursive return.
+    return quicksort(left, 'Left') + [pivot] + quicksort(right, 'Right')
 
 
 # ------------------------------------------------------------------------------
-test = random.sample(range(1, 560), 10)
-print(f"Sort this! {test}\n".center(80))
-print(f"Sorted: {quicksort(test)}".center(80))
+test = random.sample(range(10, 99), 20)
+print(f"Sorting this: {test}\n")
+print(f"\nSorted: {quicksort(test)} 🚀")
