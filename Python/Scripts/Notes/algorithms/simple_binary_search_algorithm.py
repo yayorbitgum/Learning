@@ -1,7 +1,7 @@
 # From reading "Grokking Algorithms" book.
 
 def binary_search(items: list, item):
-    """ Uses binary search to find the index of item.
+    """ Uses binary search to find the index of "item".
         Prints current search range each step.
         Returns the index and the number of steps taken."""
     items.sort()
@@ -18,7 +18,6 @@ def binary_search(items: list, item):
 
         if guess == item:
             return middle, f"{count} steps taken"
-
         if guess > item:
             highest_index = middle - 1
         else:

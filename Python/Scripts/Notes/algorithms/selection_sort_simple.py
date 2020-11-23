@@ -2,6 +2,7 @@
 import random
 
 
+# ------------------------------------------------------------------------------
 def find_smallest(stuff):
     """Returns the index of the smallest item in the input list."""
     smallest_item = stuff[0]
@@ -14,6 +15,7 @@ def find_smallest(stuff):
     return smallest_index
 
 
+# ------------------------------------------------------------------------------
 def selection_sort(stuff):
     sorted_stuff = []
 
@@ -23,6 +25,7 @@ def selection_sort(stuff):
     return sorted_stuff
 
 
+# ------------------------------------------------------------------------------
 test = random.sample(range(1, 11), 10)
 print(test)
 print(selection_sort(test))

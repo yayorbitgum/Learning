@@ -1,14 +1,19 @@
 # Practicing recursion! Take a look.
+# "When you’re writing a recursive function involving an array, the base case is
+#   often an empty array or an array with one element."
 from random import randint
 import sys
 
 
 # ------------------------------------------------------------------------------
 def add_me_up(nums: list, total=0):
-    """Adds up a list of integers recursively!
-    Returns the sum of all the numbers in the provided list "nums"."""
+    """
+    Adds up a list of integers recursively!
+    Returns the sum of all the numbers in the provided list "nums".
+    """
     running_total = nums.pop() + total
     if not nums:
+        # Base case!
         # If the list of nums is empty from all that poppin', we have our answer.
         return running_total
 
@@ -18,6 +23,7 @@ def add_me_up(nums: list, total=0):
 # ------------------------------------------------------------------------------
 def run_tests(amount):
     """
+    Creates list of numbers potentially between 1 and 2000.
     Runs the add_me_up() function "amount" of times and displays each result.
     """
     count = 0
