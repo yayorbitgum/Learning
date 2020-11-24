@@ -12,10 +12,10 @@ def quicksort(array: list, side='Initial') -> list:
         # If current array is one thing or less, then it's definitely sorted. (base case)
         return array
 
-    # Seems like it'd be best to split each part in the middle.
-    midpoint = len(array) // 2
+    # Choose a random pivot point each time.
+    random_index = random.randint(0, len(array)-1)
     # Pop out the pivot so we don't duplicate it as we keep splitting.
-    pivot = array.pop(midpoint)
+    pivot = array.pop(random_index)
     # Continually split lists into left/right until we reach base case.
     left = [item for item in array if item <= pivot]
     right = [item for item in array if item > pivot]
@@ -30,6 +30,6 @@ def quicksort(array: list, side='Initial') -> list:
 
 
 # ------------------------------------------------------------------------------
-test = random.sample(range(10, 99), 20)
+test = random.sample(range(100, 999), 20)
 print(f"Sorting this: {test}\n")
 print(f"\nSorted: {quicksort(test)} 🚀")
