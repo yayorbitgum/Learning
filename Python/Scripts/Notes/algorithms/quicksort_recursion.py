@@ -12,7 +12,7 @@ def quicksort(array: list, side='Initial') -> list:
         # If current array is one thing or less, then it's definitely sorted. (base case)
         return array
 
-    # Choose a random pivot point each time.
+    # Choose a random pivot point each time. (because it's O(n log n) on average!)
     random_index = random.randint(0, len(array)-1)
     # Pop out the pivot so we don't duplicate it as we keep splitting.
     pivot = array.pop(random_index)
