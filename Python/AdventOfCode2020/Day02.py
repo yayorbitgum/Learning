@@ -1,4 +1,6 @@
 # Advent of Code Day 2.
+# I made this regex for this challenge:
+# https://regex101.com/r/dSsjMX/1
 import re
 
 
