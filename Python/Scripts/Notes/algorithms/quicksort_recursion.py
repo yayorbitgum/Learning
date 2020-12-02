@@ -21,9 +21,9 @@ def quicksort(array: list, side='Initial') -> list:
     right = [item for item in array if item > pivot]
     # Visualization of splitting/sorting process.
     print(f"⮡ {side}: "
-          f"{left if left else '░░░'} "
+          f"{left if left else '[   ]'} "
           f"<--- {pivot} ---> "
-          f"{right if right else '░░░'}".center(80))
+          f"{right if right else '[   ]'}".center(80))
 
     # Recursive return.
     return quicksort(left, 'Left') + [pivot] + quicksort(right, 'Right')
