@@ -2,7 +2,7 @@
 
 def find_twenty_twenty():
     goal = 2020
-    with open('M:\Coding Content\input.txt', 'r') as file:
+    with open('inputs\day01_input.txt', 'r') as file:
         check_me = file.readlines()
 
         # This seems like a silly approach,

@@ -5,7 +5,7 @@ import re
 
 
 # Part 1!
-with open('M:\Coding Content\input2.txt', 'r') as file:
+with open('inputs\day02_input.txt', 'r') as file:
     regex = re.compile('(\d+)-(\d+)\s(\w):\s(\w+)')
     valid_count = 0
 
@@ -23,7 +23,7 @@ with open('M:\Coding Content\input2.txt', 'r') as file:
 
 
 # Part 2!
-with open('M:\Coding Content\input2.txt', 'r') as file:
+with open('inputs\day02_input.txt', 'r') as file:
     regex = re.compile('(\d+)-(\d+)\s(\w):\s(\w+)')
     valid_count = 0
 
