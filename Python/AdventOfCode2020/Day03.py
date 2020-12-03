@@ -23,7 +23,7 @@ with open('M:\Coding Content\day03_input.txt', 'r') as file:
 def toboggan_trees(terrain, start=0, tree_count=0, segment=0):
     end = start + 3
 
-    if segment > len(full_terrain) - 1:
+    if segment > len(terrain) - 1:
         return tree_count
 
     for obstacle in terrain[segment][start:end]:
