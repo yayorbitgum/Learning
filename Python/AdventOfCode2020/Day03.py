@@ -2,6 +2,7 @@
 
 step = 3
 
+# ------------------------------------------------------------------------------
 with open('M:\Coding Content\day03_input.txt', 'r') as file:
     file_lines = file.readlines()
     line_count = len(file_lines)
@@ -18,6 +19,7 @@ with open('M:\Coding Content\day03_input.txt', 'r') as file:
         full_terrain.append(line)
 
 
+# ------------------------------------------------------------------------------
 def toboggan_trees(terrain, start=0, tree_count=0, segment=0):
     end = start + 3
 
@@ -32,4 +34,5 @@ def toboggan_trees(terrain, start=0, tree_count=0, segment=0):
         return toboggan_trees(terrain, start, tree_count, segment)
 
 
+# ------------------------------------------------------------------------------
 print(toboggan_trees(full_terrain))
