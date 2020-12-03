@@ -15,7 +15,7 @@ with open('M:\Coding Content\day03_input.txt', 'r') as file:
 
     # "...due to something you read about once involving arboreal genetics and
     # biome stability, the same pattern repeats to the right many times."
-    # I don't know if this is exact, but it's long enough.
+    # I don't know if this is exact, but it's long enough. (for part one*)
     biome_expansion = line_count // (len(file_lines[0]) // step)
 
     for line in file_lines:
