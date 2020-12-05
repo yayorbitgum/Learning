@@ -4,6 +4,16 @@ import re
 
 keys = ['byr', 'ecl', 'eyr', 'hcl', 'hgt', 'iyr', 'pid']
 valid_count = 0
+birth_min = 1920
+birth_max = 2002
+issue_min = 2010
+issue_max = 2020
+expire_min = 2020
+expire_max = 2030
+hgt_cm_min = 150
+hgt_cm_max = 193
+hgt_in_min = 59
+hgt_in_max = 76
 
 with open('inputs\day04_input.txt', 'r') as file:
     file = file.read().strip()
@@ -39,23 +49,23 @@ def validate_passport(pp):
         return False
 
     # Birth Year.
-    if 1920 <= int(birth) <= 2002:
+    if birth_min <= int(birth) <= birth_max:
         valid += 1
     # Issue Year.
-    if 2010 <= int(issue) <= 2020:
+    if issue_min <= int(issue) <= issue_max:
         valid += 1
     # Expiration Year.
-    if 2020 <= int(expire) <= 2030:
+    if expire_min <= int(expire) <= expire_max:
         valid += 1
 
     # Height.
     if height.endswith('cm'):
         cm = int(height.rstrip('cm'))
-        if 150 <= cm <= 193:
+        if hgt_cm_min <= cm <= hgt_cm_max:
             valid += 1
     elif height.endswith('in'):
         inch = int(height.rstrip('in'))
-        if 59 <= inch <= 76:
+        if hgt_in_min <= inch <= hgt_in_max:
             valid += 1
 
     # Hair color.
