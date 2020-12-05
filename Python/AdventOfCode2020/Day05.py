@@ -43,7 +43,6 @@ for ticket in file:
     # Determine seat ID. -------------------------------------------------------
     seat_id = (rows[0] * 8) + columns[0]
     seat_ids.append(seat_id)
-    seat_ids.sort()
     print(f"Ticket {ticket.strip()}: Row {rows[0]} | Column {columns[0]} | Seat {seat_id}.")
 
 
@@ -51,6 +50,7 @@ for ticket in file:
 print(f"The highest seat ID on a boarding pass is {max(seat_ids)}.")
 
 # Part two answer!
+seat_ids.sort()
 for index, seat in enumerate(seat_ids):
     try:
         if seat_ids[index+1] != seat + 1:
