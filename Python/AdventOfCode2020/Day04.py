@@ -1,13 +1,21 @@
 # https://adventofcode.com/2020/day/4
 import re
 
+
+keys = ['byr', 'ecl', 'eyr', 'hcl', 'hgt', 'iyr', 'pid']
+valid_count = 0
+
 with open('inputs\day04_input.txt', 'r') as file:
     file = file.read().strip()
 
+# Each passport is separated by a blank line in between.
 passports = file.split('\n\n')
-keys = ['byr', 'ecl', 'eyr', 'hcl', 'hgt', 'iyr', 'pid']
+# Formatting messy input into nice clean dictionaries --------------------------
 passport_master_list = []
-valid_count = 0
+for passport in passports:
+    fields = re.split('\s', passport)
+    passport_dictionary = dict(entry.split(':') for entry in fields)
+    passport_master_list.append(passport_dictionary)
 
 
 # Functions --------------------------------------------------------------------
@@ -70,12 +78,6 @@ def validate_passport(pp):
               f"eye: {eye_color} | country: {country_id}")
         return True
 
-
-# Formatting messy input into nice clean dictionaries --------------------------
-for passport in passports:
-    fields = re.split('\s', passport)
-    passport_dictionary = dict(entry.split(':') for entry in fields)
-    passport_master_list.append(passport_dictionary)
 
 # Part one! --------------------------------------------------------------------
 for passport in passport_master_list:
