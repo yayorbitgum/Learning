@@ -98,7 +98,6 @@ for passport in passport_master_list:
 
     if left_overs == 'cid':
         valid_count += 1
-
     elif len(left_overs) == 0:
         valid_count += 1
 
@@ -108,7 +107,6 @@ print(f"Valid count for part 1: {valid_count}")
 # Part two! --------------------------------------------------------------------
 true_true = 0
 for passport in passport_master_list:
-
     if validate_passport(passport):
         true_true += 1
 
