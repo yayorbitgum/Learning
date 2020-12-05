@@ -14,7 +14,7 @@ valid_count = 0
 def validate_passport(pp):
     """ Validates each required field for the passport.
     Returns True if all required fields (7) are present and valid.
-    This is big and does many things. Should refactor later."""
+    This is big and does many things. Should refactor later?"""
     valid = 0
     birth = pp.get('byr')
     issue = pp.get('iyr')
