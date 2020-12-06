@@ -26,6 +26,7 @@ def count_answers_part_one():
             group_answers.clear()
 
     # This would mean there's no blank line at the end of the input file.
+    # In that case, this catches the last group that would be missed.
     if group_answers:
         unique_answers = set(group_answers)
         running_total += len(unique_answers)
@@ -57,6 +58,7 @@ def count_answers_part_two():
             current_group += 1
 
     # This would mean there's no blank line at the end of the input file.
+    # In that case, this catches the last group that would be missed.
     if group_answers:
         group_answers.sort()
         unique_answers = set(group_answers)
