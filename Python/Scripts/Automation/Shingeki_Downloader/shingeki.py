@@ -94,7 +94,6 @@ while True:
                 # The img class for the manga pages seems to always be this type.
                 if img['class'] == ['my-3', 'mx-auto', 'js-page']:
                     # Grab the image url from "src" tag.
-                    # For some reason, BS was pulling "\r" at the ends of some URLs too.
                     url = img['src'].rstrip('\r')
 
                     # Save manga page. -----------------------------------------
