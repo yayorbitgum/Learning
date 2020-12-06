@@ -39,6 +39,7 @@ def count_answers_part_two():
     group_answers = []
     running_total = 0
     person_count = 0
+    # I'm keeping track of the current group for debugging purposes here.
     current_group = 1
 
     for answers in data:
