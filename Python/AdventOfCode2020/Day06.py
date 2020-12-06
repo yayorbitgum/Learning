@@ -48,6 +48,7 @@ def count_answers_part_two():
             person_count += 1
             group_answers += [letter for letter in answers]
         else:
+            # I was sorting here for easier debugging view.
             group_answers.sort()
             unique_answers = set(group_answers)
             for answer in unique_answers:
