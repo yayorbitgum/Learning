@@ -1,7 +1,5 @@
 # https://adventofcode.com/2020/day/6
 
-# There must be a blank line at the end of the input file, or the final group
-# will be lost.
 with open('inputs\day06_input.txt', 'r') as file:
     file = file.read()
 
@@ -9,18 +7,17 @@ with open('inputs\day06_input.txt', 'r') as file:
 # We'll split by each unique line so group break points (blank spaces) are still
 # accounted for in this list.
 data = file.split('\n')
-print(data)
 
 
-def count_answers():
+# ------------------------------------------------------------------------------
+def count_answers_part_one():
     group_answers = []
     running_total = 0
 
     for answers in data:
+        # This is how we'll catch new lines (len of 0), ie a different group.
         if len(answers) != 0:
             group_answers += [letter for letter in answers]
-
-        # This is how we'll catch new lines (len of 0), ie a different group.
         else:
             # Remove duplicates.
             unique_answers = set(group_answers)
@@ -32,9 +29,44 @@ def count_answers():
     if group_answers:
         unique_answers = set(group_answers)
         running_total += len(unique_answers)
-        group_answers.clear()
 
     return running_total
 
 
-print(count_answers())
+# ------------------------------------------------------------------------------
+def count_answers_part_two():
+    group_answers = []
+    running_total = 0
+    person_count = 0
+    current_group = 1
+
+    for answers in data:
+        # This is how we'll catch new lines (len of 0), ie a different group.
+        if len(answers) != 0:
+            person_count += 1
+            group_answers += [letter for letter in answers]
+        else:
+            group_answers.sort()
+            unique_answers = set(group_answers)
+            for answer in unique_answers:
+                if group_answers.count(answer) == person_count:
+                    running_total += 1
+            # Reset for the next group of answers.
+            group_answers.clear()
+            person_count = 0
+            current_group += 1
+
+    # This would mean there's no blank line at the end of the input file.
+    if group_answers:
+        group_answers.sort()
+        unique_answers = set(group_answers)
+        for answer in unique_answers:
+            if group_answers.count(answer) == person_count:
+                running_total += 1
+
+    return running_total
+
+
+# ------------------------------------------------------------------------------
+print(count_answers_part_one())
+print(count_answers_part_two())
