@@ -1,9 +1,10 @@
 # https://adventofcode.com/2020/day/7
 # My WIP solution to Day 7..
 import re
+from pprint import pprint
 
 # ------------------------------------------------------------------------------
-with open('inputs\day07_input.txt', 'r') as file:
+with open('inputs\day07_test.txt', 'r') as file:
     file = file.read()
 
 all_bag_input = re.split('contain|\n', file)
@@ -19,7 +20,6 @@ def build_master_bag_dict(bag_info) -> dict:
 
     for bag_line in bag_info:
         bag = bag_line.strip().rstrip('.')
-
         # Based on our input, this will only ever happen if key_bag has been defined.
         if bag == "no other bags":
             bag_master_dict[key_bag] = bag
@@ -36,6 +36,10 @@ def build_master_bag_dict(bag_info) -> dict:
                 for group in bag_kv_regex.findall(item):
                     bag_count = group[0]
                     bag_type = group[1]
+                    # need to change every occurrence of "bag" to "bags" so
+                    # values can also be nested keys for recursive searching.
+                    if bag_type.endswith('g'):
+                        bag_type += 's'
                     internal_bags[bag_type] = bag_count
 
             bag_master_dict[key_bag] = internal_bags
@@ -43,22 +47,32 @@ def build_master_bag_dict(bag_info) -> dict:
     return bag_master_dict
 
 
+def count_bags(bag, gold_count=0):
+    # Loop through the internal bags.
+
+    nested = big_bag_dictionary[bag]
+
+    if 'shiny gold bags' in nested:
+        print(f"{key} contain a shiny gold bag! {nested}")
+        gold_count += 1
+
+    if nested == 'no other bags':
+        # TODO
+        # Need to figure out how to return to parent dictionary.
+        # Probably need some form of a queue.
+        pass
+    for bag in nested:
+        return count_bags(bag, gold_count)
+
+    return gold_count
+
+
 # ------------------------------------------------------------------------------
 big_bag_dictionary = build_master_bag_dict(all_bag_input)
 
-
-# TODO: How many bag colors can eventually contain at least one shiny gold bag?
-count = 0
 # Loop through the base bags.
+count = 0
 for key in big_bag_dictionary:
-    print(f"{key} -->")
+    count += count_bags(key)
 
-    # Loop through the internal bags.
-    items = big_bag_dictionary[key]
-    try:
-        for key_item in items:
-            print(f"{items[key_item]} {key_item}")
-
-    # We'll reach here if "no other bags" is the only value for this key.
-    except TypeError:
-        print(f"{items}")
+print(count)
