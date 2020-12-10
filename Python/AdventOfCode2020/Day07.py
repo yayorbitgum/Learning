@@ -1,10 +1,9 @@
 # https://adventofcode.com/2020/day/7
-# My WIP solution to Day 7..
+# My WIP solution to Day 7.
 import re
-from pprint import pprint
 
 # ------------------------------------------------------------------------------
-with open('inputs\day07_test.txt', 'r') as file:
+with open('inputs\day07_input.txt', 'r') as file:
     file = file.read()
 
 all_bag_input = re.split('contain|\n', file)
@@ -47,32 +46,53 @@ def build_master_bag_dict(bag_info) -> dict:
     return bag_master_dict
 
 
-def count_bags(bag, gold_count=0):
+def count_bags(bag, child_bag=None):
     # Loop through the internal bags.
-
     nested = big_bag_dictionary[bag]
 
+    if bag != child_bag:
+        print(f"Checking root: {bag}. Contains | {nested}")
+
     if 'shiny gold bags' in nested:
-        print(f"{key} contain a shiny gold bag! {nested}")
-        gold_count += 1
+        print(f"{bag} contain a shiny gold bag! {nested}")
+        checked_bags.append(bag)
+        return 1
 
-    if nested == 'no other bags':
-        # TODO
-        # Need to figure out how to return to parent dictionary.
-        # Probably need some form of a queue.
-        pass
-    for bag in nested:
-        return count_bags(bag, gold_count)
-
-    return gold_count
+    if nested != 'no other bags':
+        for bags in nested:
+            if bags not in empty_bags:
+                # If this current bag has no other bags inside of it, we need to skip it.
+                if big_bag_dictionary[bags] == 'no other bags':
+                    print(f"{bags} is empty.")
+                    empty_bags.append(bags)
+                    continue
+                else:
+                    if bags not in gold_bags:
+                        print(f"---> Checking child bag {bags}")
+                        checked_bags.append(bags)
+                        return count_bags(bags, bags)
+    else:
+        empty_bags.append(nested)
 
 
 # ------------------------------------------------------------------------------
 big_bag_dictionary = build_master_bag_dict(all_bag_input)
 
-# Loop through the base bags.
-count = 0
-for key in big_bag_dictionary:
-    count += count_bags(key)
+empty_bags = []
+gold_bags = []
+checked_bags = []
 
-print(count)
+
+# Loop through the base bags, during which we'll check nested bags with count_bags().
+# I CAN'T FIGURE THIS OUT!! ARGHH
+def double_check(count=0):
+    for key in big_bag_dictionary:
+        if key not in checked_bags:
+            result = count_bags(key)
+            if result is not None:
+                count += result
+
+    return count
+
+
+print(double_check())
