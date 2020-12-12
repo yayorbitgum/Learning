@@ -1,5 +1,8 @@
 # https://adventofcode.com/2020/day/7
-# My WIP solution to Day 7.
+# My WIP solution to Day 7. I'll have to come back to this some other day lol.
+# I need to learn how breadth first searches work.
+# I may be making this harder on myself by parsing as nested dictionaries, but
+# I'm not quite sure yet.
 import re
 
 # ------------------------------------------------------------------------------
