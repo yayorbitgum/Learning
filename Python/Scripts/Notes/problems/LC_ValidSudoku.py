@@ -1,4 +1,6 @@
 # https://leetcode.com/explore/interview/card/top-interview-questions-easy/92/array/769/
+# Even though my solution is very verbose, the solution time was quicker than average,
+# and memory usage was average it seems, at 14mb.
 
 from typing import List
 
