@@ -25,6 +25,7 @@ class Solution:
             result = match.group(0)
 
             try:
+                # This will certainly catch anything that isn't a number.
                 result = int(result)
             except ValueError:
                 return 0
