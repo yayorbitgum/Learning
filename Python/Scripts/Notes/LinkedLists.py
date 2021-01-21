@@ -17,6 +17,7 @@ class LinkedList:
     def print_list(self):
         """Print the data of all linked nodes."""
         current = self.head_node
+
         while current:
             print(current.data)
             current = current.next
@@ -25,7 +26,6 @@ class LinkedList:
     def push(self, new_data):
         """Creates a new node with new data at the front of the list.
         O(1) since we always know what the head node is."""
-
         new_node = Node(new_data)
         # Set old head node as the next for this new one.
         # (since old head_node is gonna be second node in the list now)
@@ -37,7 +37,6 @@ class LinkedList:
     def insert_after(self, prev_node, new_data):
         """ Adds a new node after another existing node.
         O(1) since we know what node to insert after."""
-
         # Make sure previous node exists.
         if prev_node is None:
             print(f"The provided previous node is not in this LinkedList.")
@@ -53,7 +52,6 @@ class LinkedList:
         O(n) since we have to traverse the whole list from the start.
         This method can also be optimized to work in O(1) by keeping
         an extra pointer to tail of linked list."""
-
         new_node = Node(new_data)
         # If the linked list is empty, then make the new node the head.
         if self.head_node is None:
@@ -69,14 +67,12 @@ class LinkedList:
     # --------------------------------------------------------------------------
     def delete_node(self, target):
         """ Delete the first occurrence of target in the LinkedList."""
-
         # Grab the head node.
         current = self.head_node
         # If head_node holds the target to be deleted.
         if current.data == target and current is not None:
             self.head_node = current.next
             return
-
         # Otherwise search for the target to delete, and keep track of
         # the previous node since we need to change prev.next.
         while current is not None:
