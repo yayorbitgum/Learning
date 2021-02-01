@@ -11,12 +11,10 @@ class Solution:
         :type node: ListNode
         :rtype: void Do not return anything, modify node in-place instead.
         """
-
         if node is None:
             # We can't delete the very last node without knowing what the head is.
             # The question accounts for this, but I want to put this here anyway.
             return
-
         # Duplicate the values of the next node, then skip over the next node.
         # Effectively replacing current node with next node, then making next node
         # the "next next" node.
