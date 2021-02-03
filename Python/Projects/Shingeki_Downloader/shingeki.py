@@ -63,7 +63,7 @@ while True:
         try:
             os.makedirs(ch_path)
         except FileExistsError:
-            pass
+            print(f"Directory exists for {ch_path}.")
 
         # Total chapter count confirmation. ------------------------------------
         # Getting a rough chapter count from the dropdown menu on the first page.
@@ -98,7 +98,6 @@ while True:
 
                     # Save manga page. -----------------------------------------
                     pg_format = format_check(page_number)
-
                     with open(f"{ch_path}/Shingeki_{ch_format}_{pg_format}.png", 'wb') as file:
                         print(f"Downloading {url}...")
                         try:
@@ -107,7 +106,6 @@ while True:
                             count += 1
                         except MissingSchema:
                             print(f"(404) Unable to find that image.\nSkipping!\n")
-                            pass
 
             # Very rarely, a chapter may contain an image that has no key 'class'.
             # These are manually placed ads what from I can tell.
@@ -115,22 +113,21 @@ while True:
             # in this case, so we'll just catch this error.
             except KeyError:
                 # Log to console so we know it happened, just in case.
-                print(f"Skipping: {img['src']}")
-                pass
+                print(f"Skipping: {img['src']}. Likely an ad.")
 
-        print(f"Finished chapter {ch_num}. Saved {count} pages!")
+        print(f"Finished chapter {ch_num}. Saved {count} pages.")
         ch_num += 1
         ch_count += 1
 
     # Else "Not found" (404) status. -------------------------------------------
     elif req.status_code == 404:
-        print(f"Results! ------------------------------------------------------\n"
-              f"We have downloaded a total of {ch_count} chapters!\n\n")
+        print(f"Results: ------------------------------------------------------\n"
+              f"You downloaded a total of {ch_count} chapters.\n\n")
         print(f"Unable to locate chapter {ch_num} of Shingeki at:")
         print(ch_url)
         print(f"Does that chapter exist yet?\n"
               f"If it does exist, check for differences in the URLs for this chapter.")
-        print(f"Shutting down program. さようなら \n(*￣▽￣)b  *:･ﾟ✧")
+        print(f"Shutting down program.")
 
         # Open folder in explorer to see results (only works in Windows)
         os.startfile(root)
