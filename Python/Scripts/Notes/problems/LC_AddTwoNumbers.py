@@ -57,7 +57,7 @@ class Solution(object):
         head = ListNode(list_input[0], next=tail)
 
         # Since we already grabbed the first two values from two pointers (heads and tails),
-        # We'll start building from the third value.
+        # We'll start building from the third value (if there is one).
         for value in list_input[2:]:
             tail.next = ListNode(value)
             tail = tail.next
