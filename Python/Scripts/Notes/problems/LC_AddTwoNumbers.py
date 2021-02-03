@@ -1,6 +1,6 @@
 # https://leetcode.com/problems/add-two-numbers/
-# I have no idea how to create a linked list out of this "ListNode" class.
-# I don't understand this problem yet.
+# This one took a long break to come back to and figure out lol.
+from typing import List
 
 
 class ListNode(object):
@@ -10,7 +10,6 @@ class ListNode(object):
 
 
 class Solution(object):
-
     def __init__(self):
         self.node_list = []
 
@@ -48,6 +47,19 @@ class Solution(object):
         return self.node_list
 
     # --------------------------------------------------------------------------
-    def pack_nodes(self, list_input):
-        # TODO!
-        pass
+    def pack_nodes(self, list_input: List[int]):
+        if len(list_input) == 1:
+            head = ListNode(list_input[0])
+            return head
+        # For a linked list, we only need to initialize the head once.
+        # We'll nest initializations of the tail as we keep extending it.
+        tail = ListNode(list_input[1])
+        head = ListNode(list_input[0], next=tail)
+
+        # Since we already grabbed the first two values from two pointers (heads and tails),
+        # We'll start building from the third value.
+        for value in list_input[2:]:
+            tail.next = ListNode(value)
+            tail = tail.next
+
+        return head
