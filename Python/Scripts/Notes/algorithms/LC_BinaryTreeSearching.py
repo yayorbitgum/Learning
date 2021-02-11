@@ -1,6 +1,5 @@
 # https://leetcode.com/problems/range-sum-of-bst/
 # Range Sum of BST.
-# Definition for a binary tree node.
 # I had to reference this to solve it:
 # https://www.tutorialspoint.com/python_data_structure/python_tree_traversal_algorithms.htm
 
