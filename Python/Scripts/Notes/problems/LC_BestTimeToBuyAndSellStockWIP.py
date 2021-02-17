@@ -17,7 +17,8 @@ class Solution:
                     # We'll only check a sale profit for any price after the buy.
                     for sell in prices[index+1:]:
                         transaction = sell-buy
-                        if transaction > 0: profits.append(transaction)
+                        if transaction > 0:
+                            profits.append(transaction)
             except IndexError:
                 # We'll only reach here if we've reached the end of prices.
                 break
