@@ -21,6 +21,7 @@ city_id = 4544349
 file_name = f'{city_id}_weather.json'
 animation_delay = 0.5
 min_in_sec = 60
+color_shift_amt = 120
 accepted_response = 200
 unauthorized_response = 401
 # Data is only updated once every 10 minutes on their servers.
@@ -78,7 +79,7 @@ def color_shift(hex_value: hex, shift_amount: int) -> str:
     # Hex values have a base of 16.
     hex_int = int(hex_value.lstrip('#'), 16)
 
-    # Max color value can only be FFFFFF.
+    # Max color value can only be FFFFFF (255, 255, 255) RGB, ie: 16,777,215 as int.
     if hex_int + shift_amount > 16777215:
         # Our way of looping back around.
         new_color = hex((hex_int + shift_amount) - 16777215).lstrip('0x')
@@ -113,6 +114,9 @@ def main():
             # ['list'][0] is current weather.
             # ['list'][1], or [2], etc would be forecast.
             # Each new list is 3 hours forecast ahead of last list. There are 40.
+            # TODO:
+            #  Make future forecasts easy to peruse.
+            #  Maybe navigable graphs and things, or at least presentable visually.
 
             # Current: [0]
             cur_description = weather['list'][0]['weather'][0]['description']
@@ -155,7 +159,7 @@ def main():
             color = '#00FF00'
             for line in readout_lines:
                 # TODO: Make better color gradient animations.
-                color = color_shift(color, 120)
+                color = color_shift(color, color_shift_amt)
                 console.print(line, justify="center", style=color)
                 sleep(animation_delay)
 

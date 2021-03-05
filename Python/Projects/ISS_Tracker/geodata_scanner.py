@@ -1,20 +1,20 @@
 """
 This will get the name of the current location based on ISS coordinates.
 
-I found some data for locations, which should allow me to tie coordinates to real location names and
-    other things.
+I found some data for locations, which should allow me to tie coordinates to
+real location names and other things.
 For US locations:
-    https://www.usgs.gov/core-science-systems/ngp/board-on-geographic-names/download-gnis-data
+https://www.usgs.gov/core-science-systems/ngp/board-on-geographic-names/download-gnis-data
 For foreign locations:
-    https://geonames.nga.mil/gns/html/namefiles.html
+https://geonames.nga.mil/gns/html/namefiles.html
 
-These files are sort of big (2-3gb), so I worked on learning to convert them to hdf5 for memory mapping,
-    so that this module called Vaex can read them nearly instantly. But I couldn't get vaex to export hdf5.
-    It provided no error when exporting, simply hangs and does not proceed after a certain point.
-    So I did pandas hdf5 exports instead, and since Vaex can't read pandas-made hdf5, I'll just
-    use pandas for this task and we'll try Vaex in the future.
+These files are fairly big (2-3gb), so I worked on learning to convert them to
+hdf5 for memory mapping, so that this module called Vaex can read them nearly
+instantly. But I couldn't get vaex to export hdf5. It provided no error when
+exporting, simply hangs and does not proceed after a certain point.
 
-I found out about Vaex by coming across this article.
+So I did pandas hdf5 exports instead, and since Vaex can't read pandas-made hdf5,
+I'll just use pandas for this task and we'll try Vaex in the future.
 https://towardsdatascience.com/how-to-analyse-100s-of-gbs-of-data-on-your-laptop-with-python-f83363dda94
 """
 
@@ -24,14 +24,17 @@ import re
 import os
 
 # Variables and File Structure -------------------------------------------------
+
 # Set acceptable degree difference here for returning coordinate matches.
 # 1.0 degree of latitude/longitude ~= 111 kilometers
 tolerance = 0.5
+
 # The paths for our hdf5 files.
 folder_name = 'GeoLocationInfo/hdf5/'
 root = os.path.abspath(os.curdir)
-national_regex = re.compile('(NationalFile)(_)?(\d*)?(\.hdf5)')
+
 # Now we locate the national file.
+national_regex = re.compile('(NationalFile)(_)?(\d*)?(\.hdf5)')
 for hdf5_file in os.listdir(folder_name):
     if national_regex.match(hdf5_file):
         national_file_path = f'{folder_name}{hdf5_file}'
@@ -44,8 +47,8 @@ global_files_list = [f'{folder_name}Countries_administrative_a.hdf5',   # 0
                      f'{folder_name}Countries_spot_s.hdf5',             # 5
                      f'{folder_name}Countries_transportation_r.hdf5',   # 6
                      f'{folder_name}Countries_undersea_u.hdf5',         # 7
-                     f'{folder_name}Countries_vegetation_v.hdf5'        # 8
-                     ]
+                     f'{folder_name}Countries_vegetation_v.hdf5']       # 8
+
 
 # Classes ----------------------------------------------------------------------
 class LocationDataFrames:
@@ -70,18 +73,18 @@ class LocationDataFrames:
                             "data files are missing from folder."
                             " Check the README.md.")
 
-        # Only grab the columns we care about.
+        # Grab only the columns we care about.
         self.us_df = national_df[['FEATURE_NAME',
                                   'STATE_ALPHA',
                                   'PRIM_LAT_DEC',
                                   'PRIM_LONG_DEC',
                                   'ELEV_IN_M']]
-        print("US geographical data loaded!\n")
+        print("US geographical data loaded.\n")
         # Show a sample to confirm.
         print(f"{self.us_df}\n")
 
         # ----------------------------------------------------------------------
-        print(f"Loading all global geographical data. This will take a moment..")
+        print(f"Loading all global geographical data. This will take a moment.")
         for index, file in enumerate(global_files_list):
             count += 1
             print(f"{count} of {len(global_files_list)}: Reading {file.lstrip(folder_name)}..")
@@ -114,7 +117,7 @@ class LocationDataFrames:
         """
         Take in ISS coordinates, and check for the closest locations in our
         US geographical dataframe.
-        Returns 3 location values if not empty, otherwise returns None if it is empty.
+        Returns list of locational data if not empty, otherwise returns None if it is empty.
         """
 
         # https://thispointer.com/python-pandas-select-rows-in-dataframe-by-conditions-on-multiple-columns/
@@ -133,11 +136,13 @@ class LocationDataFrames:
         # If the result isn't nothing:
         if len(result_df) != 0:
             # We can grab a specific value in a cell with result_df.iloc[index]['column name']
-            # So the index is the length of result_df divided by 2, ie the average/median, converted to integer.
-            #                                   [    middle index       ][  column name ]
-            result_us_feature   = result_df.iloc[int(len(result_df) / 2)]['FEATURE_NAME']
-            result_us_state     = result_df.iloc[int(len(result_df) / 2)]['STATE_ALPHA']
-            result_us_elevation = result_df.iloc[int(len(result_df) / 2)]['ELEV_IN_M']
+            # So the index is the length of result_df divided by 2,
+            # ie the average/median, converted to integer.
+            median_index = int(len(result_df) / 2)
+            #                                   [median index][  column name ]
+            result_us_feature   = result_df.iloc[median_index]['FEATURE_NAME']
+            result_us_state     = result_df.iloc[median_index]['STATE_ALPHA']
+            result_us_elevation = result_df.iloc[median_index]['ELEV_IN_M']
 
             # Return all three results as a list we can pick apart later.
             return [result_us_feature, result_us_state, result_us_elevation]
@@ -161,8 +166,9 @@ class LocationDataFrames:
             (closest_lat_df['LONG'] <= (iss_longitude + tolerance))]
 
         if len(result_df) != 0:
-            #                                  [    middle index       ][     column      ]
-            result_pop_feature = result_df.iloc[int(len(result_df) / 2)]['FULL_NAME_ND_RG']
+            median_index = int(len(result_df) / 2)
+            #                                  [median index][     column      ]
+            result_pop_feature = result_df.iloc[median_index]['FULL_NAME_ND_RG']
             # Returns location name.
             return result_pop_feature
 

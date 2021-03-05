@@ -1,5 +1,6 @@
 # Header Reference -------------------------------------------------------------
-# Header info for National text file.
+#
+# Header info for National text file. ------------------------------------------
 # 0: ï»¿FEATURE_ID
 # 1: FEATURE_NAME       <- Usable Name for City or Land Feature.
 # 2: FEATURE_CLASS
@@ -20,8 +21,8 @@
 # 17: MAP_NAME
 # 18: DATE_CREATED
 # 19: DATE_EDITED
-# ------------------------------------------------------------------------------
-# All global text data sets have the same header
+#
+# All global text data sets have the same header, ------------------------------
 # so we can use this for all those Countries files.
 # Index: 0. Column Header: RC.
 # Index: 1. Column Header: UFI.
