@@ -5,16 +5,18 @@
 
 # Imports ----------------------------------------------------------------------
 # TODO: Need to resolve 'tables' dependencies and resulting HDF5 errors.
+# This is likely from me upgrading to Python 3.9. I'll investigate as time goes on
+# and modules get updated.
 import os
 import pandas as pd
 import re
-import multiprocessing
+from multiprocessing import cpu_count
 # Importing lists from another file just for keeping code looking clean.
 import db_headers
 
 # Variables --------------------------------------------------------------------
 # Pandas uses numexpr, and with it I can set max threads for doing logic, for max performance.
-os.environ['NUMEXPR_MAX_THREADS'] = str(multiprocessing.cpu_count())
+os.environ['NUMEXPR_MAX_THREADS'] = str(cpu_count())
 folder_name = 'GeoLocationInfo'
 global_files_list = ['Countries_administrative_a.txt',
                      'Countries_hydrographic_h.txt',
