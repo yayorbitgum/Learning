@@ -11,6 +11,7 @@ from config import my_key
 from time import sleep
 from datetime import datetime, timedelta
 # rich module imports for making a colorful and stylized console-based UI.
+# https://rich.readthedocs.io/en/latest/console.html
 from rich.console import Console
 
 # Variables --------------------------------------------------------------------
