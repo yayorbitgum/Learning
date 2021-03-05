@@ -1,6 +1,4 @@
 # https://leetcode.com/problems/count-items-matching-a-rule/
-# "Runtime: 244 ms, faster than 100.00% of Python3 online submissions for Count Items Matching a Rule."
-# Damn, this one turned out really fast I suppose hahah.
 from typing import List
 
 
