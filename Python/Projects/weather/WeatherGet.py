@@ -100,7 +100,11 @@ def main():
     """
     while True:
         validated_key = verify_key_exists(my_key)
-        response = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?id={city_id}&APPID={validated_key}")
+        response = requests.get(f"http://api.openweathermap.org/data/2.5/forecast"
+                                f"?id={city_id}"
+                                f"&APPID={validated_key}")
+
+        # (1/3) ----------------------------------------------------------------
         # Make sure we succeeded before we try to save it.
         if response.status_code == accepted_response:
             # Save the request so we don't have to pull from API over and over.
@@ -166,6 +170,7 @@ def main():
             console.print(f"Next update in {round(api_request_delay_in_seconds / min_in_sec)} "
                           f"minutes at {next_update_time.strftime('%H:%M')}.\n\n")
 
+        # (2/3) ----------------------------------------------------------------
         elif response.status_code == unauthorized_response:
             console.print("Your key was rejected with a 401 response code (Unauthorized).\n"
                           "Did you setup your API key properly?\n"
@@ -173,11 +178,13 @@ def main():
                           "for the 'Current Weather Data'. Click Subscribe and choose "
                           "the free option.\n"
                           "Then, check for your API key at --> https://home.openweathermap.org/api_keys\n"
-                          "Enter that key in config.py and try again.")
+                          "Enter that key in config.py and try again.", style='red')
 
+        # (3/3) ----------------------------------------------------------------
         else:
-            console.print(f"\n\n\nResponse code is {response.status_code}. \n\n\n")
+            console.print(f"\n\n\nResponse code is {response.status_code}. \n\n\n", style='red')
 
+        # ----------------------------------------------------------------------
         # Wait this long before querying again.
         sleep(api_request_delay_in_seconds)
 
