@@ -1,1 +1,3 @@
-All scripts and projects related to python language I've made or am working on. Most of it is just the result of learning and making sure I save everything I do!
+- For current projects and larger scripts, check Projects.
+- For smaller scripts and automation, check Scripts/Automation.
+- Other files are personal notes and solutions to problems.
