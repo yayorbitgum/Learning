@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 # Variables --------------------------------------------------------------------
 # reference "city.list.json" provided by openweathermap.org.
 # You can pass in coordinates and other parameters, but IDs are more precise.
+# TODO: User input for location, then find closest (fuzzy) match in city.list.
 city_id = 4544349
 file_name = f'{city_id}_weather.json'
 animation_delay = 0.5
@@ -56,11 +57,12 @@ def k_to_f(k):
 
 
 def verify_key_exists(key):
+    # TODO: Help user automatically grab API key and save into their own config.py.
     """ Ensure user API key exists. If it does, return it."""
     if key is not None:
         return key
     else:
-        raise Exception('You need an API key from openweathermap.org to grab weather data.\n'
+        raise Exception('You need an API key from openweathermap.org to grab current weather data.\n'
                         'Register, generate a key, and save that key as a string in config.py.\n'
                         'You can find your key(s) here --> https://home.openweathermap.org/api_keys')
 
@@ -109,6 +111,7 @@ def main():
 
             # Add some motion to the data, rather than blasting you with everything
             # at once.
+            # TODO: Use cooler console-based UI module https://github.com/willmcgugan/rich .
             readout_lines = [f" ---------------- {city_name} --------------------------\n",
                               f"    {cur_description.capitalize()}.",
                               f"    {cur_humidity}% humidity.",
