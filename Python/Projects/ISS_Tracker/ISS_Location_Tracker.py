@@ -4,38 +4,33 @@
 # Initially started as practicing requests but then I found
 # a neat API for the ISS.
 # http://api.open-notify.org/
-#
-# Every link and resource I come across is just the result
-# of Googling and exploring related documentation,
-# every single time.
 
 
-# //////////////////////////////////////////// Imports ////////////////////////////////////////////
+# Imports ----------------------------------------------------------------------
 import requests
 import math
 import pyfiglet
 from time import sleep as pause
 from datetime import datetime as dt
-from geodata_scanner import LocationLove
+from geodata_scanner import LocationDataFrames
 
 
-# //////////////////////////////////////////// Variables ////////////////////////////////////////////
-folder_name = 'GeoLocationInfo/hdf5/'
-national_file_path = f'{folder_name}NationalFile_20200501.hdf5'
+# Variables --------------------------------------------------------------------
+folder_name = 'GeoLocationInfo/hdf5'
+national_file_path = f'{folder_name}/NationalFile_20200501.hdf5'
 
-global_files_list = [f'{folder_name}Countries_administrative_a.hdf5',
-                     f'{folder_name}Countries_hydrographic_h.hdf5',
-                     f'{folder_name}Countries_hypsographic_t.hdf5',
-                     f'{folder_name}Countries_localities_l.hdf5',
-                     f'{folder_name}Countries_populatedplaces_p.hdf5',
-                     f'{folder_name}Countries_spot_s.hdf5',
-                     f'{folder_name}Countries_transportation_r.hdf5',
-                     f'{folder_name}Countries_undersea_u.hdf5',
-                     f'{folder_name}Countries_vegetation_v.hdf5'
-                     ]
+global_files_list = [f'{folder_name}/Countries_administrative_a.hdf5',
+                     f'{folder_name}/Countries_hydrographic_h.hdf5',
+                     f'{folder_name}/Countries_hypsographic_t.hdf5',
+                     f'{folder_name}/Countries_localities_l.hdf5',
+                     f'{folder_name}/Countries_populatedplaces_p.hdf5',
+                     f'{folder_name}/Countries_spot_s.hdf5',
+                     f'{folder_name}/Countries_transportation_r.hdf5',
+                     f'{folder_name}/Countries_undersea_u.hdf5',
+                     f'{folder_name}/Countries_vegetation_v.hdf5']
 
 
-# //////////////////////////////////////////// Static Functions ////////////////////////////////////////////
+# Static Functions -------------------------------------------------------------
 def format_lng_direction(longitude_input):
     """
     :param longitude_input: Take in the longitude and
@@ -72,7 +67,7 @@ def format_lat_direction(latitude_input):
 
 def set_update_rate():
     """
-    Takes user input, just for setting how often we ping for ISS location.
+    Let user set update rate for location ping.
     """
     try:
         rate = float(input("Please enter your preferred update rate in seconds, "
@@ -81,7 +76,7 @@ def set_update_rate():
         return rate
 
     except ValueError:
-        print("\nWell, since you didn't enter a number, I'll just set it to 5 seconds.\n")
+        print("\nYou didn't enter a number. Update rate set to 5 seconds.\n")
         pause(1)
         return 5
 
@@ -102,7 +97,7 @@ class ISSTracking:
         self.my_long = 0.0
         self.my_lat = 0.0
         self.loc_scan_count = 0
-        self.LL = LocationLove(self.latitude, self.longitude)
+        self.loc_df = LocationDataFrames(self.latitude, self.longitude)
 
     def get_location_input(self):
         """ Have the user input their own coordinates for distance tracking."""
@@ -194,8 +189,8 @@ class ISSTracking:
         We'll pass in the user input coordinates.
         The dataframes are opened and scanned in geodata_scanner.py.
         """
-        usa_results = self.LL.scan_usa_df(self.my_lat, self.my_long)
-        global_pop_result = self.LL.scan_global_pop_df(self.my_lat, self.my_long)
+        usa_results = self.loc_df.scan_usa_df(self.my_lat, self.my_long)
+        global_pop_result = self.loc_df.scan_global_pop_df(self.my_lat, self.my_long)
 
         if usa_results is not None:
             usa_feature = usa_results[0]
@@ -223,8 +218,8 @@ class ISSTracking:
 
         # This is where we pass in the current ISS coordinates to be checked against the
         # location dataframes we've set up and converted.
-        usa_results = self.LL.scan_usa_df(self.latitude, self.longitude)
-        global_pop_result = self.LL.scan_global_pop_df(self.latitude, self.longitude)
+        usa_results = self.loc_df.scan_usa_df(self.latitude, self.longitude)
+        global_pop_result = self.loc_df.scan_global_pop_df(self.latitude, self.longitude)
 
         if usa_results is not None:
             # scan_usa_df() returns a list of three things: feature, state, and elevation.
@@ -247,7 +242,7 @@ class ISSTracking:
         """
         print(pyfiglet.figlet_format("ISS Tracker", font='alligator2'))
         # Start process of loading our hdf5 files into dataframes.
-        self.LL.startup_load()
+        self.loc_df.startup_load()
         # Make sure we only get input after loading the databases.
         self.get_location_input()
 

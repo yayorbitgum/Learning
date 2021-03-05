@@ -129,6 +129,6 @@ while True:
               f"If it does exist, check for differences in the URLs for this chapter.")
         print(f"Shutting down program.")
 
-        # Open folder in explorer to see results (only works in Windows)
+        # Open folder in explorer to see results (only works in Windows).
         os.startfile(root)
         break

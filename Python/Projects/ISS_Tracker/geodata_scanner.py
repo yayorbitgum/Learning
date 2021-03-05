@@ -31,13 +31,14 @@ import os
 tolerance = 0.5
 # The data set paths for our hdf5 files.
 folder_name = 'GeoLocationInfo/hdf5/'
+root = os.path.abspath(os.curdir)
 # This regex should help us load any NationalFile version that we might use.
 # https://regex101.com/
 national_regex = re.compile('(NationalFile)(_)?(\d*)?(\.hdf5)')
 # Now we locate the national file.
-for findme in os.listdir('GeoLocationInfo/hdf5'):
-    if national_regex.match(findme):
-        national_file_path = f'{folder_name}{findme}'
+for hdf5_file in os.listdir(folder_name):
+    if national_regex.match(hdf5_file):
+        national_file_path = f'{folder_name}{hdf5_file}'
 
 global_files_list = [f'{folder_name}Countries_administrative_a.hdf5',   # 0
                      f'{folder_name}Countries_hydrographic_h.hdf5',     # 1
@@ -51,8 +52,8 @@ global_files_list = [f'{folder_name}Countries_administrative_a.hdf5',   # 0
                      ]
 
 
-# //////////////////////////////////////////// Classes/Methods ////////////////////////////////////////////
-class LocationLove:
+# Classes ----------------------------------------------------------------------
+class LocationDataFrames:
     def __init__(self, iss_latitude, iss_longitude):
         self.iss_latitude = iss_latitude
         self.iss_longitude = iss_longitude
@@ -66,8 +67,15 @@ class LocationLove:
         print(f"Loading US geographical data..")
 
         # Read us-based data file.
-        national_df = pd.read_hdf(national_file_path)
-        # Only grab the columns we care about (I should probably save this as another file and skip this step).
+        try:
+            national_df = pd.read_hdf(national_file_path)
+        except NameError:
+            print("Missing location data files!")
+            os.startfile(f"{root}/{folder_name}")
+            raise NameError("national_file_path is likely undefined if data files are missing from folder."
+                            " Check the README.md.")
+
+        # Only grab the columns we care about.
         self.us_df = national_df[['FEATURE_NAME',
                                   'STATE_ALPHA',
                                   'PRIM_LAT_DEC',
@@ -77,22 +85,20 @@ class LocationLove:
         # Show a sample to confirm.
         print(f"{self.us_df}\n")
 
-        # We'll loop through our list of global files, add each dataframe to a list, then
-        # concatenate those dataframes together with pd.concat.
+        # ----------------------------------------------------------------------
         print(f"Loading all global geographical data. This will take a moment..")
         for index, file in enumerate(global_files_list):
             count += 1
-            # Show current step, file and how many more to go.
             print(f"{count} of {len(global_files_list)}: Reading {file.lstrip(folder_name)}..")
-            # Read the current file into dataframe.
+
             this_full_df = pd.read_hdf(file)
-            # Grab the columns we want. Most of the other data is empty or useless unfortunately.
+            # Grab the columns we want because most of the other fields are empty.
             this_df = this_full_df[['LAT', 'LONG', 'FULL_NAME_ND_RG']]
             global_df_list.append(this_df)
 
-        # https://pandas.pydata.org/pandas-docs/stable/user_guide/merging.html
         print("Merging global dataframes..\n")
-        # If I set the keys, I can actually locate (df.loc[]) based on the original data categories too.
+        # If I set the keys while concatenating, I can locate based on the
+        # original data categories too with df.loc[].
         self.global_df = pd.concat(global_df_list,
                                    ignore_index=True,
                                    keys=['administrative',
@@ -116,14 +122,13 @@ class LocationLove:
         """
 
         # https://thispointer.com/python-pandas-select-rows-in-dataframe-by-conditions-on-multiple-columns/
-        # So first we'll get a frame of the closest latitudes +- some degrees of tolerance we set earlier.
+        # First we'll get a frame of the closest latitudes +- some degrees of tolerance we set earlier.
         closest_lat_df = self.us_df[
             (self.us_df['PRIM_LAT_DEC'] >= (iss_latitude - tolerance)) &
-            (self.us_df['PRIM_LAT_DEC'] <= (iss_latitude + tolerance))
-            ]
+            (self.us_df['PRIM_LAT_DEC'] <= (iss_latitude + tolerance))]
 
         # Then from those closest latitudes, we'll search for the closest longitude +- some degrees.
-        # This should be our results of the closest locations with some room for imprecision.
+        # This should be our results of the reasonably closest locations.
         result_df = closest_lat_df[
             (closest_lat_df['PRIM_LONG_DEC'] >= (iss_longitude - tolerance)) &
             (closest_lat_df['PRIM_LONG_DEC'] <= (iss_longitude + tolerance))
@@ -133,15 +138,15 @@ class LocationLove:
         if len(result_df) != 0:
             # We can grab a specific value in a cell with result_df.iloc[index]['column name']
             # So the index is the length of result_df divided by 2, ie the average/median, converted to integer.
-            #                                 [    middle index       ][  column name ]
-            result_us_feature = result_df.iloc[int(len(result_df) / 2)]['FEATURE_NAME']
-            result_us_state = result_df.iloc[int(len(result_df) / 2)]['STATE_ALPHA']
+            #                                   [    middle index       ][  column name ]
+            result_us_feature   = result_df.iloc[int(len(result_df) / 2)]['FEATURE_NAME']
+            result_us_state     = result_df.iloc[int(len(result_df) / 2)]['STATE_ALPHA']
             result_us_elevation = result_df.iloc[int(len(result_df) / 2)]['ELEV_IN_M']
 
             # Return all three results as a list we can pick apart later.
             return [result_us_feature, result_us_state, result_us_elevation]
 
-        # Otherwise if it is, return None.
+        # Otherwise if there was no location found at all, return None.
         elif len(result_df) == 0:
             return None
 
@@ -151,30 +156,19 @@ class LocationLove:
         global populated areas geographical dataframe.
         Returns 2 location values if not empty, otherwise returns None if it is empty.
         """
-
-        # So first we'll get a frame of the closest latitudes +- 0.02 degrees.
         closest_lat_df = self.global_df[
             (self.global_df['LAT'] >= (iss_latitude - tolerance)) &
-            (self.global_df['LAT'] <= (iss_latitude + tolerance))
-            ]
+            (self.global_df['LAT'] <= (iss_latitude + tolerance))]
 
-        # Then from those closest latitudes, we'll search for the closest longitude +- 0.02 degrees.
-        # This should be our results of the closest locations with some room for imprecision.
         result_df = closest_lat_df[
             (closest_lat_df['LONG'] >= (iss_longitude - tolerance)) &
-            (closest_lat_df['LONG'] <= (iss_longitude + tolerance))
-            ]
+            (closest_lat_df['LONG'] <= (iss_longitude + tolerance))]
 
-        # If the result isn't nothing:
         if len(result_df) != 0:
-            # We can grab a specific value in a cell with result_df.iloc[index]['column name']
-            # So the index is the length of result_df divided by 2, ie the average/median, converted to integer.
             #                                  [    middle index       ][     column      ]
             result_pop_feature = result_df.iloc[int(len(result_df) / 2)]['FULL_NAME_ND_RG']
-
-            # Return the location name.
+            # Returns location name.
             return result_pop_feature
 
-        # Otherwise if it is empty, return None.
         elif len(result_df) == 0:
             return None
