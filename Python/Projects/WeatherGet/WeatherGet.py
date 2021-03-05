@@ -137,9 +137,8 @@ def main():
             elif temp_adjust > 0:
                 fut_temp_text = f"{temp_adjust}° warmer at {fut_temperature}° F."
 
-            # Add some motion to the data, rather than blasting you with everything
-            # at once.
-            # TODO: Use cooler console-based UI module https://github.com/willmcgugan/rich .
+            # ------------------------------------------------------------------
+            # Lines into list to be animated.
             readout_lines = [f"--- {city_name} ---",
                              f"{cur_description.capitalize()}.",
                              f"{cur_humidity}% humidity.",
@@ -152,11 +151,10 @@ def main():
                              f"{fut_temp_text}",
                              f"---\n"]
 
-            # ------------------------------------------------------------------
             # Console output animation loop.
             color = '#00FF00'
             for line in readout_lines:
-                # TODO: Explore 'rich' color_system.
+                # TODO: Make better color gradient animations.
                 color = color_shift(color, 120)
                 console.print(line, justify="center", style=color)
                 sleep(animation_delay)
