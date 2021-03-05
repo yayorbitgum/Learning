@@ -1,7 +1,6 @@
 # Pull from openweathermap.org to current weather and the weather in the next 3 hours.
 # https://openweathermap.org/forecast5
 
-
 # Imports ----------------------------------------------------------------------
 import requests
 import json
@@ -61,9 +60,9 @@ def k_to_f(k: int) -> float:
 
 
 def verify_key_exists(key: str) -> str:
-    # TODO: Help user automatically grab API key and save into their own config.py.
     """ Ensure user API key exists. If it does, return it."""
     if key is not None:
+        # TODO: Help user automatically grab API key and save into their own config.py.
         return key
     else:
         raise Exception('You need an API key from openweathermap.org to grab current weather data.\n'
@@ -81,7 +80,8 @@ def color_shift(hex_value: hex, shift_amount: int) -> str:
 
     # Max color value can only be FFFFFF.
     if hex_int + shift_amount > 16777215:
-        new_color = '0000FF'
+        # Our way of looping back around.
+        new_color = hex((hex_int + shift_amount) - 16777215).lstrip('0x')
     else:
         new_color = hex(hex_int + shift_amount).lstrip('0x')
         # We need the hex value to always be 6 digits to be a valid color.
