@@ -18,22 +18,18 @@ I found out about Vaex by coming across this article.
 https://towardsdatascience.com/how-to-analyse-100s-of-gbs-of-data-on-your-laptop-with-python-f83363dda94
 """
 
-
-# //////////////////////////////////////////// Imports ////////////////////////////////////////////
+# Imports ----------------------------------------------------------------------
 import pandas as pd
 import re
 import os
 
-
-# //////////////////////////////////////////// Variables and File Structure ////////////////////////////////////////////
+# Variables and File Structure -------------------------------------------------
 # Set acceptable degree difference here for returning coordinate matches.
-# 1.0 degree of latitude/longitude = ~111 kilometers
+# 1.0 degree of latitude/longitude ~= 111 kilometers
 tolerance = 0.5
-# The data set paths for our hdf5 files.
+# The paths for our hdf5 files.
 folder_name = 'GeoLocationInfo/hdf5/'
 root = os.path.abspath(os.curdir)
-# This regex should help us load any NationalFile version that we might use.
-# https://regex101.com/
 national_regex = re.compile('(NationalFile)(_)?(\d*)?(\.hdf5)')
 # Now we locate the national file.
 for hdf5_file in os.listdir(folder_name):
@@ -51,7 +47,6 @@ global_files_list = [f'{folder_name}Countries_administrative_a.hdf5',   # 0
                      f'{folder_name}Countries_vegetation_v.hdf5'        # 8
                      ]
 
-
 # Classes ----------------------------------------------------------------------
 class LocationDataFrames:
     def __init__(self, iss_latitude, iss_longitude):
@@ -64,15 +59,15 @@ class LocationDataFrames:
         """Loads all hdf5 files into dataframes to be used for searching."""
         global_df_list = []
         count = 0
-        print(f"Loading US geographical data..")
 
-        # Read us-based data file.
+        print(f"Loading US geographical data..")
         try:
             national_df = pd.read_hdf(national_file_path)
         except NameError:
             print("Missing location data files!")
             os.startfile(f"{root}/{folder_name}")
-            raise NameError("national_file_path is likely undefined if data files are missing from folder."
+            raise NameError("national_file_path is likely undefined if "
+                            "data files are missing from folder."
                             " Check the README.md.")
 
         # Only grab the columns we care about.
@@ -117,7 +112,8 @@ class LocationDataFrames:
 
     def scan_usa_df(self, iss_latitude, iss_longitude):
         """
-        Take in ISS coordinates, and check for the closest locations in our US geographical dataframe.
+        Take in ISS coordinates, and check for the closest locations in our
+        US geographical dataframe.
         Returns 3 location values if not empty, otherwise returns None if it is empty.
         """
 
