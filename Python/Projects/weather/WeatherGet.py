@@ -12,8 +12,6 @@ from time import sleep
 from datetime import datetime, timedelta
 # rich module imports for making a colorful and stylized console-based UI.
 from rich.console import Console
-from rich.style import Style
-from rich.color import parse_rgb_hex
 
 # Variables --------------------------------------------------------------------
 # reference "city.list.json" provided by openweathermap.org.
