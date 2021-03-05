@@ -1,20 +1,13 @@
-# Pull from openweathermap.org to show me weather data in the console!
-# Why not use my phone? Well I can just keep this up on my second monitor and
-# take a peek at it every now and then get (somewhat) live updates without
-# needing to refresh or open or touch anything.
-# And it'll make me feel really cool and smart.
+# Pull from openweathermap.org to current weather and the weather in the next 3 hours.
 # https://openweathermap.org/forecast5
-# Data is only updated once every 10 minutes on their servers.
 
 
 # Imports ----------------------------------------------------------------------
 import requests
 import json
 from config import my_key
-# pprint is a bit simpler to make clean formats of json dumps for reading,
-# for figuring out keys/values in these nested dictionaries the API gives.
-from pprint import pprint
 from time import sleep
+from datetime import datetime, timedelta
 
 
 # Variables --------------------------------------------------------------------
@@ -22,8 +15,11 @@ from time import sleep
 # You can pass in coordinates and other parameters, but IDs are more precise.
 city_id = 4544349
 file_name = f'{city_id}_weather.json'
-delay = 1
-sleepy_time = 600
+animation_delay = 1
+min_in_sec = 60
+accepted_response = 200
+# Data is only updated once every 10 minutes on their servers.
+api_request_delay_in_seconds = 600
 
 
 # Functions --------------------------------------------------------------------
@@ -48,8 +44,8 @@ def open_json():
 def k_to_f(k):
     """
     Converts kelvin to celsius, then to fahrenheit. Pass in kelvin first.
-    I'm just using Google here.
     Converting directly from K to F gave me differing temperature results.
+    I don't understand why. Yet.
     """
     celsius = k - 273.15
     fahrenheit = (celsius * 1.8) + 32
@@ -58,16 +54,15 @@ def k_to_f(k):
 
 def main():
     """
-    Our loop to make requests and dig through the json file to display
-    weather data we like.
+    Main loop to make requests and dig through the json file to display
+    weather data we want.
     """
     while True:
         response = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?id={city_id}&APPID={my_key}")
         # Make sure we succeeded before we try to save it.
-        if response.status_code == 200:
+        if response.status_code == accepted_response:
             # Save the request so we don't have to pull from API over and over.
             save_json(response)
-            # Open the local save so we can play with data.
             weather = open_json()
             city_name   = weather['city']['name']
             # ['list'][0] is current weather.
@@ -86,7 +81,6 @@ def main():
             cur_temperature = round(k_to_f(cur_temps['temp']), 1)
             cur_feels_like  = round(k_to_f(cur_temps['feels_like']), 1)
             fut_temperature = round(k_to_f(fut_temps['temp']), 1)
-            # fut_feels_like  = round(k_to_f(fut_temps['feels_like']), 1)
 
             cur_humidity    = fut_temps['humidity']
             fut_humidity    = fut_temps['humidity']
@@ -98,37 +92,36 @@ def main():
             elif temp_adjust > 0:
                 fut_temp_text = f"{temp_adjust}° warmer at {fut_temperature}° F."
 
-            # Pauses to add some motion to the data.
-            print(f" ---------------- {city_name} --------------------------\n")
-            sleep(delay)
-            print(f"    {cur_description.capitalize()}!")
-            sleep(delay)
-            print(f"    {cur_humidity}% humidity.")
-            sleep(delay)
-            print(f"    {cur_temperature}° F: Current temperature.")
-            sleep(delay)
-            print(f"    {cur_feels_like}° F: Feels like this.\n")
-            sleep(delay)
-            print(f"  ------------------------------------------------------\n")
-            sleep(delay)
-            print(f"Coming up in 3 hours..\n")
-            sleep(delay)
-            print(f"    {fut_description.capitalize()} soon!")
-            sleep(delay)
-            print(f"    {fut_humidity}% humidity.")
-            sleep(delay)
-            print(f"    {fut_temp_text}")
-            sleep(delay)
-            print(f"  ------------------------------------------------------\n")
-            sleep(delay)
+            # Add some motion to the data, rather than blasting you with everything
+            # at once.
+            readout_lines = [f" ---------------- {city_name} --------------------------\n",
+                              f"    {cur_description.capitalize()}.",
+                              f"    {cur_humidity}% humidity.",
+                              f"    {cur_temperature}° F current temp.",
+                              f"    {cur_feels_like}° F feeling.\n",
+                              f"------------------------------------------------------\n",
+                              f"Coming up in 3 hours:\n",
+                              f"    {fut_description.capitalize()}.",
+                              f"    {fut_humidity}% humidity.",
+                              f"    {fut_temp_text}",
+                              f"------------------------------------------------------\n"]
 
-            print(f"Waiting {sleepy_time/60} minutes.\n\n")
+            for line in readout_lines:
+                print(line)
+                sleep(animation_delay)
+
+            time = datetime.now()
+            update_delay_delta = timedelta(seconds=api_request_delay_in_seconds)
+            next_update_time = time + update_delay_delta
+
+            print(f"Next update in {round(api_request_delay_in_seconds / min_in_sec)} "
+                  f"minutes at {next_update_time.strftime('%H:%M')}.\n\n")
 
         else:
             print(f"\n\n\nResponse code is {response.status_code}. \n\n\n")
 
         # Wait this long before querying again.
-        sleep(sleepy_time)
+        sleep(api_request_delay_in_seconds)
 
 
 # Program-----------------------------------------------------------------------
