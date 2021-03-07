@@ -185,6 +185,7 @@ def temp_difference(start_temp: int, end_temp: int) -> str:
         return f"{temp_adjust}° warmer at {end_temp}° F."
 
 
+# ------------------------------------------------------------------------------
 def color_by_temperature(temperature: int) -> str:
     """Take in temperature value and return text with color tags for use with rich ui."""
     # Color reference: https://rich.readthedocs.io/en/latest/_modules/rich/color.html
@@ -204,6 +205,7 @@ def color_by_temperature(temperature: int) -> str:
     return f"[{color}]{temperature}°F[/]"
 
 
+# ------------------------------------------------------------------------------
 def wind_degrees_to_direction(degrees: int) -> str:
     """Convert input degrees (int) to and return cardinal direction (str)."""
 
