@@ -51,8 +51,8 @@ class WeatherAPIData:
     forecast_index accepts int between 0 and 40. Each index is a 3 hour forecast
     interval. 0 index is live weather."""
 
-    def __init__(self, weather_path, forecast_index: int):
-        self.weather = open_json(weather_path)
+    def __init__(self, weather_json, forecast_index: int):
+        self.weather = weather_json
         # JSON data.
         self.city_name   = self.weather['city']['name']
         self.temp        = self.weather['list'][forecast_index]['main']['temp']
@@ -239,7 +239,7 @@ def get_next_update_time(start_time):
     update_delay_delta = timedelta(seconds=api_request_delay_in_seconds)
     next_update_time = start_time + update_delay_delta
     next_update_in_minutes = round(api_request_delay_in_seconds / min_in_sec)
-    next_update_time_clean = next_update_time.strftime('%H:%M:%S')
+    next_update_time_clean = next_update_time.strftime('%H:%M')
     message = f"Next update in {next_update_in_minutes} minutes at {next_update_time_clean}.\n\n"
 
     return message
@@ -250,18 +250,20 @@ def get_next_update_time(start_time):
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
     key = verify_key_exists(my_key)
-    response = request_weather_api(key)
-    save_json(response, file_name)
-
-    weather_now = WeatherAPIData(file_name, 0)
-    weather_03h = WeatherAPIData(file_name, 1)
-    weather_06h = WeatherAPIData(file_name, 2)
-    weather_09h = WeatherAPIData(file_name, 3)
-    weather_12h = WeatherAPIData(file_name, 4)
-
-    weather_blocks = [weather_12h, weather_09h, weather_06h, weather_03h, weather_now]
 
     while True:
+        response = request_weather_api(key)
+        save_json(response, file_name)
+        weather_data = open_json(file_name)
+
+        weather_now = WeatherAPIData(weather_data, 0)
+        weather_03h = WeatherAPIData(weather_data, 1)
+        weather_06h = WeatherAPIData(weather_data, 2)
+        weather_09h = WeatherAPIData(weather_data, 3)
+        weather_12h = WeatherAPIData(weather_data, 4)
+
+        weather_blocks = [weather_12h, weather_09h, weather_06h, weather_03h, weather_now]
+
         current_time = datetime.now()
         interface = create_ui(weather_now, current_time)
         # The UI is actually drawn to the console here.
