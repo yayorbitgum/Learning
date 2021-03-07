@@ -154,6 +154,7 @@ def verify_key_exists(key: str) -> str:
 
 
 # ------------------------------------------------------------------------------
+# TODO: This should probably be in a different file.
 def color_shift(hex_value: hex, shift_amount: int) -> str:
     """Take a color hex value and add/subtract by given amount.
     Convert RBG hex value to RBG triplet value that rich can use.
