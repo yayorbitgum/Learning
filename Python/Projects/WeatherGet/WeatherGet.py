@@ -54,18 +54,18 @@ class WeatherAPIData:
     def __init__(self, weather_path, forecast_index: int):
         self.weather = open_json(weather_path)
         # JSON data.
-        self.city_name = self.weather['city']['name']
-        self.temp = self.weather['list'][forecast_index]['main']['temp']
-        self.feels_like = self.weather['list'][forecast_index]['main']['feels_like']
-        self.temp_min = self.weather['list'][forecast_index]['main']['temp_min']
-        self.temp_max = self.weather['list'][forecast_index]['main']['temp_max']
-        self.pressure = self.weather['list'][forecast_index]['main']['pressure']
-        self.humidity = self.weather['list'][forecast_index]['main']['humidity']
+        self.city_name   = self.weather['city']['name']
+        self.temp        = self.weather['list'][forecast_index]['main']['temp']
+        self.feels_like  = self.weather['list'][forecast_index]['main']['feels_like']
+        self.temp_min    = self.weather['list'][forecast_index]['main']['temp_min']
+        self.temp_max    = self.weather['list'][forecast_index]['main']['temp_max']
+        self.pressure    = self.weather['list'][forecast_index]['main']['pressure']
+        self.humidity    = self.weather['list'][forecast_index]['main']['humidity']
         self.description = self.weather['list'][forecast_index]['weather'][0]['description']
-        self.wind_speed = self.weather['list'][forecast_index]['wind']['speed']
-        self.wind_direction = self.weather['list'][forecast_index]['wind']['deg']
-        self.visibility = self.weather['list'][forecast_index]['visibility']
-        self.date = self.weather['list'][forecast_index]['dt_txt']
+        self.wind_speed  = self.weather['list'][forecast_index]['wind']['speed']
+        self.wind_dir    = self.weather['list'][forecast_index]['wind']['deg']
+        self.visibility  = self.weather['list'][forecast_index]['visibility']
+        self.date        = self.weather['list'][forecast_index]['dt_txt']
 
         self.update_k_to_f()
         self.data = {"City name": self.city_name,
@@ -78,7 +78,7 @@ class WeatherAPIData:
                      "Pressure": self.pressure,
                      "Humidity": self.humidity,
                      "Wind Speed": self.wind_speed,
-                     "Wind Direction": self.wind_direction,
+                     "Wind Direction": self.wind_dir,
                      "Visibility": self.visibility}
 
     # --------------------------------------------------------------------------
@@ -187,6 +187,7 @@ def temp_difference(start_temp: int, end_temp: int) -> str:
 def create_ui(now_input, timestamp=None):
     """ Create our user interface within the console. Returns the rich Layout."""
 
+    # https://rich.readthedocs.io/en/latest/index.html
     # TODO: This is a messy function. Break it apart.
     now_temp = Text(str(weather_now.temp))
     now_wind = Text(str(weather_now.wind_speed))
