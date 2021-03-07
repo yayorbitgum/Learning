@@ -6,6 +6,7 @@
 # ------------------------------------------------------------------------------
 import requests
 import json
+from bisect import bisect
 # config is where your unique API key is stored as a string.
 from config import my_key
 # Lengthy but helpful messages.
@@ -84,10 +85,10 @@ class WeatherAPIData:
     # --------------------------------------------------------------------------
     def update_k_to_f(self):
         """Run the kelvin to farenheit conversion function on our temp values."""
-        self.temp = round(k_to_f(self.temp))
-        self.temp_min = round(k_to_f(self.temp_min))
-        self.temp_max = round(k_to_f(self.temp_max))
-        self.feels_like = round(k_to_f(self.feels_like))
+        self.temp       = round(convert_k_to_f(self.temp))
+        self.temp_min   = round(convert_k_to_f(self.temp_min))
+        self.temp_max   = round(convert_k_to_f(self.temp_max))
+        self.feels_like = round(convert_k_to_f(self.feels_like))
 
     # --------------------------------------------------------------------------
     def show_all_data(self):
@@ -136,7 +137,7 @@ def open_json(file_path: str):
 
 
 # ------------------------------------------------------------------------------
-def k_to_f(k: int) -> float:
+def convert_k_to_f(k: int) -> float:
     """Convert kelvin to fahrenheit, return result."""
     celsius = k - 273.15
     fahrenheit = (celsius * 1.8) + 32
@@ -155,7 +156,7 @@ def verify_key_exists(key: str) -> str:
 
 # ------------------------------------------------------------------------------
 # TODO: This should probably be in a different file.
-def color_shift(hex_value: hex, shift_amount: int) -> str:
+def shift_color(hex_value: hex, shift_amount: int) -> str:
     """Take a color hex value and add/subtract by given amount.
     Convert RBG hex value to RBG triplet value that rich can use.
     Return new color value."""
@@ -184,21 +185,49 @@ def temp_difference(start_temp: int, end_temp: int) -> str:
         return f"{temp_adjust}° warmer at {end_temp}° F."
 
 
+def color_by_temperature(temperature: int) -> str:
+    """Take in temperature value and return text with color tags for use with rich ui."""
+    # Color reference: https://rich.readthedocs.io/en/latest/_modules/rich/color.html
+    temperature_breakpoints = [0, 32, 50, 65, 79, 89, 101, 115]
+    temperature_colors = ["blue_violet",
+                          "deep_sky_blue1",
+                          "cyan",
+                          "green",
+                          "yellow",
+                          "orange4",
+                          "red",
+                          "magenta",
+                          "bright_magenta"]
+    bisect_index = bisect(temperature_breakpoints, temperature)
+    color = temperature_colors[bisect_index]
+    # Colors are assigned within strings like HTML tags, with [brackets][/brackets].
+    return f"[{color}]{temperature}°F[/]"
+
+
+def wind_degrees_to_direction(degrees: int) -> str:
+    """Convert input degrees (int) to and return cardinal direction (str)."""
+
+    breakpoints = [355, 360, 0, 5, 85, 95, 175, 185, 265, 275]
+    directions = ["North", "North", "North", "North",
+                  "Northeast", "East", "Southeast", "South",
+                  "Southwest", "West", "Northwest"]
+
+    bisect_index = bisect(breakpoints, degrees)
+    direction = directions[bisect_index]
+    return direction
+
+
 # ------------------------------------------------------------------------------
-def create_ui(now_input, timestamp=None):
+def create_ui(weather_current, timestamp=None):
     """ Create our user interface within the console. Returns the rich Layout."""
 
+    # Temperature color tagging.
+    current_colored = color_by_temperature(weather_current.temp)
+    feels_colored = color_by_temperature(weather_current.feels_like)
+
+    wind_cardinal = wind_degrees_to_direction(weather_current.wind_dir)
+
     # https://rich.readthedocs.io/en/latest/index.html
-    # TODO: This is a messy function. Break it apart.
-    now_temp = Text(str(weather_now.temp))
-    now_wind = Text(str(weather_now.wind_speed))
-    now_humidity = Text(str(weather_now.humidity))
-    now_feels_like = Text(str(weather_now.feels_like))
-    now_texts = [now_temp, now_wind, now_humidity, now_feels_like]
-
-    for text in now_texts:
-        text.stylize('bold magenta', 0, 6)
-
     ui = Layout()
     # TODO: Flesh out the UI more and fill with useful weather info.
     ui.split(
@@ -216,9 +245,12 @@ def create_ui(now_input, timestamp=None):
         # "Now" panel, showing current weather info.
         Layout(
             Panel(
-                f"Current temp: {now_input.temp}",
+                f"Currently {current_colored}\n"
+                f"Feels like {feels_colored}\n"
+                f"Wind blowing {wind_cardinal} at {weather_current.wind_speed}mph\n"
+                f"Humidity at {weather_current.humidity}%",
                 box=box.DOUBLE,
-                title=now_input.city_name),
+                title=f"[yellow bold]{weather_current.city_name}"),
             name='now',
             ratio=4),
         # "Info" panel, showing time until next update.
