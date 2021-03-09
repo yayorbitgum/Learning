@@ -13,4 +13,4 @@ and **download the list of cities** from openweathermap to allow for fuzzy match
 - http://bulk.openweathermap.org/sample/city.list.json.gz
 
 _And for faster fuzzy matching based on C++, pip install the following:_
-- python-Levenshtein
+- _python-Levenshtein_
