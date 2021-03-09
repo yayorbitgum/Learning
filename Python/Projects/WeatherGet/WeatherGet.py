@@ -405,5 +405,6 @@ if __name__ == '__main__':
         current_time = datetime.now()
         interface = create_ui(current_time)
         console.print(interface)
+
         sleep(api_request_delay_in_seconds)
         response = request_weather_api(key, city_id)
