@@ -5,9 +5,9 @@ Your forecast is displayed in a neat console-based UI!
 Data is pulled from https://openweathermap.org/forecast5.
 
 # To use, make sure you pip install the following:
-- _requests_
-- _rich_ 
-- _fuzzywuzzy_
+- _pip install requests_
+- _pip install rich_ 
+- _pip install fuzzywuzzy_
 
 and **download the list of cities** from openweathermap to allow for fuzzy matching your input when their API doesn't like what you entered!
 - http://bulk.openweathermap.org/sample/city.list.json.gz
