@@ -9,3 +9,8 @@ message_forbidden = "Your key was rejected with a 401 response code (Unauthorize
 missing_api_exception = Exception('You need an API key from openweathermap.org to grab current weather data.\n'
                                   'Register, generate a key, and save that key as a string in config.py.\n'
                                   'You can find your key(s) here --> https://home.openweathermap.org/api_keys')
+
+missing_city_list = "[red]city.list.json not found![/red]\n" \
+                    "To allow fuzzy matching, download city.list.json here:\n" \
+                    "http://bulk.openweathermap.org/sample/city.list.json.gz\n" \
+                    "and place it in your root folder with WeatherGet.py."

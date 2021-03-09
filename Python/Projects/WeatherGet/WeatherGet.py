@@ -4,15 +4,17 @@
 # ------------------------------------------------------------------------------
 # Imports ----------------------------------------------------------------------
 # ------------------------------------------------------------------------------
+import os
 import requests
 import json
 from bisect import bisect
-# config is where your unique API key is stored as a string.
-from config import my_key
-# Lengthy but helpful messages.
-import error_messages as errors
 from time import sleep
 from datetime import datetime, timedelta
+# Fuzzy input matching when API rejects user input.
+from location_parser import fuzzy_find_city
+# config is where your unique API key is stored as a string.
+from config import my_key
+import error_messages as errors
 # For type-hinting.
 from requests import Response
 # rich module imports for making a colorful and stylized console-based UI.
@@ -23,24 +25,20 @@ from rich.panel import Panel
 from rich.live import Live
 from rich.table import Table
 from rich import box
-from rich.text import Text
 
 # ------------------------------------------------------------------------------
 # Variables --------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-# reference "city.list.json" provided by openweathermap.org.
-# You can pass in coordinates and other parameters, but IDs are more precise.
-# TODO: User input for location, then find closest (fuzzy) match in city.list.
-city_id = 4544349
-file_name = f'{city_id}_weather.json'
+# Data is only updated once every 10 minutes on their servers.
+api_request_delay_in_seconds = 600
 animation_delay = 0.5
 min_in_sec = 60
 color_shift_amt = 120
-accepted_response = 200
-unauthorized_response = 401
-# Data is only updated once every 10 minutes on their servers.
-api_request_delay_in_seconds = 600
-# Here's how we'll make everything pretty.
+
+accepted_code = 200
+unauth_code = 401
+not_found_code = 404
+
 console = Console(color_system='truecolor')
 
 
@@ -48,9 +46,9 @@ console = Console(color_system='truecolor')
 # Classes ----------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 class WeatherAPIData:
-    """Object for examining and presenting weather data from api request.
+    """Object for examining and presenting weather data from API requests.
     forecast_index accepts int between 0 and 40. Each index is a 3 hour forecast
-    interval. 0 index is live weather."""
+    interval. 0 index is live weather (I might be wrong on 0 being live)."""
 
     def __init__(self, weather_json, forecast_index: int):
         self.weather = weather_json
@@ -84,7 +82,10 @@ class WeatherAPIData:
 
     # --------------------------------------------------------------------------
     def update_k_to_f(self):
-        """Run the kelvin to farenheit conversion function on our temp values."""
+        """
+        This method runs the kelvin to farenheit conversion function
+        on our temperature values.
+        """
         self.temp       = round(convert_k_to_f(self.temp))
         self.temp_min   = round(convert_k_to_f(self.temp_min))
         self.temp_max   = round(convert_k_to_f(self.temp_max))
@@ -99,30 +100,72 @@ class WeatherAPIData:
 
         with Live(table, refresh_per_second=4):
             for description, data in self.data.items():
-                sleep(0.3)
                 table.add_row(description, str(data))
 
 
 # ------------------------------------------------------------------------------
 # Functions --------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-def request_weather_api(key: str) -> Response:
-    """Request api from openweathermap.org. Return requests object if successful."""
-    request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?id={city_id}&APPID={key}")
-
-    if request.status_code == accepted_response:
-        return request
-    elif request.status_code == unauthorized_response:
-        console.print(errors.message_forbidden, style='red')
+def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
+    """
+    Request api from openweathermap.org.
+    Return tuple of requests object, and specific city id if successful.
+    https://openweathermap.org/current
+    """
+    if api_city_id is not None:
+        request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast"
+                               f"?id={api_city_id}"
+                               f"&APPID={api_key}")
     else:
-        console.print(f"\n\n\nResponse code is {request.status_code}. \n\n\n", style='red')
+        request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast"
+                               f"?q={location}"
+                               f"&APPID={api_key}")
+
+    # 200 ----------------------------------------------------------------------
+    if request.status_code == accepted_code:
+        request_and_id = [request, api_city_id]
+        return request_and_id
+
+    # 401 ----------------------------------------------------------------------
+    elif request.status_code == unauth_code:
+        console.print(errors.message_forbidden, style='red')
+
+    # 404 ----------------------------------------------------------------------
+    elif request.status_code == not_found_code:
+        # Openweathermap's API didn't like our location input for various reasons.
+        # So let's try our own very slow fuzzy matching locally!
+        console.print('[red]Did you mean...[/]')
+        console.print('[grey0][italic]Searching for closest matches...[/][/]')
+
+        # Fuzzy results selection. ---------------------------------------------
+        choices = fuzzy_find_city(location)
+        for index, choice in enumerate(choices):
+            console.print(f"{index}: {choice}")
+
+        try:
+            selection = int(input('Choose option number: '))
+            location_string = choices[selection]
+        except (IndexError, ValueError):
+            # We'll default to first option for now. TODO: Ask for input again.
+            location_string = choices[0]
+
+        city, state, api_city_id = location_string.split(',')
+        api_city_id = api_city_id.strip()
+
+        # ----------------------------------------------------------------------
+        # Now that we've got the exact city id, let's request API again.
+        return request_weather_api(my_key, api_city_id)
+
+    else:
+        console.print(f'[red] Response code {request.status_code}![/]')
 
 
 # ------------------------------------------------------------------------------
-def save_json(request: Response, file_path: str):
+def save_json(request, file_path: str):
     """Save the provided json file to given file_path."""
-    with open(file_path, 'w') as file:
-        json.dump(request.json(), file)
+    if request is not None:
+        with open(file_path, 'w') as file:
+            json.dump(request.json(), file)
 
 
 # ------------------------------------------------------------------------------
@@ -180,9 +223,9 @@ def temp_difference(start_temp: int, end_temp: int) -> str:
     # Show temp difference between two temperatures, rounded. Return message string.
     temp_adjust = round(end_temp - start_temp, 1)
     if temp_adjust <= 0:
-        return f"{temp_adjust}° cooler at {end_temp}° F."
+        return f"{temp_adjust}°F cooler."
     elif temp_adjust > 0:
-        return f"{temp_adjust}° warmer at {end_temp}° F."
+        return f"{temp_adjust}°F warmer."
 
 
 # ------------------------------------------------------------------------------
@@ -209,59 +252,78 @@ def color_by_temperature(temperature: int) -> str:
 def wind_degrees_to_direction(degrees: int) -> str:
     """Convert input degrees (int) to and return cardinal direction (str)."""
 
-    breakpoints = [355, 360, 0, 5, 85, 95, 175, 185, 265, 275]
-    directions = ["North", "North", "North", "North",
+    breakpoints = [0, 5, 85, 95, 175, 185, 265, 275, 355, 360]
+    directions = ["North", "North",
                   "Northeast", "East", "Southeast", "South",
-                  "Southwest", "West", "Northwest"]
+                  "Southwest", "West", "Northwest", "North", "North"]
 
     bisect_index = bisect(breakpoints, degrees)
     direction = directions[bisect_index]
     return direction
 
 
-# ------------------------------------------------------------------------------
-def create_ui(weather_current, timestamp=None):
-    """ Create our user interface within the console. Returns the rich Layout."""
-
+def create_weather_panel(weather: WeatherAPIData) -> Panel:
+    """ Take in WeatherAPIData instance. Return rich Panel with weather info."""
     # Temperature color tagging.
-    current_colored = color_by_temperature(weather_current.temp)
-    feels_colored = color_by_temperature(weather_current.feels_like)
+    current_colored = color_by_temperature(weather.temp)
+    feels_colored = color_by_temperature(weather.feels_like)
+    # N E S W text.
+    wind_cardinal = wind_degrees_to_direction(weather.wind_dir)
+    panel_text = (f"{current_colored} with {weather.description.title()}\n"
+                  f"Feels like {feels_colored}\n"
+                  f"{wind_cardinal} @ [cyan]{weather.wind_speed}mph[/]\n"
+                  f"Humidity @ [cyan]{weather.humidity}%[/]\n")
 
-    wind_cardinal = wind_degrees_to_direction(weather_current.wind_dir)
+    title = weather.date
 
+    panel = Panel(panel_text, box=box.ASCII, title=title)
+
+    return panel
+
+
+# ------------------------------------------------------------------------------
+def create_ui(timestamp=None):
+    """ Create our user interface within the console. Returns the rich Layout."""
     # https://rich.readthedocs.io/en/latest/index.html
     ui = Layout()
-    # TODO: Flesh out the UI more and fill with useful weather info.
     ui.split(
         Layout(name='left'),
         Layout(name='right'),
         direction='horizontal')
 
+    panel_now = create_weather_panel(weather_now)
+    panel_3h = create_weather_panel(weather_03h)
+    panel_6h = create_weather_panel(weather_06h)
+    panel_9h = create_weather_panel(weather_09h)
+    panel_info = Panel(f"[i]{get_next_update_time(timestamp)}[/]")
+
+    panel_now.title = f"[yellow]{weather_now.city_name}[/]"
+    panel_3h.title = f"[yellow]3 Hours[/]"
+    panel_6h.title = f"[yellow]6 Hours[/]"
+    panel_9h.title = f"[yellow]9 Hours[/]"
+
+    # Add temperature differences to forecast panels.
+    temp_diff_3h = temp_difference(weather_now.temp, weather_03h.temp)
+    temp_diff_6h = temp_difference(weather_now.temp, weather_06h.temp)
+    temp_diff_9h = temp_difference(weather_now.temp, weather_09h.temp)
+    panel_3h.renderable += f"{temp_diff_3h}"
+    panel_6h.renderable += f"{temp_diff_6h}"
+    panel_9h.renderable += f"{temp_diff_9h}"
+
+    panel_now.box = box.DOUBLE
+    panel_info.box = box.ASCII
+
+    # Future forecast panels.
     ui['right'].split(
-        Layout(name='3h'),
-        Layout(name='6h'),
-        Layout(name='9h'),
+        Layout(panel_3h, name='3h'),
+        Layout(panel_6h, name='6h'),
+        Layout(panel_9h, name='9h'),
         direction='vertical')
 
+    # "now" and "info" panels.
     ui['left'].split(
-        # "Now" panel, showing current weather info.
-        Layout(
-            Panel(
-                f"Currently {current_colored}\n"
-                f"Feels like {feels_colored}\n"
-                f"Wind blowing {wind_cardinal} at {weather_current.wind_speed}mph\n"
-                f"Humidity at {weather_current.humidity}%",
-                box=box.DOUBLE,
-                title=f"[yellow bold]{weather_current.city_name}"),
-            name='now',
-            ratio=4),
-        # "Info" panel, showing time until next update.
-        Layout(
-            Panel(
-                get_next_update_time(timestamp),
-                box=box.ASCII),
-            name='info'),
-        # Split direction for splitting "left" layout into "now" and "info" layouts.
+        Layout(panel_now, name='now', ratio=4),
+        Layout(panel_info, name='info'),
         direction='vertical')
 
     return ui
@@ -270,36 +332,52 @@ def create_ui(weather_current, timestamp=None):
 # ------------------------------------------------------------------------------
 def get_next_update_time(start_time):
     """Returns a string showing the next API update delay, and what time it will be."""
-    update_delay_delta = timedelta(seconds=api_request_delay_in_seconds)
-    next_update_time = start_time + update_delay_delta
+    next_update_time = start_time + timedelta(seconds=api_request_delay_in_seconds)
     next_update_in_minutes = round(api_request_delay_in_seconds / min_in_sec)
-    next_update_time_clean = next_update_time.strftime('%H:%M')
-    message = f"Next update in {next_update_in_minutes} minutes at {next_update_time_clean}.\n\n"
+    next_update_text = next_update_time.strftime('%H:%M')
+
+    message = (f"Next update in {next_update_in_minutes} minutes "
+               f"at {next_update_text.lstrip('0')}")
 
     return message
+
+
+def clear_old_json():
+    """Delete old files from previous script runs generated in json_files."""
+    json_file_list = [file for file in os.listdir('json_files') if file.endswith('json')]
+
+    if json_file_list:
+        console.print(f"[grey0] Deleting old files generated by WeatherGet...[/]")
+
+        for file in json_file_list:
+            os.remove(os.path.join('json_files', file))
+            console.print(f"[red]Removed {file} from 'json_files' folder.[/red]")
 
 
 # ------------------------------------------------------------------------------
 # Start here.
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
+
+    clear_old_json()
+    location = input('Enter location: ').title()
+    file_name = f'json_files/{location}.json'
     key = verify_key_exists(my_key)
+    # request_weather_api will give us (API Response, city_id).
+    response = request_weather_api(key)
+    city_id = response[1]
 
     while True:
-        response = request_weather_api(key)
-        save_json(response, file_name)
+        save_json(response[0], file_name)
         weather_data = open_json(file_name)
-
         weather_now = WeatherAPIData(weather_data, 0)
         weather_03h = WeatherAPIData(weather_data, 1)
         weather_06h = WeatherAPIData(weather_data, 2)
         weather_09h = WeatherAPIData(weather_data, 3)
-        weather_12h = WeatherAPIData(weather_data, 4)
-
-        weather_blocks = [weather_12h, weather_09h, weather_06h, weather_03h, weather_now]
 
         current_time = datetime.now()
-        interface = create_ui(weather_now, current_time)
-        # The UI is actually drawn to the console here.
+        interface = create_ui(current_time)
         console.print(interface)
+
         sleep(api_request_delay_in_seconds)
+        response = request_weather_api(key, city_id)
