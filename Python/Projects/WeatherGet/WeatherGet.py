@@ -13,7 +13,7 @@ from bisect import bisect
 from time import sleep
 from datetime import datetime, timedelta
 # Fuzzy input matching when API rejects user input.
-from location_parser import fuzzy_find_city
+from location_parser import fuzzy_find_city, city_list_filepath
 # config is where your unique API key is stored as a string.
 from config import my_key
 import error_messages as errors
@@ -56,6 +56,11 @@ class WeatherAPIData:
         self.weather = weather_json
         # JSON data.
         self.city_name   = self.weather['city']['name']
+        self.id          = self.weather['city']['id']
+        self.latitude    = self.weather['city']['coord']['lat']
+        self.longitude   = self.weather['city']['coord']['lon']
+        self.country     = self.weather['city']['country']
+        self.population  = self.weather['city']['population']
         self.temp        = self.weather['list'][forecast_index]['main']['temp']
         self.feels_like  = self.weather['list'][forecast_index]['main']['feels_like']
         self.temp_min    = self.weather['list'][forecast_index]['main']['temp_min']
@@ -174,7 +179,7 @@ def save_json(request, file_path: str):
 def open_json(file_path: str):
     """Open the json file in root folder. Return the json object."""
     try:
-        with open(file_path) as file:
+        with open(file_path, encoding='utf8') as file:
             json_data = json.load(file)
             return json_data
     except FileNotFoundError:
@@ -262,6 +267,7 @@ def wind_degrees_to_direction(degrees: int) -> str:
     return direction
 
 
+# ------------------------------------------------------------------------------
 def create_weather_panel(weather: WeatherAPIData) -> Panel:
     """ Take in WeatherAPIData instance. Return rich Panel with weather info."""
     # Temperature color tagging.
@@ -275,14 +281,30 @@ def create_weather_panel(weather: WeatherAPIData) -> Panel:
                   f"Humidity @ [cyan]{weather.humidity}%[/]\n")
 
     title = weather.date
-
     panel = Panel(panel_text, box=box.ASCII, title=title)
-
     return panel
 
 
 # ------------------------------------------------------------------------------
-def create_ui(timestamp=None):
+def determine_state_code(city_list_file, weather_response_id) -> str:
+    """
+    Compare city IDs between city list and weather API data.
+    Return state ID from match, or empty string if no match.
+    """
+    # Openweather API does not return state ID for whatever reason,
+    # but it does return the city code, so we can use that to determine the state.
+    state_code = ''
+    location_data = open_json(city_list_file)
+    for city in location_data:
+        if weather_response_id == city['id']:
+            state_code = city['state']
+            return state_code
+
+    return state_code
+
+
+# ------------------------------------------------------------------------------
+def create_ui(timestamp: datetime):
     """ Create our user interface within the console. Returns the rich Layout."""
     # https://rich.readthedocs.io/en/latest/index.html
     ui = Layout()
@@ -297,7 +319,12 @@ def create_ui(timestamp=None):
     panel_9h = create_weather_panel(weather_09h)
     panel_info = Panel(f"[i]{get_next_update_time(timestamp)}[/]")
 
-    panel_now.title = f"[yellow]{weather_now.city_name}[/]"
+    state_code = determine_state_code(city_list_filepath, weather_now.id)
+    if state_code:
+        panel_now.title = f"[yellow]{weather_now.city_name}, {state_code}[/]"
+    else:
+        panel_now.title = f"[yellow]{weather_now.city_name}[/]"
+
     panel_3h.title = f"[yellow]3 Hours[/]"
     panel_6h.title = f"[yellow]6 Hours[/]"
     panel_9h.title = f"[yellow]9 Hours[/]"
@@ -361,15 +388,15 @@ if __name__ == '__main__':
 
     clear_old_json()
     location = input('Enter location: ').title()
-    file_name = f'json_files/{location}.json'
+    weather_api_file_name = f'json_files/{location}.json'
     key = verify_key_exists(my_key)
     # request_weather_api will give us (API Response, city_id).
     response = request_weather_api(key)
     city_id = response[1]
 
     while True:
-        save_json(response[0], file_name)
-        weather_data = open_json(file_name)
+        save_json(response[0], weather_api_file_name)
+        weather_data = open_json(weather_api_file_name)
         weather_now = WeatherAPIData(weather_data, 0)
         weather_03h = WeatherAPIData(weather_data, 1)
         weather_06h = WeatherAPIData(weather_data, 2)
@@ -378,6 +405,5 @@ if __name__ == '__main__':
         current_time = datetime.now()
         interface = create_ui(current_time)
         console.print(interface)
-
         sleep(api_request_delay_in_seconds)
         response = request_weather_api(key, city_id)

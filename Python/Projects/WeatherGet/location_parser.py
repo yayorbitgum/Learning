@@ -5,7 +5,7 @@ from fuzzywuzzy import fuzz
 from rich.console import Console
 from error_messages import missing_city_list
 
-file_path = 'city.list.json'
+city_list_filepath = 'city.list.json'
 console = Console(color_system='truecolor')
 
 
@@ -34,7 +34,7 @@ def fuzzy_find_city(loc=None) -> list:
     Return list of best city 'name' and 'state' matches.
     """
 
-    locations = read_city_json(file_path)
+    locations = read_city_json(city_list_filepath)
     if loc is None:
         user_input = input('Enter location (city, state): ')
     else:
