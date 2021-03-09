@@ -1,6 +1,8 @@
 # Pull from openweathermap.org to display current weather forecasts.
 # https://openweathermap.org/forecast5
 
+# TODO: Automate grabbing API key.
+# TODO: Automate grabbing city.list.json, and decompressing.
 # ------------------------------------------------------------------------------
 # Imports ----------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -191,14 +193,12 @@ def convert_k_to_f(k: int) -> float:
 def verify_key_exists(key: str) -> str:
     """ Ensure user API key exists. If it does, return it."""
     if key is not None:
-        # TODO: Help user automatically grab API key.
         return key
     else:
         raise errors.missing_api_exception
 
 
 # ------------------------------------------------------------------------------
-# TODO: This should probably be in a different file.
 def shift_color(hex_value: hex, shift_amount: int) -> str:
     """Take a color hex value and add/subtract by given amount.
     Convert RBG hex value to RBG triplet value that rich can use.
