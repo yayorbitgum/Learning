@@ -16,5 +16,5 @@ Data is pulled from https://openweathermap.org/forecast5.
 - **Download the list of cities** from openweathermap to allow for fuzzy matching your input when their API doesn't like what you entered!
   - http://bulk.openweathermap.org/sample/city.list.json.gz _(3.8mb download, 40mb when unzipped)_
 
-- _And for faster fuzzy matching based on C++, pip install the following:_
-  - _python-Levenshtein_
+- _And for faster fuzzy matching based on C++, install the following:_
+  - _pip install python-Levenshtein_
