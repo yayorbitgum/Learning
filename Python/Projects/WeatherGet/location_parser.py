@@ -1,15 +1,25 @@
+# TODO:
+#   For city.list.json, nest one additional dictionary depth based on each letter
+#   of the alphabet, so that we first only search the matching starting letter
+#   of our search term. Divide the entire list by 26 elements, rather than thousands.
+#
 # city.list.json is pulled from
 # http://bulk.openweathermap.org/sample/city.list.json.gz
+
+# Imports. ---------------------------------------------------------------------
 import json
 import sys
 from fuzzywuzzy import fuzz
 from rich.console import Console
 from error_messages import missing_city_list
 
+
+# Variables. -------------------------------------------------------------------
 city_list_filepath = 'city.list.json'
 console = Console(color_system='truecolor')
 
 
+# Functions. -------------------------------------------------------------------
 def read_city_json(file):
     """
     Read city file and return json object.
@@ -27,6 +37,14 @@ def read_city_json(file):
     except FileNotFoundError:
         console.print(missing_city_list)
         sys.exit()
+
+
+def alphabetizer():
+    ...
+
+
+def verify_alphabet_nesting():
+    ...
 
 
 def fuzzy_find_city(loc=None) -> list:
@@ -50,6 +68,7 @@ def fuzzy_find_city(loc=None) -> list:
         state = None
 
     # --------------------------------------------------------------------------
+    # TODO: Make more efficient.
     for location in locations:
         ratio = fuzz.partial_ratio(location, city)
 

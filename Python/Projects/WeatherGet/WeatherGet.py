@@ -32,7 +32,7 @@ from rich import box
 # Variables --------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # Data is only updated once every 10 minutes on their servers.
-api_request_delay_in_seconds = 600
+api_delay_in_sec = 600
 animation_delay = 0.5
 min_in_sec = 60
 color_shift_amt = 120
@@ -315,6 +315,57 @@ def determine_state_code(city_list_file, weather_response_id) -> str:
 
 
 # ------------------------------------------------------------------------------
+def create_weather_panel_future(weather: WeatherAPIData, current: WeatherAPIData, index) -> Panel:
+    """
+    Take in WeatherAPIData instances and chosen forecast index.
+    Return rich Panel with weather info.
+    """
+
+    current_colored = color_by_temperature(weather.temperature)
+    feels_colored = color_by_temperature(weather.feels_like)
+    wind_cardinal = wind_degrees_to_direction(weather.wind_dir)
+
+    panel_text = (f"{current_colored} with {weather.description.title()}\n"
+                  f"Feels like {feels_colored}\n"
+                  f"{wind_cardinal} @ [cyan]{weather.wind_speed}mph[/]\n"
+                  f"Humidity @ [cyan]{weather.humidity}%[/]\n"
+                  f"{temp_difference(current.temperature, weather.temperature)}")
+
+    panel = Panel(panel_text, box=box.ASCII)
+    panel.title = f"[yellow]{index * 3} Hours[/]"
+    return panel
+
+
+# ------------------------------------------------------------------------------
+def create_weather_panel_now(weather: WeatherAPIData) -> Panel:
+    """ Take in WeatherAPIData instance. Return rich Panel with weather info."""
+
+    current_colored = color_by_temperature(weather.temperature)
+    feels_colored = color_by_temperature(weather.feels_like)
+    wind_cardinal = wind_degrees_to_direction(weather.wind_dir)
+    lat = weather.latitude
+    lon = weather.longitude
+
+    panel_text = (f"{current_colored} with {weather.description.title()}\n"
+                  f"Feels like {feels_colored}\n"
+                  f"{wind_cardinal} @ [cyan]{weather.wind_speed}mph[/]\n"
+                  f"Humidity @ [cyan]{weather.humidity}%[/]\n"
+                  f"\n[i]Population: {weather.population:,}[/]"
+                  f"[i]\nGPS: [link=https://www.google.com/maps/@{lat},{lon}]{lat}, {lon}[/link][/]")
+
+    panel = Panel(panel_text, box=box.ASCII)
+    panel.box = box.DOUBLE
+
+    state_code = determine_state_code(city_list_filepath, weather_now.id)
+    if state_code:
+        panel.title = f"[yellow]{weather_now.city_name}, {state_code}, {weather_now.country}[/]"
+    else:
+        panel.title = f"[yellow]{weather_now.city_name}, {weather_now.country}[/]"
+
+    return panel
+
+
+# ------------------------------------------------------------------------------
 def create_ui(timestamp: datetime):
     """ Create our user interface within the console. Returns the rich Layout."""
     # https://rich.readthedocs.io/en/latest/index.html
@@ -324,40 +375,11 @@ def create_ui(timestamp: datetime):
         Layout(name='right'),
         direction='horizontal')
 
-    panel_now = create_weather_panel(weather_now)
-    panel_3h = create_weather_panel(weather_03h)
-    panel_6h = create_weather_panel(weather_06h)
-    panel_9h = create_weather_panel(weather_09h)
-    panel_info = Panel(f"[i]{get_next_update_time(timestamp, api_request_delay_in_seconds)}[/]")
-
-    state_code = determine_state_code(city_list_filepath, weather_now.id)
-    if state_code:
-        panel_now.title = f"[yellow]{weather_now.city_name}, {state_code}, {weather_now.country}[/]"
-    else:
-        panel_now.title = f"[yellow]{weather_now.city_name}, {weather_now.country}[/]"
-
-    lat = weather_now.latitude
-    lon = weather_now.longitude
-    # Add population and GPS only to now panel. Don't need them for the other panels.
-    panel_now.renderable += f"[i]\nPopulation: {weather_now.population:,}[/]"
-    panel_now.renderable += f"[i]\nGPS: [link=https://www.google.com/maps/@{lat},{lon}]{lat}, {lon}[/link][/]"
-    panel_3h.title = f"[yellow]3 Hours[/]"
-    panel_6h.title = f"[yellow]6 Hours[/]"
-    panel_9h.title = f"[yellow]9 Hours[/]"
-
-    # Add temperature differences unique to forecast panels.
-    # TODO:
-    #  At this point I'm thinking I should just make a unique function for
-    #  creating forecast panels to remove some bloat from this function.
-    #  Probably create_weather_panel_current() and create_weather_panel_future().
-    temp_diff_3h = temp_difference(weather_now.temperature, weather_03h.temperature)
-    temp_diff_6h = temp_difference(weather_now.temperature, weather_06h.temperature)
-    temp_diff_9h = temp_difference(weather_now.temperature, weather_09h.temperature)
-    panel_3h.renderable += f"{temp_diff_3h}"
-    panel_6h.renderable += f"{temp_diff_6h}"
-    panel_9h.renderable += f"{temp_diff_9h}"
-
-    panel_now.box = box.DOUBLE
+    panel_now = create_weather_panel_now(weather_now)
+    panel_3h = create_weather_panel_future(weather_03h, weather_now, 1)
+    panel_6h = create_weather_panel_future(weather_06h, weather_now, 2)
+    panel_9h = create_weather_panel_future(weather_09h, weather_now, 3)
+    panel_info = Panel(f"[i]{get_next_update_time(timestamp, api_delay_in_sec)}[/]")
     panel_info.box = box.ASCII
 
     # Future forecast panels.
@@ -419,8 +441,8 @@ if __name__ == '__main__':
     clear_old_json()
     location = input('Enter location: ').title()
     weather_api_file_name = f'{json_folder_path}/{location}.json'
+
     key = verify_key_exists(my_key)
-    # request_weather_api will give us (API Response, city_id).
     response = request_weather_api(key)
     city_id = response[1]
 
@@ -436,5 +458,5 @@ if __name__ == '__main__':
         interface = create_ui(current_time)
         console.print(interface)
 
-        sleep(api_request_delay_in_seconds)
+        sleep(api_delay_in_sec)
         response = request_weather_api(key, city_id)
