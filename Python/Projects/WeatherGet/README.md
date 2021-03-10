@@ -21,3 +21,8 @@ Data is pulled from https://openweathermap.org/forecast5.
 
 - _(Optional) For faster fuzzy matching based on C++, install the following:_
   - _pip install python-Levenshtein_
+
+# TODO ->  
+- Have a _setup.py_ do all of this for you instead.
+- Live display that resizes based on console window.
+- Better visualization of upcoming forecast differences.

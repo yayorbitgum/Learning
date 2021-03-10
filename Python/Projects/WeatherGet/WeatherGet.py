@@ -63,7 +63,7 @@ class WeatherAPIData:
         self.longitude   = self.weather['city']['coord']['lon']
         self.country     = self.weather['city']['country']
         self.population  = self.weather['city']['population']
-        self.temperature        = self.weather['list'][forecast_index]['main']['temp']
+        self.temperature = self.weather['list'][forecast_index]['main']['temp']
         self.feels_like  = self.weather['list'][forecast_index]['main']['feels_like']
         self.temp_min    = self.weather['list'][forecast_index]['main']['temp_min']
         self.temp_max    = self.weather['list'][forecast_index]['main']['temp_max']
