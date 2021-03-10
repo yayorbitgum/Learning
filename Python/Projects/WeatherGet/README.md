@@ -26,3 +26,4 @@ Data is pulled from https://openweathermap.org/forecast5.
 - Have a _setup.py_ do all of this for you instead.
 - Live display that resizes based on console window.
 - Better visualization of upcoming forecast differences.
+- Allow for input to change city, update, exit, etc.
