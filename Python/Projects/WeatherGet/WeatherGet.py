@@ -73,11 +73,14 @@ class WeatherAPIData:
         self.wind_speed  = self.weather['list'][forecast_index]['wind']['speed']
         self.wind_dir    = self.weather['list'][forecast_index]['wind']['deg']
         self.visibility  = self.weather['list'][forecast_index]['visibility']
-        self.date        = self.weather['list'][forecast_index]['dt_txt']
-
-        self.update_k_to_f()
-        self.data = {"City name": self.city_name,
-                     "Time block": self.date,
+        self.timestamp   = self.weather['list'][forecast_index]['dt_txt']
+        self.data = {"ID": self.id,
+                     "City name": self.city_name,
+                     "Country": self.country,
+                     "Latitude": self.latitude,
+                     "Longitude": self.longitude,
+                     "Population": self.population,
+                     "Time block": self.timestamp,
                      "Weather description": self.description,
                      "Temperature": self.temperature,
                      "Minimum Temperature": self.temp_min,
@@ -87,7 +90,10 @@ class WeatherAPIData:
                      "Humidity": self.humidity,
                      "Wind Speed": self.wind_speed,
                      "Wind Direction": self.wind_dir,
-                     "Visibility": self.visibility}
+                     "Visibility": self.visibility,}
+        # For our purposes, we'll always want fahrenheit so run update on init.
+        self.update_k_to_f()
+        # ----------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
     def update_k_to_f(self):
@@ -95,14 +101,14 @@ class WeatherAPIData:
         This method runs the kelvin to farenheit conversion function
         on our temperature values.
         """
-        self.temperature       = round(convert_k_to_f(self.temperature))
-        self.temp_min   = round(convert_k_to_f(self.temp_min))
-        self.temp_max   = round(convert_k_to_f(self.temp_max))
-        self.feels_like = round(convert_k_to_f(self.feels_like))
+        self.temperature = round(convert_k_to_f(self.temperature))
+        self.temp_min    = round(convert_k_to_f(self.temp_min))
+        self.temp_max    = round(convert_k_to_f(self.temp_max))
+        self.feels_like  = round(convert_k_to_f(self.feels_like))
 
     # --------------------------------------------------------------------------
     def show_all_data(self):
-        """ Show all the data we got from this block of weather forecast."""
+        """ Show all the data we got from requested weather forecast block."""
         table = Table()
         table.add_column('Description')
         table.add_column('Data')
@@ -147,11 +153,10 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
         # Openweathermap's API does not partial matching, so often rejects input.
         # So let's try our own very slow fuzzy matching locally!
         # TODO: Maybe this would be a good time to practice making my own API
-        # and just have a server host the city.list.json, to give us back the id.
+        # and just have a server host the city.list.json.
         console.print('[red]Did you mean...[/]')
         console.print('[grey0][italic]Searching for closest matches...[/][/]')
 
-        # Fuzzy results selection. ---------------------------------------------
         choices = fuzzy_find_city(location)
         for index, choice in enumerate(choices):
             console.print(f"{index}: {choice}")
@@ -166,10 +171,10 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
         city, state, api_city_id = location_string.split(',')
         api_city_id = api_city_id.strip()
 
-        # ----------------------------------------------------------------------
         # Now that we've got the exact city id, let's request API again.
         return request_weather_api(my_key, api_city_id)
 
+    # All other codes. ---------------------------------------------------------
     else:
         console.print(f'[red] Response code {request.status_code}![/]')
 
@@ -276,17 +281,17 @@ def wind_degrees_to_direction(degrees: int) -> str:
 # ------------------------------------------------------------------------------
 def create_weather_panel(weather: WeatherAPIData) -> Panel:
     """ Take in WeatherAPIData instance. Return rich Panel with weather info."""
-    # Temperature color tagging.
+
     current_colored = color_by_temperature(weather.temperature)
     feels_colored = color_by_temperature(weather.feels_like)
-    # N E S W text.
     wind_cardinal = wind_degrees_to_direction(weather.wind_dir)
+
     panel_text = (f"{current_colored} with {weather.description.title()}\n"
                   f"Feels like {feels_colored}\n"
                   f"{wind_cardinal} @ [cyan]{weather.wind_speed}mph[/]\n"
                   f"Humidity @ [cyan]{weather.humidity}%[/]\n")
 
-    title = weather.date
+    title = weather.timestamp
     panel = Panel(panel_text, box=box.ASCII, title=title)
     return panel
 
@@ -333,13 +338,18 @@ def create_ui(timestamp: datetime):
 
     lat = weather_now.latitude
     lon = weather_now.longitude
+    # Add population and GPS only to now panel. Don't need them for the other panels.
     panel_now.renderable += f"[i]\nPopulation: {weather_now.population:,}[/]"
     panel_now.renderable += f"[i]\nGPS: [link=https://www.google.com/maps/@{lat},{lon}]{lat}, {lon}[/link][/]"
     panel_3h.title = f"[yellow]3 Hours[/]"
     panel_6h.title = f"[yellow]6 Hours[/]"
     panel_9h.title = f"[yellow]9 Hours[/]"
 
-    # Add temperature differences to forecast panels.
+    # Add temperature differences unique to forecast panels.
+    # TODO:
+    #  At this point I'm thinking I should just make a unique function for
+    #  creating forecast panels to remove some bloat from this function.
+    #  Probably create_weather_panel_current() and create_weather_panel_future().
     temp_diff_3h = temp_difference(weather_now.temperature, weather_03h.temperature)
     temp_diff_6h = temp_difference(weather_now.temperature, weather_06h.temperature)
     temp_diff_9h = temp_difference(weather_now.temperature, weather_09h.temperature)
