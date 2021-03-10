@@ -63,7 +63,7 @@ class WeatherAPIData:
         self.longitude   = self.weather['city']['coord']['lon']
         self.country     = self.weather['city']['country']
         self.population  = self.weather['city']['population']
-        self.temp        = self.weather['list'][forecast_index]['main']['temp']
+        self.temperature        = self.weather['list'][forecast_index]['main']['temp']
         self.feels_like  = self.weather['list'][forecast_index]['main']['feels_like']
         self.temp_min    = self.weather['list'][forecast_index]['main']['temp_min']
         self.temp_max    = self.weather['list'][forecast_index]['main']['temp_max']
@@ -79,7 +79,7 @@ class WeatherAPIData:
         self.data = {"City name": self.city_name,
                      "Time block": self.date,
                      "Weather description": self.description,
-                     "Temperature": self.temp,
+                     "Temperature": self.temperature,
                      "Minimum Temperature": self.temp_min,
                      "Maximum Temperature": self.temp_max,
                      "Feels like": self.feels_like,
@@ -95,7 +95,7 @@ class WeatherAPIData:
         This method runs the kelvin to farenheit conversion function
         on our temperature values.
         """
-        self.temp       = round(convert_k_to_f(self.temp))
+        self.temperature       = round(convert_k_to_f(self.temperature))
         self.temp_min   = round(convert_k_to_f(self.temp_min))
         self.temp_max   = round(convert_k_to_f(self.temp_max))
         self.feels_like = round(convert_k_to_f(self.feels_like))
@@ -121,6 +121,9 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
     Return tuple of requests object, and specific city id if successful.
     https://openweathermap.org/current
     """
+
+    # We need to make a different API request depending on if we have basic
+    # user search term, or if we've acquired the specific city id.
     if api_city_id is not None:
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast"
                                f"?id={api_city_id}"
@@ -141,8 +144,10 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
 
     # 404 ----------------------------------------------------------------------
     elif request.status_code == not_found_code:
-        # Openweathermap's API didn't like our location input for various reasons.
+        # Openweathermap's API does not partial matching, so often rejects input.
         # So let's try our own very slow fuzzy matching locally!
+        # TODO: Maybe this would be a good time to practice making my own API
+        # and just have a server host the city.list.json, to give us back the id.
         console.print('[red]Did you mean...[/]')
         console.print('[grey0][italic]Searching for closest matches...[/][/]')
 
@@ -197,10 +202,10 @@ def convert_k_to_f(k: int) -> float:
 
 
 # ------------------------------------------------------------------------------
-def verify_key_exists(key: str) -> str:
+def verify_key_exists(key_to_verify: str) -> str:
     """ Ensure user API key exists. If it does, return it."""
-    if key is not None:
-        return key
+    if key_to_verify is not None:
+        return key_to_verify
     else:
         raise errors.missing_api_exception
 
@@ -258,7 +263,6 @@ def color_by_temperature(temperature: int) -> str:
 # ------------------------------------------------------------------------------
 def wind_degrees_to_direction(degrees: int) -> str:
     """Convert input degrees (int) to and return cardinal direction (str)."""
-
     breakpoints = [0, 5, 85, 95, 175, 185, 265, 275, 355, 360]
     directions = ["North", "North",
                   "Northeast", "East", "Southeast", "South",
@@ -273,7 +277,7 @@ def wind_degrees_to_direction(degrees: int) -> str:
 def create_weather_panel(weather: WeatherAPIData) -> Panel:
     """ Take in WeatherAPIData instance. Return rich Panel with weather info."""
     # Temperature color tagging.
-    current_colored = color_by_temperature(weather.temp)
+    current_colored = color_by_temperature(weather.temperature)
     feels_colored = color_by_temperature(weather.feels_like)
     # N E S W text.
     wind_cardinal = wind_degrees_to_direction(weather.wind_dir)
@@ -319,22 +323,26 @@ def create_ui(timestamp: datetime):
     panel_3h = create_weather_panel(weather_03h)
     panel_6h = create_weather_panel(weather_06h)
     panel_9h = create_weather_panel(weather_09h)
-    panel_info = Panel(f"[i]{get_next_update_time(timestamp)}[/]")
+    panel_info = Panel(f"[i]{get_next_update_time(timestamp, api_request_delay_in_seconds)}[/]")
 
     state_code = determine_state_code(city_list_filepath, weather_now.id)
     if state_code:
-        panel_now.title = f"[yellow]{weather_now.city_name}, {state_code}[/]"
+        panel_now.title = f"[yellow]{weather_now.city_name}, {state_code}, {weather_now.country}[/]"
     else:
-        panel_now.title = f"[yellow]{weather_now.city_name}[/]"
+        panel_now.title = f"[yellow]{weather_now.city_name}, {weather_now.country}[/]"
 
+    lat = weather_now.latitude
+    lon = weather_now.longitude
+    panel_now.renderable += f"[i]\nPopulation: {weather_now.population:,}[/]"
+    panel_now.renderable += f"[i]\nGPS: [link=https://www.google.com/maps/@{lat},{lon}]{lat}, {lon}[/link][/]"
     panel_3h.title = f"[yellow]3 Hours[/]"
     panel_6h.title = f"[yellow]6 Hours[/]"
     panel_9h.title = f"[yellow]9 Hours[/]"
 
     # Add temperature differences to forecast panels.
-    temp_diff_3h = temp_difference(weather_now.temp, weather_03h.temp)
-    temp_diff_6h = temp_difference(weather_now.temp, weather_06h.temp)
-    temp_diff_9h = temp_difference(weather_now.temp, weather_09h.temp)
+    temp_diff_3h = temp_difference(weather_now.temperature, weather_03h.temperature)
+    temp_diff_6h = temp_difference(weather_now.temperature, weather_06h.temperature)
+    temp_diff_9h = temp_difference(weather_now.temperature, weather_09h.temperature)
     panel_3h.renderable += f"{temp_diff_3h}"
     panel_6h.renderable += f"{temp_diff_6h}"
     panel_9h.renderable += f"{temp_diff_9h}"
@@ -359,10 +367,10 @@ def create_ui(timestamp: datetime):
 
 
 # ------------------------------------------------------------------------------
-def get_next_update_time(start_time):
+def get_next_update_time(start_time, delay_in_seconds):
     """Returns a string showing the next API update delay, and what time it will be."""
-    next_update_time = start_time + timedelta(seconds=api_request_delay_in_seconds)
-    next_update_in_minutes = round(api_request_delay_in_seconds / min_in_sec)
+    next_update_time = start_time + timedelta(seconds=delay_in_seconds)
+    next_update_in_minutes = round(delay_in_seconds / min_in_sec)
     next_update_text = next_update_time.strftime('%H:%M')
 
     message = (f"Next update in {next_update_in_minutes} minutes "
@@ -371,6 +379,7 @@ def get_next_update_time(start_time):
     return message
 
 
+# ------------------------------------------------------------------------------
 def clear_old_json():
     """Check for and delete old files from previous script runs generated in json_files."""
     json_file_list = [file for file in os.listdir('json_files') if file.endswith('json')]
@@ -383,6 +392,7 @@ def clear_old_json():
             console.print(f"[red]Removed {file} from 'json_files' folder.[/red]")
 
 
+# ------------------------------------------------------------------------------
 def create_json_folder():
     try:
         os.mkdir(json_folder_path)

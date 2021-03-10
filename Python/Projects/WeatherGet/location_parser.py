@@ -1,4 +1,5 @@
-# city.list.json is pulled from: http://bulk.openweathermap.org/sample/city.list.json.gz
+# city.list.json is pulled from
+# http://bulk.openweathermap.org/sample/city.list.json.gz
 import json
 import sys
 from fuzzywuzzy import fuzz
@@ -33,7 +34,7 @@ def fuzzy_find_city(loc=None) -> list:
     Check locations list json (city.list.json) for best matches of user input.
     Return list of best city 'name' and 'state' matches.
     """
-
+    best_choices = []
     locations = read_city_json(city_list_filepath)
     if loc is None:
         user_input = input('Enter location (city, state): ')
@@ -48,8 +49,7 @@ def fuzzy_find_city(loc=None) -> list:
         city = user_input
         state = None
 
-    best_choices = []
-
+    # --------------------------------------------------------------------------
     for location in locations:
         ratio = fuzz.partial_ratio(location, city)
 
@@ -80,6 +80,7 @@ def fuzzy_find_city(loc=None) -> list:
                                 f"{location['name']}, "
                                 f"{location['state']}, "
                                 f"{location['id']}")
+    # --------------------------------------------------------------------------
 
     # For sorting by prefix numbers [match ratios] in string.
     best_choices.sort()
@@ -87,6 +88,7 @@ def fuzzy_find_city(loc=None) -> list:
     return best_choices
 
 
+# ------------------------------------------------------------------------------
 if __name__ == '__main__':
     results = fuzzy_find_city()
     for result in results:
