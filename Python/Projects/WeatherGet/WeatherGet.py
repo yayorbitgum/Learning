@@ -222,15 +222,17 @@ def shift_color(hex_value: hex, shift_amount: int) -> str:
     Return new color value."""
     # Hex values have a base of 16.
     hex_int = int(hex_value.lstrip('#'), 16)
-    # Maximum color value is FFFFFF (255, 255, 255) RGB for non-HDR, ie: 16,777,215 as int.
+    # Maximum color value is FFFFFF (255, 255, 255) RGB for non-HDR,
+    # ie: 16,777,215 as int.
     if hex_int + shift_amount > 16777215:
         # Our way of looping back around.
         new_color = hex((hex_int + shift_amount) - 16777215).lstrip('0x')
     else:
         new_color = hex(hex_int + shift_amount).lstrip('0x')
-        # We need the hex value to always be 6 digits to be a valid color.
-        while len(new_color) < 6:
-            new_color = '0' + new_color
+
+    # We need the hex value to always be 6 digits to be a valid color.
+    while len(new_color) < 6:
+        new_color = '0' + new_color
 
     return f"#{new_color}"
 
