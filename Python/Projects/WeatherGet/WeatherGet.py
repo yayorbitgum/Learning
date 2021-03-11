@@ -337,8 +337,7 @@ def create_weather_panel_now(weather: WeatherAPIData) -> Panel:
                   f"\n[i]Population: {weather.population:,}[/]"
                   f"[i]\nGPS: [link=https://www.google.com/maps/@{lat},{lon}]{lat}, {lon}[/link][/]")
 
-    panel = Panel(panel_text, box=box.ASCII)
-    panel.box = box.DOUBLE
+    panel = Panel(panel_text, box=box.DOUBLE)
 
     state_code = determine_state_code(city_list_filepath, weather_now.id)
     if state_code:
