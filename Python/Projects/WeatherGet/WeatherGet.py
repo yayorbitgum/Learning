@@ -281,24 +281,6 @@ def wind_degrees_to_direction(degrees: int) -> str:
 
 
 # ------------------------------------------------------------------------------
-def create_weather_panel(weather: WeatherAPIData) -> Panel:
-    """ Take in WeatherAPIData instance. Return rich Panel with weather info."""
-
-    current_colored = color_by_temperature(weather.temperature)
-    feels_colored = color_by_temperature(weather.feels_like)
-    wind_cardinal = wind_degrees_to_direction(weather.wind_dir)
-
-    panel_text = (f"{current_colored} with {weather.description.title()}\n"
-                  f"Feels like {feels_colored}\n"
-                  f"{wind_cardinal} @ [cyan]{weather.wind_speed}mph[/]\n"
-                  f"Humidity @ [cyan]{weather.humidity}%[/]\n")
-
-    title = weather.timestamp
-    panel = Panel(panel_text, box=box.ASCII, title=title)
-    return panel
-
-
-# ------------------------------------------------------------------------------
 def determine_state_code(city_list_file, weather_response_id) -> str:
     """
     Compare city IDs between city list and weather API data.
