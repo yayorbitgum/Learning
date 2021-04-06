@@ -433,8 +433,6 @@ if __name__ == '__main__':
         weather_06h = WeatherAPIData(weather_data, 2)
         weather_09h = WeatherAPIData(weather_data, 3)
 
-        weather_now.show_all_data()
-
         current_time = datetime.now()
         interface = create_ui(current_time)
         console.print(interface)
