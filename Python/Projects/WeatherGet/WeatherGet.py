@@ -3,6 +3,8 @@
 
 # TODO: Automate grabbing API key.
 # TODO: Automate grabbing city.list.json, and decompressing.
+# TODO: Allow for interrupting / input to change location.
+# TODO: Live display on website.
 # ------------------------------------------------------------------------------
 # Imports ----------------------------------------------------------------------
 # ------------------------------------------------------------------------------
