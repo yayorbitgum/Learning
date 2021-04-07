@@ -1,8 +1,3 @@
-# TODO:
-#   For city.list.json, nest one additional dictionary depth based on each letter
-#   of the alphabet, so that we first only search the matching starting letter
-#   of our search term. Divide the entire list by 26 elements, rather than thousands.
-#
 # city.list.json is pulled from
 # http://bulk.openweathermap.org/sample/city.list.json.gz
 
@@ -94,7 +89,6 @@ def fuzzy_find_city(loc=None) -> list:
     Return list of best city 'name' and 'state' matches.
     """
     best_choices = []
-    # TODO: Implement alphabetized search.
     locations = read_city_json(city_list_alphabet_filepath)
     if loc is None:
         user_input = input('Enter location (city, state): ')
