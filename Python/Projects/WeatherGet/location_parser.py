@@ -12,10 +12,13 @@ import sys
 from fuzzywuzzy import fuzz
 from rich.console import Console
 from error_messages import missing_city_list
+from collections import defaultdict
+import string
 
 
 # Variables. -------------------------------------------------------------------
 city_list_filepath = 'city.list.json'
+city_list_alphabet_filepath = 'city.list.alphabet.json'
 console = Console(color_system='truecolor')
 
 
@@ -40,11 +43,49 @@ def read_city_json(file):
 
 
 def alphabetizer():
-    ...
+    """
+    Add alphabet as keys to city.list.json to partially speed up searching.
+    """
+    file_path = city_list_filepath
+    new_path = city_list_alphabet_filepath
+    city_file = read_city_json(file_path)
+    alphabet = string.ascii_uppercase
+    new_dict = defaultdict(list)
+
+    for city in city_file:
+        count = 0
+
+        for letter in alphabet:
+            count += 1
+            if city['name'].upper().startswith(letter):
+                new_dict[letter].append(city)
+                # Once we find the letter, break this loop or it'll copy this city 26 times.
+                break
+            elif count == 26:
+                # We reach here if we've found a city that starts with a special character.
+                new_dict['SPECIAL'].append(city)
+                break
+
+    with open(new_path, 'w') as output:
+        json.dump(new_dict, output, sort_keys=True, indent=4)
 
 
-def verify_alphabet_nesting():
-    ...
+def verify_alphabet_nesting(path):
+    """
+    Make sure alphabetized json key length is 27 (26 letters + 1 special).
+    Return True if so, otherwise return unexpected length as integer.
+    """
+    try:
+        with open(path) as json_file:
+            data = json.load(json_file)
+
+            if len(data) == 27:
+                return True
+            else:
+                return len(data)
+
+    except FileNotFoundError:
+        return False
 
 
 def fuzzy_find_city(loc=None) -> list:
@@ -53,6 +94,7 @@ def fuzzy_find_city(loc=None) -> list:
     Return list of best city 'name' and 'state' matches.
     """
     best_choices = []
+    # TODO: Implement alphabetized search.
     locations = read_city_json(city_list_filepath)
     if loc is None:
         user_input = input('Enter location (city, state): ')
@@ -68,7 +110,7 @@ def fuzzy_find_city(loc=None) -> list:
         state = None
 
     # --------------------------------------------------------------------------
-    # TODO: Make more efficient.
+    # TODO: Implement alphabetized search.
     for location in locations:
         ratio = fuzz.partial_ratio(location, city)
 
@@ -109,6 +151,19 @@ def fuzzy_find_city(loc=None) -> list:
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
+
+    alphabet_result = verify_alphabet_nesting(city_list_alphabet_filepath)
+    if alphabet_result:
+        print("Alphabetized json is proper length!")
+    else:
+        print("Alphabetizing city.list.json..")
+        alphabetizer()
+        print("Verifying..")
+        if alphabet_result:
+            print("Done!")
+        else:
+            print(f"Expected key length of 27. Got {alphabet_result}.")
+
     results = fuzzy_find_city()
     for result in results:
         print(result)
