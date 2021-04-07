@@ -1,3 +1,6 @@
+# Sped up fuzzy searching considerably by rebuilding the json for alphabetical search
+# of city/location name first.
+
 from collections import defaultdict
 from location_parser import read_city_json
 import string

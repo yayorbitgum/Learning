@@ -73,7 +73,7 @@ def alphabetizer():
 def verify_alphabet_nesting(path):
     """
     Make sure alphabetized json key length is 27 (26 letters + 1 special).
-    Return True if so, otherwise return unexpected length as integer.
+    Return True if so.
     """
     try:
         with open(path) as json_file:
@@ -82,7 +82,7 @@ def verify_alphabet_nesting(path):
             if len(data) == 27:
                 return True
             else:
-                return len(data)
+                return False
 
     except FileNotFoundError:
         return False
@@ -90,12 +90,12 @@ def verify_alphabet_nesting(path):
 
 def fuzzy_find_city(loc=None) -> list:
     """
-    Check locations list json (city.list.json) for best matches of user input.
+    Check locations list json for best matches of user input.
     Return list of best city 'name' and 'state' matches.
     """
     best_choices = []
     # TODO: Implement alphabetized search.
-    locations = read_city_json(city_list_filepath)
+    locations = read_city_json(city_list_alphabet_filepath)
     if loc is None:
         user_input = input('Enter location (city, state): ')
     else:
@@ -103,46 +103,47 @@ def fuzzy_find_city(loc=None) -> list:
 
     if ',' in user_input:
         city, state = user_input.split(',')
-        city = city.strip()
+        city = city.strip().title()
         state = state.upper().strip()
     else:
-        city = user_input
+        city = user_input.strip().title()
         state = None
 
     # --------------------------------------------------------------------------
-    # TODO: Implement alphabetized search.
-    for location in locations:
-        ratio = fuzz.partial_ratio(location, city)
+    for letter in locations:
+        if city.startswith(letter):
 
-        # Perfect match for city and state. ------------------------------------
-        if ratio == 100 and location['state'] == state:
-            console.print(f"[grey0]Perfect match: {location['name']}, {location['state']}[/]")
-            # If we found the exact city and state with 100% ratio,
-            # clear the list and return single value.
-            del best_choices
-            best_choices = [f"{ratio}%: "
-                            f"{location['name']}, "
-                            f"{location['state']}, "
-                            f"{location['id']}"]
-            return best_choices
+            for location in locations[letter]:
+                ratio = fuzz.partial_ratio(location['name'], city)
 
-        # 70%+ match for location, and exact match for state. ------------------
-        elif ratio >= 70 and location['state'] == state and state is not None:
-            console.print(f"[grey0]Possible match: {location['name']}, {location['state']}[/]")
-            best_choices.append(f"{ratio}%: "
-                                f"{location['name']}, "
-                                f"{location['state']}, "
-                                f"{location['id']}")
+                # Perfect match for city and state. ----------------------------
+                if ratio == 100 and location['state'] == state:
+                    console.print(f"[grey0]Perfect match: {location['name']}, {location['state']}[/]")
+                    # If we found the exact city and state with 100% ratio,
+                    # clear the list and return single value.
+                    del best_choices
+                    best_choices = [f"{ratio}%: "
+                                    f"{location['name']}, "
+                                    f"{location['state']}, "
+                                    f"{location['id']}"]
+                    return best_choices
 
-        # 85%+ match for location name only. -----------------------------------
-        elif ratio >= 85:
-            console.print(f"[grey0]Possible match: {location['name']}, {location['state']}[/]")
-            best_choices.append(f"{ratio}%: "
-                                f"{location['name']}, "
-                                f"{location['state']}, "
-                                f"{location['id']}")
+                # 70%+ match for location, and exact match for state. ----------
+                elif ratio >= 70 and location['state'] == state and state is not None:
+                    console.print(f"[grey0]Possible match: {location['name']}, {location['state']}[/]")
+                    best_choices.append(f"{ratio}%: "
+                                        f"{location['name']}, "
+                                        f"{location['state']}, "
+                                        f"{location['id']}")
+
+                # 80%+ match for location name only. ---------------------------
+                elif ratio >= 80:
+                    console.print(f"[grey0]Possible match: {location['name']}, {location['state']}[/]")
+                    best_choices.append(f"{ratio}%: "
+                                        f"{location['name']}, "
+                                        f"{location['state']}, "
+                                        f"{location['id']}")
     # --------------------------------------------------------------------------
-
     # For sorting by prefix numbers [match ratios] in string.
     best_choices.sort()
     best_choices.reverse()
@@ -162,7 +163,7 @@ if __name__ == '__main__':
         if alphabet_result:
             print("Done!")
         else:
-            print(f"Expected key length of 27. Got {alphabet_result}.")
+            print(f"Unexpected key length. Ensure city.list.json is populated.")
 
     results = fuzzy_find_city()
     for result in results:
