@@ -16,7 +16,10 @@ cleaned = []
 for email in emails:
     if '+' in email:
         blocks = email.split('+')
+        # The very first block before the first split is always gonna be the name.
         name = blocks[0]
+        # The very last block is always going to be the domain, but may contain
+        # extra characters after the last '+' split.
         domain_split = blocks[-1].split('@')
         domain = domain_split[-1]
 
