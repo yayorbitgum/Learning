@@ -203,7 +203,6 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
         # TODO: Maybe this would be a good time to practice making my own API
         # and just have a server host the city.list.json.
         console.print('[red]Did you mean...[/]')
-        console.print('[grey0][italic]Searching for closest matches...[/][/]')
 
         choices = fuzzy_find_city(location)
         for index, choice in enumerate(choices):

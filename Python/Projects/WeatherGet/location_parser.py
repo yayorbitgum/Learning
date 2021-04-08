@@ -112,7 +112,6 @@ def fuzzy_find_city(loc=None) -> list:
 
                 # Perfect match for city and state. ----------------------------
                 if ratio == 100 and location['state'] == state:
-                    console.print(f"[grey0]Perfect match: {location['name']}, {location['state']}[/]")
                     # If we found the exact city and state with 100% ratio,
                     # clear the list and return single value.
                     del best_choices
@@ -124,7 +123,6 @@ def fuzzy_find_city(loc=None) -> list:
 
                 # 70%+ match for location, and exact match for state. ----------
                 elif ratio >= 70 and location['state'] == state and state is not None:
-                    console.print(f"[grey0]Possible match: {location['name']}, {location['state']}[/]")
                     best_choices.append(f"{ratio}%: "
                                         f"{location['name']}, "
                                         f"{location['state']}, "
@@ -132,7 +130,6 @@ def fuzzy_find_city(loc=None) -> list:
 
                 # 80%+ match for location name only. ---------------------------
                 elif ratio >= 80:
-                    console.print(f"[grey0]Possible match: {location['name']}, {location['state']}[/]")
                     best_choices.append(f"{ratio}%: "
                                         f"{location['name']}, "
                                         f"{location['state']}, "
