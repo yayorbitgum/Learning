@@ -25,4 +25,4 @@ Data is pulled from https://openweathermap.org/forecast5.
 # TODO ->  
 - Have a _setup.py_ do all of this for you instead.
 - Better visualization of upcoming forecast differences.
-- Implement as a live website.
+- Implement as a live website and skip all this mess.

@@ -167,11 +167,9 @@ def fuzzy_find_city(loc=None) -> list:
         # City starts with english letter A to Z.
         if city.startswith(letter):
             for location in locations[letter]:
-
                 # Perfect match means we don't need to search anymore.
                 if location['name'] == city and location['state'] == territory:
                     return [f"{location['name']}, {location['state']}, {location['id']}"]
-
                 else:
                     choices.update(fuzz_ratio(
                         city,
@@ -181,7 +179,6 @@ def fuzzy_find_city(loc=None) -> list:
                         location['id']
                         )
                     )
-
     # --------------------------------------------------------------------------
     # City name input doesn't start with any letter from english alphabet.
     # This means we're looking up weather on a foreign territory for sure.
@@ -197,7 +194,7 @@ def fuzzy_find_city(loc=None) -> list:
                     location['id']
                 )
             )
-
+    # --------------------------------------------------------------------------
     # We used a set initially to prevent duplicate results from fuzzy matching.
     # Now we convert to list so we can sort the choices based on most likely match
     # to least likely match. Choices will always be a small selection, so speed
