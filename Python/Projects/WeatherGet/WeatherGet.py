@@ -175,9 +175,6 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
     # We need to make a different API request depending on if we have basic
     # user search term, or if we've acquired the specific city id.
     if api_city_id is not None:
-        # For some reason, "?id" request can return slightly different data.
-        # Ex: Oklahoma City, OK city_id response will be only missing population
-        # field, whereas "?q" will have population filled.
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast"
                                f"?id={api_city_id}"
                                f"&APPID={api_key}")
@@ -211,14 +208,13 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
             try:
                 selection = int(input('Choose option number: '))
                 location_string = choices[selection]
-
                 # If "None of the above."
                 if location_string == choices[-1]:
                     initialize()
                     return request_weather_api(key)
 
             except (IndexError, ValueError):
-                # We'll default to first option.
+                # We'll default to first option for ease of use.
                 location_string = choices[0]
 
             city, state, api_city_id = location_string.split(',')
@@ -226,13 +222,13 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
             # Now that we've got the exact city id, let's request API again.
             return request_weather_api(my_key, api_city_id)
 
-        # No choices were returned. Very unlikely unless wildly misspelled.
+        # No choices were returned. Input was wildly misspelled.
         else:
             console.print('[red]Unable to find any matches! Try again.[/]')
             initialize()
             return request_weather_api(key)
 
-    # All other codes. ---------------------------------------------------------
+    # All other codes (will debug when I see them). ----------------------------
     else:
         console.print(f'[red]Response code {request.status_code}![/]')
 

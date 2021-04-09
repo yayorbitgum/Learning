@@ -18,7 +18,7 @@
 # Running this script directly will allow you to test fuzzy matching results,
 # verify the json format is optimized for this searching, and if not, optimize it.
 #
-# TODO: Download this file automatically.
+# TODO: Download city.list.json automatically.
 # TODO: Or, better yet, make this into a website where the backend can update by itself.
 
 # Imports. ---------------------------------------------------------------------
@@ -62,7 +62,7 @@ def read_city_json(file):
 
 def alphabetizer():
     """
-    Add alphabet as keys to city.list.json to partially speed up searching.
+    Add alphabet as keys to city.list.json to significantly speed up fuzzy searching.
     """
     file_path = city_list_filepath
     new_path = city_list_alphabet_filepath
@@ -81,7 +81,7 @@ def alphabetizer():
                 break
             elif count == 26:
                 # We reach here if we've found a city that starts with a special character.
-                new_dict['SPECIAL'].append(city)
+                new_dict['*'].append(city)
                 break
 
     # utf8 encoding and ensure_ascii=False required for cities like
