@@ -3,7 +3,6 @@
 
 # TODO: Automate grabbing API key.
 # TODO: Automate grabbing city.list.json, and decompressing.
-# TODO: Allow for interrupting / input to change location.
 # TODO: Live display on website.
 # ------------------------------------------------------------------------------
 # Imports ----------------------------------------------------------------------
@@ -198,32 +197,44 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
 
     # 404 ----------------------------------------------------------------------
     elif request.status_code == not_found_code:
-        # Openweathermap's API does not partial matching, so often rejects input.
-        # So let's try our own very slow fuzzy matching locally!
-        # TODO: Maybe this would be a good time to practice making my own API
-        # and just have a server host the city.list.json.
-        console.print('[red]Did you mean...[/]')
-
+        console.print('[red][i]Checking...[/][/]')
+        # Openweathermap's API does not do partial matching, so it often rejects input.
+        # So let's do our own fuzzy matching!
         choices = fuzzy_find_city(location)
-        for index, choice in enumerate(choices):
-            console.print(f"{index}: {choice}")
+        choices.append('None of the above.')
 
-        try:
-            selection = int(input('Choose option number: '))
-            location_string = choices[selection]
-        except (IndexError, ValueError):
-            # We'll default to first option for now. TODO: Ask for input again.
-            location_string = choices[0]
+        if len(choices) != 1:
+            console.print('[red][i]Did you mean...[/][/]')
+            for index, choice in enumerate(choices):
+                console.print(f"{index}: {choice}")
 
-        city, state, api_city_id = location_string.split(',')
-        api_city_id = api_city_id.strip()
+            try:
+                selection = int(input('Choose option number: '))
+                location_string = choices[selection]
 
-        # Now that we've got the exact city id, let's request API again.
-        return request_weather_api(my_key, api_city_id)
+                # If "None of the above."
+                if location_string == choices[-1]:
+                    initialize()
+                    return request_weather_api(key)
+
+            except (IndexError, ValueError):
+                # We'll default to first option.
+                location_string = choices[0]
+
+            city, state, api_city_id = location_string.split(',')
+            api_city_id = api_city_id.strip()
+            # Now that we've got the exact city id, let's request API again.
+            return request_weather_api(my_key, api_city_id)
+
+        # No choices were returned. Very unlikely unless wildly misspelled.
+        else:
+            console.print('[red]Unable to find any matches! Try again.[/]')
+            initialize()
+            return request_weather_api(key)
 
     # All other codes. ---------------------------------------------------------
     else:
-        console.print(f'[red] Response code {request.status_code}![/]')
+        console.print(f'[red]Response code {request.status_code}![/]')
 
 
 # ------------------------------------------------------------------------------
@@ -361,6 +372,7 @@ def create_ui(timestamp: datetime):
     panel_9h = weather_09h.create_weather_panel()
     panel_info = Panel(f"[i]{get_next_update_time(timestamp, api_delay_in_sec)}[/]")
     panel_info.box = box.ASCII
+    panel_info.renderable += f"\n[i]Press [red]CTRL-C[/red] for different location at any time.[/]"
 
     # Future forecast panels.
     ui['right'].split(
@@ -371,9 +383,12 @@ def create_ui(timestamp: datetime):
 
     # "now" and "info" panels.
     ui['left'].split(
-        Layout(panel_now, name='now', ratio=4),
+        Layout(panel_now, name='now', ratio=3),
         Layout(panel_info, name='info'),
         direction='vertical')
+
+    # This does a good job of stopping the UI from clipping beyond console.
+    ui.height = console.height - 1
 
     return ui
 
@@ -383,10 +398,10 @@ def get_next_update_time(start_time, delay_in_seconds):
     """Returns a string showing the next API update delay, and what time it will be."""
     next_update_time = start_time + timedelta(seconds=delay_in_seconds)
     next_update_in_minutes = round(delay_in_seconds / min_in_sec)
-    next_update_text = next_update_time.strftime('%H:%M')
+    next_update_text = next_update_time.strftime('%H:%M %p')
 
-    message = (f"Next update in {next_update_in_minutes} minutes "
-               f"at {next_update_text.lstrip('0')}")
+    message = (f"Next update in [yellow]{next_update_in_minutes} minutes[/]"
+               f" at [yellow]{next_update_text.lstrip('0')}[/].")
 
     return message
 
@@ -401,7 +416,7 @@ def clear_old_json():
 
         for file in json_file_list:
             os.remove(os.path.join('json_files', file))
-            console.print(f"[red]Removed {file} from 'json_files' folder.[/red]")
+            console.print(f"[red][i]Removed {file} from 'json_files' folder.[/][/]")
 
 
 # ------------------------------------------------------------------------------
@@ -413,22 +428,55 @@ def create_json_folder():
 
 
 # ------------------------------------------------------------------------------
+def get_user_input() -> str:
+    """ Ask for user input for location, title result and return."""
+    loc = input('Enter location: ').title()
+    return loc
+
+
+# ------------------------------------------------------------------------------
+def set_json_path(loc) -> str:
+    """Take in location and return file path for json based on loc name."""
+    path = f'{json_folder_path}/{loc}.json'
+    return path
+
+
+# ------------------------------------------------------------------------------
+def initialize():
+    """
+    Start up sequence: Create folder for api json, clear old json files,
+    ask user for requested location, and set file path for json.
+    Sets location and weather_path variables globally, thus
+    can be called at any time to restart full sequence.
+    """
+
+    # TODO: Find a better way to do this. "location" is referenced directly in a
+    # couple of separate functions. Might be confusing later on.
+    global location
+    global weather_path
+
+    create_json_folder()
+    clear_old_json()
+    # Here's where the global variables are assigned.
+    location = get_user_input()
+    weather_path = f'{json_folder_path}/{location}.json'
+
+
+# ------------------------------------------------------------------------------
 # Start here.
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    create_json_folder()
-    clear_old_json()
-    location = input('Enter location: ').title()
-    weather_api_file_name = f'{json_folder_path}/{location}.json'
-
+    initialize()
     key = verify_key_exists(my_key)
     response = request_weather_api(key)
     city_id = response[1]
 
     while True:
-        save_json(response[0], weather_api_file_name)
-        weather_data = open_json(weather_api_file_name)
+        # The one place (global) weather_path is referenced for now.
+        save_json(response[0], weather_path)
+        console.print('[grey0][i]Loading..[/][/]')
+        weather_data = open_json(weather_path)
         weather_now = WeatherAPIData(weather_data, 0)
         weather_03h = WeatherAPIData(weather_data, 1)
         weather_06h = WeatherAPIData(weather_data, 2)
@@ -438,5 +486,14 @@ if __name__ == '__main__':
         interface = create_ui(current_time)
         console.print(interface)
 
-        sleep(api_delay_in_sec)
+        try:
+            for _ in range(api_delay_in_sec):
+                sleep(1)
+        except KeyboardInterrupt:
+            # Interrupting means asking for input again, redoing api response,
+            # as well as resetting city_id since it's otherwise set outside the loop.
+            initialize()
+            response = request_weather_api(key)
+            city_id = response[1]
+
         response = request_weather_api(key, city_id)
