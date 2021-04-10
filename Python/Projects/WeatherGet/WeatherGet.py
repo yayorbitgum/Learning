@@ -171,9 +171,6 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
     Return tuple of requests object, and specific city id if successful.
     https://openweathermap.org/current
     """
-
-    # We need to make a different API request depending on if we have basic
-    # user search term, or if we've acquired the specific city id.
     # TODO:
     #  Most of the time we're making two APi requests. Now that I've got
     #  fuzzy matching sped up fairly well, might as well always grab city id
@@ -187,16 +184,17 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
                                f"?q={location}"
                                f"&APPID={api_key}")
 
-    # 200 ----------------------------------------------------------------------
+    # API responses. -----------------------------------------------------------
+    # 200 "OK".
     if request.status_code == accepted_code:
         request_and_id = [request, api_city_id]
         return request_and_id
 
-    # 401 ----------------------------------------------------------------------
+    # 401 "Forbidden".
     elif request.status_code == unauth_code:
         console.print(errors.message_forbidden, style='red')
 
-    # 404 ----------------------------------------------------------------------
+    # 404 "Not Found".
     elif request.status_code == not_found_code:
         console.print('[red][i]Checking...[/][/]')
         # Openweathermap's API does not do partial matching, so it often rejects input.
@@ -232,7 +230,7 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
             initialize()
             return request_weather_api(key)
 
-    # All other codes (will debug when I see them). ----------------------------
+    # All other codes (will debug when I see them).
     else:
         console.print(f'[red]Response code {request.status_code}![/]')
 
