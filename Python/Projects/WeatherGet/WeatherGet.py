@@ -470,12 +470,12 @@ if __name__ == '__main__':
         interface = create_ui(current_time)
         console.print(interface)
 
+        # Interrupting means asking for input again, redoing api response,
+        # as well as resetting city_id since it's otherwise set outside the loop.
         try:
             for _ in range(api_delay_in_sec):
                 sleep(1)
         except KeyboardInterrupt:
-            # Interrupting means asking for input again, redoing api response,
-            # as well as resetting city_id since it's otherwise set outside the loop.
             initialize()
             response = request_weather_api(key)
             city_id = response[1]
