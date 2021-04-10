@@ -243,7 +243,6 @@ def save_json(request, file_path: str):
             json.dump(request.json(), file)
 
 
-# ------------------------------------------------------------------------------
 def open_json(file_path: str):
     """Open the json file in root folder. Return the json object."""
     try:
@@ -254,7 +253,6 @@ def open_json(file_path: str):
         print("Json file hasn't been created yet.")
 
 
-# ------------------------------------------------------------------------------
 def convert_k_to_f(k: int) -> float:
     """Convert kelvin to fahrenheit, return result."""
     celsius = k - 273.15
@@ -262,7 +260,6 @@ def convert_k_to_f(k: int) -> float:
     return fahrenheit
 
 
-# ------------------------------------------------------------------------------
 def verify_key_exists(key_to_verify: str) -> str:
     """ Ensure user API key exists. If it does, return it."""
     if key_to_verify is not None:
@@ -271,7 +268,6 @@ def verify_key_exists(key_to_verify: str) -> str:
         raise errors.missing_api_exception
 
 
-# ------------------------------------------------------------------------------
 def shift_color(hex_value: hex, shift_amount: int) -> str:
     """Take a color hex value and add/subtract by given amount.
     Convert RBG hex value to RBG triplet value that rich can use.
@@ -293,7 +289,6 @@ def shift_color(hex_value: hex, shift_amount: int) -> str:
     return f"#{new_color}"
 
 
-# ------------------------------------------------------------------------------
 def temp_difference(start_temp: int, end_temp: int) -> str:
     # Show temp difference between two temperatures, rounded. Return message string.
     temp_adjust = round(end_temp - start_temp, 1)
@@ -303,7 +298,6 @@ def temp_difference(start_temp: int, end_temp: int) -> str:
         return f"{temp_adjust}°F warmer."
 
 
-# ------------------------------------------------------------------------------
 def color_by_temperature(temperature: int) -> str:
     """Take in temperature value and return text with color tags for use with rich ui."""
     # Color reference: https://rich.readthedocs.io/en/latest/_modules/rich/color.html
@@ -323,7 +317,6 @@ def color_by_temperature(temperature: int) -> str:
     return f"[{color}]{temperature}°F[/]"
 
 
-# ------------------------------------------------------------------------------
 def wind_degrees_to_direction(degrees: int) -> str:
     """Convert input degrees (int) to and return cardinal direction (str)."""
     breakpoints = [0, 5, 85, 95, 175, 185, 265, 275, 355, 360]
@@ -336,7 +329,6 @@ def wind_degrees_to_direction(degrees: int) -> str:
     return direction
 
 
-# ------------------------------------------------------------------------------
 def determine_state_code(city_list_file, weather_response_id) -> str:
     """
     Compare city IDs between city list and weather API data.
@@ -354,7 +346,6 @@ def determine_state_code(city_list_file, weather_response_id) -> str:
     return state_code
 
 
-# ------------------------------------------------------------------------------
 def create_ui(timestamp: datetime):
     """ Create our user interface within the console. Returns the rich Layout."""
     # https://rich.readthedocs.io/en/latest/index.html
@@ -391,7 +382,6 @@ def create_ui(timestamp: datetime):
     return ui
 
 
-# ------------------------------------------------------------------------------
 def get_next_update_time(start_time, delay_in_seconds):
     """Returns a string showing the next API update delay, and what time it will be."""
     next_update_time = start_time + timedelta(seconds=delay_in_seconds)
@@ -404,7 +394,6 @@ def get_next_update_time(start_time, delay_in_seconds):
     return message
 
 
-# ------------------------------------------------------------------------------
 def clear_old_json():
     """Check for and delete old files from previous script runs generated in json_files."""
     json_file_list = [file for file in os.listdir('json_files') if file.endswith('json')]
@@ -417,7 +406,6 @@ def clear_old_json():
             console.print(f"[red][i]Removed {file} from 'json_files' folder.[/][/]")
 
 
-# ------------------------------------------------------------------------------
 def create_json_folder():
     try:
         os.mkdir(json_folder_path)
@@ -425,14 +413,12 @@ def create_json_folder():
         console.print('[grey0 italic]Found json_files folder.[/]')
 
 
-# ------------------------------------------------------------------------------
 def get_user_input() -> str:
     """ Ask for user input for location, title result and return."""
     loc = input('Enter location: ').title()
     return loc
 
 
-# ------------------------------------------------------------------------------
 def set_json_path(loc) -> str:
     """Take in location and return file path for json based on loc name."""
     path = f'{json_folder_path}/{loc}.json'
