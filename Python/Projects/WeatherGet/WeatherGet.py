@@ -174,6 +174,10 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
 
     # We need to make a different API request depending on if we have basic
     # user search term, or if we've acquired the specific city id.
+    # TODO:
+    #  Most of the time we're making two APi requests. Now that I've got
+    #  fuzzy matching sped up fairly well, might as well always grab city id
+    #  from fuzzy matching database first so we only ever make one.
     if api_city_id is not None:
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast"
                                f"?id={api_city_id}"
