@@ -107,13 +107,10 @@ while True:
                         except MissingSchema:
                             print(f"(404) Unable to find that image.\nSkipping!\n")
 
-            # Very rarely, a chapter may contain an image that has no key 'class'.
-            # These are manually placed ads what from I can tell.
-            # I didn't think returning a default value with .get() would help
-            # in this case, so we'll just catch this error.
             except KeyError:
-                # Log to console so we know it happened, just in case.
-                print(f"Skipping: {img['src']}. Likely an ad.")
+                # Very rarely, a chapter may contain an image that has no key 'class'.
+                # These are manually placed ads what from I can tell.
+                print(f"Skipping: {img['src']}.")
 
         print(f"Finished chapter {ch_num}. Saved {count} pages.")
         ch_num += 1
