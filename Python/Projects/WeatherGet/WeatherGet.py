@@ -136,15 +136,15 @@ class WeatherAPIData:
                       f"{wind_cardinal} @ [cyan]{self.wind_speed}mph[/]\n"
                       f"Humidity @ [cyan]{self.humidity}%[/]\n")
 
-        # Current weather panel. -----------------------------------------------
+        # Forecast weather panel. ----------------------------------------------
         if self.forecast_index > 0:
 
-            panel_text += f"{temp_difference(weather_now.temperature, self.temperature)}\n"
+            panel_text += f"{show_temp_difference(weather_now.temperature, self.temperature)}\n"
             panel = Panel(panel_text, box=box.ASCII)
             panel.title = f"[yellow]{self.forecast_index * 3} Hours[/]"
             return panel
 
-        # Forecast weather panel. ----------------------------------------------
+        # Current weather panel. -----------------------------------------------
         elif self.forecast_index == 0:
 
             panel_text += (f"\n[i]Population: {self.population:,}[/]"
@@ -172,7 +172,7 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
     https://openweathermap.org/current
     """
     # TODO:
-    #  Most of the time we're making two APi requests. Now that I've got
+    #  Most of the time we're making two API requests. Now that I've got
     #  fuzzy matching sped up fairly well, might as well always grab city id
     #  from fuzzy matching database first so we only ever make one.
     if api_city_id is not None:
@@ -289,7 +289,7 @@ def shift_color(hex_value: hex, shift_amount: int) -> str:
     return f"#{new_color}"
 
 
-def temp_difference(start_temp: int, end_temp: int) -> str:
+def show_temp_difference(start_temp: int, end_temp: int) -> str:
     # Show temp difference between two temperatures, rounded. Return message string.
     temp_adjust = round(end_temp - start_temp, 1)
     if temp_adjust <= 0:
@@ -384,12 +384,16 @@ def create_ui(timestamp: datetime):
 
 def get_next_update_time(start_time, delay_in_seconds):
     """Returns a string showing the next API update delay, and what time it will be."""
-    next_update_time = start_time + timedelta(seconds=delay_in_seconds)
-    next_update_in_minutes = round(delay_in_seconds / min_in_sec)
-    next_update_text = next_update_time.strftime('%H:%M %p')
+    next_time = start_time + timedelta(seconds=delay_in_seconds)
+    next_up_minutes = round(delay_in_seconds / min_in_sec)
+    next_up = next_time.strftime('%H:%M %p')
 
-    message = (f"Next update in [yellow]{next_update_in_minutes} minutes[/]"
-               f" at [yellow]{next_update_text.lstrip('0')}[/].")
+    hour, minute_and_period = next_up.split(':')
+    if int(hour) > 12:
+        hour = int(hour) - 12
+
+    message = (f"Next update in [yellow]{next_up_minutes} minutes[/]"
+               f" at [yellow]{hour}:{minute_and_period}[/].")
 
     return message
 
