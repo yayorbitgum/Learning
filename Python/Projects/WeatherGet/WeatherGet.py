@@ -175,14 +175,21 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
     #  Most of the time we're making two API requests. Now that I've got
     #  fuzzy matching sped up fairly well, might as well always grab city id
     #  from fuzzy matching database first so we only ever make one.
-    if api_city_id is not None:
-        request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast"
-                               f"?id={api_city_id}"
-                               f"&APPID={api_key}")
-    else:
-        request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast"
-                               f"?q={location}"
-                               f"&APPID={api_key}")
+    try:
+        if api_city_id is not None:
+            request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast"
+                                   f"?id={api_city_id}"
+                                   f"&APPID={api_key}")
+        else:
+            request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast"
+                                   f"?q={location}"
+                                   f"&APPID={api_key}")
+
+    except requests.exceptions.ConnectionError:
+        console.print(f"[red]Connection failed! "
+                      f"Check your internet connection and try again.[/]")
+        initialize()
+        return request_weather_api(api_key)
 
     # API responses. -----------------------------------------------------------
     # 200 "OK".
@@ -414,7 +421,7 @@ def create_json_folder():
     try:
         os.mkdir(json_folder_path)
     except FileExistsError:
-        console.print('[grey0 italic]Found json_files folder.[/]')
+        pass
 
 
 def get_user_input() -> str:
