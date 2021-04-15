@@ -10,9 +10,12 @@
 import os
 import requests
 import json
+# Speed up any repeated calls with Least Recently Used cache.
+from functools import lru_cache
 from bisect import bisect
 from time import sleep
 from datetime import datetime, timedelta
+from timer import Timer
 # Fuzzy input matching when API rejects user input.
 from location_parser import fuzzy_find_city, city_list_filepath
 # config is where your unique API key is stored as a string.
@@ -250,6 +253,10 @@ def save_json(request, file_path: str):
             json.dump(request.json(), file)
 
 
+# json files are repeatedly opened to check weather API info as well as
+# finding city ids for different searches. If we cache here, it cuts down
+# time of subsequent searches significantly, at the cost of ~200mb memory usage.
+@lru_cache
 def open_json(file_path: str):
     """Open the json file in root folder. Return the json object."""
     try:
@@ -336,6 +343,8 @@ def wind_degrees_to_direction(degrees: int) -> str:
     return direction
 
 
+# Might as well cache this if user searches same location again.
+@lru_cache
 def determine_state_code(city_list_file, weather_response_id) -> str:
     """
     Compare city IDs between city list and weather API data.
@@ -470,6 +479,7 @@ if __name__ == '__main__':
     while True:
         # The one place (global) weather_path is referenced for now.
         save_json(response[0], weather_path)
+
         console.print('[grey0][i]Loading..[/][/]')
         weather_data = open_json(weather_path)
         weather_now = WeatherAPIData(weather_data, 0)
@@ -478,11 +488,11 @@ if __name__ == '__main__':
         weather_09h = WeatherAPIData(weather_data, 3)
 
         current_time = datetime.now()
+        # create_ui() takes 0.8s to complete due to city_id json checks.
+        # @lru_cache was used to help here. Down to 0.0001s.
         interface = create_ui(current_time)
         console.print(interface)
 
-        # Interrupting means asking for input again, redoing api response,
-        # as well as resetting city_id since it's otherwise set outside the loop.
         try:
             for _ in range(api_delay_in_sec):
                 sleep(1)

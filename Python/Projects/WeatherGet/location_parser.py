@@ -28,6 +28,7 @@ from fuzzywuzzy import fuzz
 from rich.console import Console
 from error_messages import missing_city_list
 from collections import defaultdict
+from functools import lru_cache
 import string
 
 
@@ -41,6 +42,7 @@ ratio_best_match = 100
 
 
 # Functions. -------------------------------------------------------------------
+@lru_cache()
 def read_city_json(file):
     """
     Read city file and return json object.
@@ -108,6 +110,7 @@ def verify_alphabet_nesting(path):
         return False
 
 
+@lru_cache()
 def fuzz_ratio(city_input, territory_input, loc_city, loc_territory, loc_id):
     choices = set()
     ratio = fuzz.token_set_ratio(loc_city, city_input)
