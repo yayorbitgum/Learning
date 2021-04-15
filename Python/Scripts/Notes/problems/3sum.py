@@ -31,8 +31,7 @@ class Solution:
 
         # We'll keep running this loop and finding triplets until all 3 pointers
         # reach the end of nums and none of them can push up any farther.
-        while (px, py, pz) != (length - 3, length - 2, length - 1):
-
+        while (px, py, pz) != (length-3, length-2, length-1):
             # We found a valid triplet. Make sure we don't already have this combo.
             if x + y + z == 0 and [x, y, z] not in results:
                 results.append([x, y, z])
