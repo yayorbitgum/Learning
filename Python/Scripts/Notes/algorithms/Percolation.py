@@ -29,22 +29,27 @@ class Percolation:
 
     def open_site(self, x, y):
         """Open site at coordinates if not open already."""
-        if self.grid[y][x] != 1:
+        if not self.is_open(x, y):
             self.grid[y][x] = 1
         else:
             print(f"[{x},{y}] is already open.")
 
     def is_open(self, x, y) -> bool:
         """Check if a site is open."""
-        ...
+        if self.grid[y][x] == 1:
+            return True
+        return False
 
     def is_full(self, x, y) -> bool:
         """Check if the given site is full."""
         ...
 
     def num_of_open_sites(self) -> int:
-        """Return the number of open sites"""
-        ...
+        """Return the number of open sites."""
+        count = 0
+        for row in self.grid:
+            count += row.count(1)
+        return count
 
     def percolates(self):
         """Check if the system percolates."""
@@ -53,7 +58,7 @@ class Percolation:
 
 # ------------------------------------------------------------------------------
 def random_list(low, high, length) -> List:
-    """Generate a list of random numbers."""
+    """Generate a random number length times, return list."""
     results = []
     for _ in range(length):
         n = random.randint(low, high)
@@ -64,13 +69,14 @@ def random_list(low, high, length) -> List:
 
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
-    size = 10
-    fill = 30
-    perc = Percolation(size)
+    grid_size = 1000
+    fill_attempts = 950_000
+    perc = Percolation(grid_size)
 
-    random_x_coords = random_list(0, size-1, fill)
-    random_y_coords = random_list(0, size-1, fill)
+    random_x_coords = random_list(0, grid_size-1, fill_attempts)
+    random_y_coords = random_list(0, grid_size-1, fill_attempts)
     for xx, yy in zip(random_x_coords, random_y_coords):
         perc.open_site(xx, yy)
 
     perc.show_grid()
+    print(f"{perc.num_of_open_sites():,} open sites.")
