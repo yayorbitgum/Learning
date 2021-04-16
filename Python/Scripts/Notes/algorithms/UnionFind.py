@@ -127,16 +127,17 @@ class QuickUnion:
             self.size[a_root] += self.size[b_root]
 
 
-print("Quick-find ----------------")
-uf = QuickFind(10)
-uf.union(0, 4)
-uf.union(4, 6)
-uf.verify_indexes()
-print(uf.is_connected(0, 6))
+if __name__ == "__main__":
+    print("Quick-find ----------------")
+    uf = QuickFind(10)
+    uf.union(0, 4)
+    uf.union(4, 6)
+    uf.verify_indexes()
+    print(uf.is_connected(0, 6))
 
-print("Quick-union ---------------")
-quf = QuickUnion(10)
-quf.union(0, 4)
-quf.union(4, 6)
-quf.verify_indexes()
-print(quf.is_connected(0, 6))
+    print("Quick-union ---------------")
+    quf = QuickUnion(10)
+    quf.union(0, 4)
+    quf.union(4, 6)
+    quf.verify_indexes()
+    print(quf.is_connected(0, 6))
