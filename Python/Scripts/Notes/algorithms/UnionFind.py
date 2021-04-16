@@ -1,5 +1,10 @@
-# Connectivity problem.
-# https://www.coursera.org/learn/algorithms-part1/lecture/EcF3P/quick-find
+# # https://www.coursera.org/learn/algorithms-part1/lecture/EcF3P/quick-find
+# Solving dynamic connectivity problem. How do we link many nodes together
+#   in a performant manner?
+# Can also solve percolation problem. How do we figure out the chance that a
+#   n-by-n grid/system can percolate (reach from the top of a medium to bottom unimpeded),
+#   and at what threshold does percolation become essentially guaranteed?
+#
 # "Find" query - Check if two objects are in the same component.
 # "Union" command - Replace components containing two objects with their union.
 #
@@ -13,10 +18,14 @@
 #   Trees can get too tall and then it's slow to work through entire branch
 #   just to get one value.
 #
-# Weighted quick-union would be:
+# Weighted quick-union would be: log(n)
 #   Modify quick-union to avoid tall trees.
 #   Keep track of size of each tree (number of objects/nodes).
 #   Balance by linking root of smaller tree to root of larger tree.
+#
+# Path compression of quick-union would be: log*(n)
+#   When we find the root of a node, we might as well set the id of that
+#   examined node to point to the root. There's no reason not to.
 
 class QuickFind:
     def __init__(self, node_count):
@@ -63,19 +72,29 @@ class QuickUnion:
         """ Print current index/nodes list (indicating connections)."""
         for index, node in enumerate(self.nodes):
             if index == node:
-                print(f"{index} is a root.")
+                print(f"{index} is a root. Tree size is {self.size[index]}.")
             else:
-                print(f"{index} connects to {node}")
+                print(f"{index} connects to {node}. Tree size is {self.check_size(node)}.")
 
-        print(self.size)
+    def check_size(self, node):
+        """Check the size of the tree the given node is attached to."""
+        root = self.find_root(node)
+        return self.size[root]
+
+    def find_largest(self, node):
+        """Returns the largest element in the connected component."""
+        ...
 
     def find_root(self, node):
         """
-        Return root of given node.
+        Return root of given node. Assign node's id to root for path compression.
         The root of anything will be when the node and index are the same.
         So to find it, we just keep moving up the node's pointers (indexes).
         """
         while node != self.nodes[node]:
+            # Set id of each examined node to the root (compressing path).
+            self.nodes[node] = self.nodes[self.nodes[node]]
+            # Crawl up the tree.
             node = self.nodes[node]
         return node
 
@@ -87,14 +106,19 @@ class QuickUnion:
             return False
 
     def union(self, a_node, b_node):
-        """Connect two nodes by changing root of node_a to point to root of node_b."""
+        """
+        Connect two nodes by attaching the root of the smaller tree to the larger
+        of the two. "self.size" is updated to reflect new tree sizes.
+        """
         a_root = self.find_root(a_node)
         b_root = self.find_root(b_node)
 
+        # If the two nodes share the same root, they are already connected.
         if a_root == b_root:
             return
 
         # Link root of smaller tree to root of bigger tree and update size.
+        # This is where quick-union becomes weighted.
         if self.size[a_root] < self.size[b_root]:
             self.nodes[a_root] = b_root
             self.size[b_root] += self.size[a_root]
@@ -115,4 +139,4 @@ quf = QuickUnion(10)
 quf.union(0, 4)
 quf.union(4, 6)
 quf.verify_indexes()
-print(uf.is_connected(0, 6))
+print(quf.is_connected(0, 6))
