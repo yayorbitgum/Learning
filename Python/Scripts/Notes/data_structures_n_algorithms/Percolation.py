@@ -73,6 +73,7 @@ class PercolationStats:
     def confidence_high(self):
         ...
 
+
 # ------------------------------------------------------------------------------
 def random_list(low, high, length) -> List:
     """Generate a random number length times, return list."""
