@@ -56,6 +56,23 @@ class Percolation:
         ...
 
 
+class PercolationStats:
+    def __init__(self, grid: List[List[int]], trials: int):
+        self.grid = grid
+        self.trials = trials
+
+    def mean(self):
+        ...
+
+    def standard_deviation(self):
+        ...
+
+    def confidence_low(self):
+        ...
+
+    def confidence_high(self):
+        ...
+
 # ------------------------------------------------------------------------------
 def random_list(low, high, length) -> List:
     """Generate a random number length times, return list."""
