@@ -57,7 +57,7 @@ class WeatherGetTests(unittest.TestCase):
                   ("Del City", 4534934),
                   ("New York City", 5128581),
                   ("Los Angeles", 5368361),
-                  ("Loomis", 5368233)
+                  ("Loomis", 5368233),
                   )
 
         for city in cities:
