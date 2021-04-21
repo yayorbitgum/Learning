@@ -31,7 +31,6 @@ from collections import defaultdict
 from functools import lru_cache
 import string
 
-
 # Variables. -------------------------------------------------------------------
 city_list_filepath = 'city.list.json'
 city_list_alphabet_filepath = 'city.list.alphabet.json'
@@ -146,7 +145,8 @@ def fuzz_ratio(city_input, territory_input, loc_city, loc_territory, loc_id):
 def fuzzy_find_city(loc=None) -> list:
     """
     Check locations list json for best matches of user input.
-    Return list of best city 'name' and 'state' matches.
+    Return list of best city 'name' and 'state' matches, with "none of the above"
+    as the last option.
     """
     choices = set()
     locations = read_city_json(city_list_alphabet_filepath)
@@ -174,12 +174,13 @@ def fuzzy_find_city(loc=None) -> list:
                 if location['name'] == city and location['state'] == territory:
                     return [f"{location['name']}, {location['state']}, {location['id']}"]
                 else:
-                    choices.update(fuzz_ratio(
-                        city,
-                        territory,
-                        location['name'],
-                        location['state'],
-                        location['id']
+                    choices.update(
+                        fuzz_ratio(
+                            city,
+                            territory,
+                            location['name'],
+                            location['state'],
+                            location['id']
                         )
                     )
     # --------------------------------------------------------------------------
@@ -200,10 +201,10 @@ def fuzzy_find_city(loc=None) -> list:
     # --------------------------------------------------------------------------
     # We used a set initially to prevent duplicate results from fuzzy matching.
     # Now we convert to list so we can sort the choices based on most likely match
-    # to least likely match. Choices will always be a small selection, so speed
-    # differences between set/tuple and list/array are inconsequential.
+    # to least likely match.
     sorted_choices = list(choices)
     sorted_choices.sort()
+    sorted_choices.append("None of the above.")
     return sorted_choices
 
 

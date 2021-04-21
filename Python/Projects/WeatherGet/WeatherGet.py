@@ -212,7 +212,6 @@ def request_weather_api(api_key: str, loc, api_city_id=None) -> (Response, str):
         # Openweathermap's API does not do partial matching, so it often rejects input.
         # So let's do our own fuzzy matching!
         choices = fuzzy_find_city(location)
-        choices.append('None of the above.')
 
         if len(choices) != 1:
             console.print('[red][i]Did you mean...[/][/]')
