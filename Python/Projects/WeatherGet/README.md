@@ -1,4 +1,4 @@
-This script pulls from _openweathermap.org_ API to display weather forecasts for whatever location you enter.
+A console app that pulls from _openweathermap.org_ API for quick short-term weather forecasts for whatever location you enter.
 
 Your forecast is displayed in a neat console-based UI!  
 
