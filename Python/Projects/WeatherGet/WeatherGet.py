@@ -15,7 +15,6 @@ from functools import lru_cache
 from bisect import bisect
 from time import sleep
 from datetime import datetime, timedelta
-from timer import Timer
 # Fuzzy input matching when API rejects user input.
 from location_parser import fuzzy_find_city, city_list_filepath
 # config is where your unique API key is stored as a string.
@@ -100,6 +99,9 @@ class WeatherAPIData:
         self.update_k_to_f()
         # ----------------------------------------------------------------------
 
+    def __iter__(self):
+        return iter(self.data.items())
+
     # --------------------------------------------------------------------------
     def update_k_to_f(self):
         """
@@ -150,10 +152,10 @@ class WeatherAPIData:
         # Current weather panel. -----------------------------------------------
         elif self.forecast_index == 0:
 
-            panel_text += (f"\n[i]Population: {self.population:,}[/]"
-                           f"[i]\nGPS: [link=https://www.google.com/maps/@{lat},{lon}]"
-                           f"{lat}, {lon}[/link][/]")
+            if self.population != 0:
+                panel_text += f"\n[i]Population: {self.population:,}[/]"
 
+            panel_text += f"[i]\nGPS: [link=https://www.google.com/maps/@{lat},{lon}]{lat}, {lon}[/link][/]"
             panel = Panel(panel_text, box=box.DOUBLE)
             state_code = determine_state_code(city_list_filepath, self.id)
 
@@ -168,7 +170,7 @@ class WeatherAPIData:
 # ------------------------------------------------------------------------------
 # Functions --------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
+def request_weather_api(api_key: str, loc, api_city_id=None) -> (Response, str):
     """
     Request api from openweathermap.org.
     Return tuple of requests object, and specific city id if successful.
@@ -185,14 +187,14 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
                                    f"&APPID={api_key}")
         else:
             request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast"
-                                   f"?q={location}"
+                                   f"?q={loc}"
                                    f"&APPID={api_key}")
 
     except requests.exceptions.ConnectionError:
         console.print(f"[red]Connection failed! "
                       f"Check your internet connection and try again.[/]")
         initialize()
-        return request_weather_api(api_key)
+        return request_weather_api(api_key, loc)
 
     # API responses. -----------------------------------------------------------
     # 200 "OK".
@@ -223,7 +225,7 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
                 # If "None of the above."
                 if location_string == choices[-1]:
                     initialize()
-                    return request_weather_api(key)
+                    return request_weather_api(key, loc)
 
             except (IndexError, ValueError):
                 # We'll default to first option for ease of use.
@@ -232,13 +234,13 @@ def request_weather_api(api_key: str, api_city_id=None) -> (Response, str):
             city, state, api_city_id = location_string.split(',')
             api_city_id = api_city_id.strip()
             # Now that we've got the exact city id, let's request API again.
-            return request_weather_api(my_key, api_city_id)
+            return request_weather_api(my_key, loc, api_city_id)
 
         # No choices were returned. Input was wildly misspelled.
         else:
-            console.print('[red]Unable to find any matches! Try again.[/]')
+            console.print("[red]Couldn't to find any matches! Try again.[/]")
             initialize()
-            return request_weather_api(key)
+            return request_weather_api(key, loc)
 
     # All other codes (will debug when I see them).
     else:
@@ -315,8 +317,8 @@ def show_temp_difference(start_temp: int, end_temp: int) -> str:
 def color_by_temperature(temperature: int) -> str:
     """Take in temperature value and return text with color tags for use with rich ui."""
     # Color reference: https://rich.readthedocs.io/en/latest/_modules/rich/color.html
-    temperature_breakpoints = [0, 32, 50, 65, 79, 89, 101, 115]
-    temperature_colors = ["blue_violet",
+    temperature_breakpoints = (0, 32, 50, 65, 79, 89, 101, 115)
+    temperature_colors = ("blue_violet",
                           "deep_sky_blue1",
                           "cyan",
                           "green",
@@ -324,7 +326,7 @@ def color_by_temperature(temperature: int) -> str:
                           "orange4",
                           "red",
                           "magenta",
-                          "bright_magenta"]
+                          "bright_magenta")
     bisect_index = bisect(temperature_breakpoints, temperature)
     color = temperature_colors[bisect_index]
     # Colors are assigned within strings like HTML tags, with [brackets][/brackets].
@@ -333,10 +335,10 @@ def color_by_temperature(temperature: int) -> str:
 
 def wind_degrees_to_direction(degrees: int) -> str:
     """Convert input degrees (int) to and return cardinal direction (str)."""
-    breakpoints = [0, 5, 85, 95, 175, 185, 265, 275, 355, 360]
-    directions = ["North", "North",
+    breakpoints = (0, 15, 85, 95, 175, 185, 265, 275, 355, 360)
+    directions = ("North", "North",
                   "Northeast", "East", "Southeast", "South",
-                  "Southwest", "West", "Northwest", "North", "North"]
+                  "Southwest", "West", "Northwest", "North", "North")
 
     bisect_index = bisect(breakpoints, degrees)
     direction = directions[bisect_index]
@@ -473,7 +475,7 @@ if __name__ == '__main__':
 
     initialize()
     key = verify_key_exists(my_key)
-    response = request_weather_api(key)
+    response = request_weather_api(key, location)
     city_id = response[1]
 
     while True:
@@ -498,7 +500,7 @@ if __name__ == '__main__':
                 sleep(1)
         except KeyboardInterrupt:
             initialize()
-            response = request_weather_api(key)
+            response = request_weather_api(key, location)
             city_id = response[1]
 
-        response = request_weather_api(key, city_id)
+        response = request_weather_api(key, location, city_id)
