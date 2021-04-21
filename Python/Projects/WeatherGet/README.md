@@ -1,7 +1,7 @@
 This script pulls from _openweathermap.org_ API to display weather forecasts for whatever location you enter.
 
 Your forecast is displayed in a neat console-based UI!
-
+![WeatherGet screenshot](https://i.imgur.com/WALDlgt.png)
 Data is pulled from https://openweathermap.org/forecast5.
 
 # Installation ->

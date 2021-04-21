@@ -1,5 +1,4 @@
 import unittest
-
 from WeatherGet import determine_state_code
 from WeatherGet import wind_degrees_to_direction
 from WeatherGet import request_weather_api
