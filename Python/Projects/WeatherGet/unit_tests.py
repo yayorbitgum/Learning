@@ -60,6 +60,8 @@ class WeatherGetTests(unittest.TestCase):
                   ("New York City", 5128581),
                   ("Los Angeles", 5368361),
                   ("Loomis", 5368233),
+                  ("Milwaukie", 5740900),
+                  ("Pittsfield", 4947459),
                   )
 
         for city in cities:
@@ -81,7 +83,7 @@ class WeatherGetTests(unittest.TestCase):
 
             # Assert relevant api data matches.
             for name_data, id_data in zip(name_api_response, id_api_response):
-                with self.subTest(f"API Test fail -> {name_api_response.city_name}: {name_data[0]}"):
+                with self.subTest(f"API Test fail -> {city_name}: {name_data[0]}"):
                     self.assertEqual(
                         name_data,
                         id_data,
