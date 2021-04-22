@@ -1,13 +1,5 @@
 # Scrapes and downloads all images from readnsk.com for Attack on Titan.
 # Organizes saved images by chapter and page in folders.
-#
-# Personal notes/references. ---------------------------------------------------
-# Dissecting HTML pages with BeautifulSoup:
-# https://www.crummy.com/software/BeautifulSoup/bs4/doc/
-# Getting all images on a page:
-# https://stackoverflow.com/questions/18408307/how-to-extract-and-download-all-images-from-a-website-using-beautifulsoup
-# Saving image data to a file:
-# https://stackoverflow.com/questions/54338681/how-to-download-images-from-websites-using-beautiful-soup
 
 # Imports. ---------------------------------------------------------------------
 import os
