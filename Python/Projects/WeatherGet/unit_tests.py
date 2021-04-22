@@ -1,10 +1,16 @@
+# Through these tests I was able to determine openweathermap's api
+# does not return population data if you request directly by city_id.
+# These are made with different API calls.
+# "?id=" in the request URL for city ID, otherwise you use "?q=" for
+# querying by location name. Are these referencing two different
+# databases that (almost) have identical information? Why is there two?
 import unittest
-from WeatherGet import determine_state_code
-from WeatherGet import wind_degrees_to_direction
-from WeatherGet import request_weather_api
-from WeatherGet import WeatherAPIData
-from WeatherGet import save_json
-from WeatherGet import open_json
+from WeatherGet import (determine_state_code,
+                        wind_degrees_to_direction,
+                        request_weather_api,
+                        WeatherAPIData,
+                        save_json,
+                        open_json)
 from config import my_key
 
 
@@ -95,12 +101,6 @@ class WeatherGetTests(unittest.TestCase):
                         f" (id = {city_id})\n"
                         f"By name request returns {name_data[1]}, but"
                         f" by city id request returns {id_data[1]}.")
-            # Through these tests I was able to determine openweathermap's api
-            # does not return population data if you request directly by city_id.
-            # These are made with different API calls.
-            # "?id=" in the request URL for city ID, otherwise you use "?q=" for
-            # querying by location name. Are these referencing two different
-            # databases that (almost) have identical information? Why is there two?
 
 
 if __name__ == '__main__':
