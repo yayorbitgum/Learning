@@ -27,7 +27,7 @@ class WeatherGetTests(unittest.TestCase):
 
         for degrees, expected_direction in tests:
             result = wind_degrees_to_direction(degrees)
-            with self.subTest(f"Wind direction test for {degrees} degrees."):
+            with self.subTest(f"Wind direction test -> {degrees} degrees."):
                 self.assertEqual(expected_direction, result, f"input degrees: {degrees}")
 
     def test_state_code(self):
@@ -47,7 +47,7 @@ class WeatherGetTests(unittest.TestCase):
             city_id = test[0]
             state_code = test[1]
             result = determine_state_code('city.list.json', city_id)
-            with self.subTest(f"State code test for {city_id}, {state_code}"):
+            with self.subTest(f"State code test -> {city_id}, {state_code}"):
                 self.assertEqual(state_code, result, f"input city_id: {city_id}")
 
     def test_api_data_responses(self):
@@ -81,9 +81,13 @@ class WeatherGetTests(unittest.TestCase):
             name_api_response = WeatherAPIData(open_json(name_path), 0)
             id_api_response = WeatherAPIData(open_json(id_path), 0)
 
+            # Make sure our two API requests are actually for the same city.
+            with self.subTest(f"API Name Test -> {city_name}."):
+                self.assertEqual(name_api_response.id, id_api_response.id)
+
             # Assert relevant api data matches.
             for name_data, id_data in zip(name_api_response, id_api_response):
-                with self.subTest(f"API Test fail -> {city_name}: {name_data[0]}"):
+                with self.subTest(f"API Data Test -> {city_name}: {name_data[0]}"):
                     self.assertEqual(
                         name_data,
                         id_data,
