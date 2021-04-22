@@ -65,25 +65,24 @@ class WeatherGetTests(unittest.TestCase):
             city_id = city[1]
             by_name = request_weather_api(my_key, city_name)
             by_city_id = request_weather_api(my_key, city_name, city_id)
-            # Assert both types of requests are accepted.
-            with self.subTest(f"Check status codes."):
-                self.assertEqual(by_name[0].status_code, by_city_id[0].status_code)
+            # Assert both types of requests are accepted before we continue.
+            self.assertEqual(by_name[0].status_code, by_city_id[0].status_code)
 
             # Save requests so we can examine WeatherAPIData class.
             name_path = "json_files/by_name.json"
             id_path = "json_files/by_city_id.json"
             save_json(by_name[0], name_path)
             save_json(by_city_id[0], id_path)
-            n_api = WeatherAPIData(open_json(name_path), 0)
-            id_api = WeatherAPIData(open_json(id_path), 0)
+            name_api_response = WeatherAPIData(open_json(name_path), 0)
+            id_api_response = WeatherAPIData(open_json(id_path), 0)
 
             # Assert relevant api data matches.
-            for n_data, id_data in zip(n_api, id_api):
+            for name_data, id_data in zip(name_api_response, id_api_response):
                 with self.subTest("API data points test."):
-                    self.assertEqual(n_data, id_data,
-                                     f"{n_data[0]} mismatch for {city_name}."
+                    self.assertEqual(name_data, id_data,
+                                     f"{name_data[0]} mismatch for {city_name}."
                                      f" (id = {city_id})\n"
-                                     f"By name request returns {n_data[1]}, but"
+                                     f"By name request returns {name_data[1]}, but"
                                      f" by city id request returns {id_data[1]}.")
             # Through these tests I was able to determine openweathermap's api
             # does not return population data if you request directly by city_id.
