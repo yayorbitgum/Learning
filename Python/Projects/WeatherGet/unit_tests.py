@@ -27,7 +27,8 @@ class WeatherGetTests(unittest.TestCase):
 
         for degrees, expected_direction in tests:
             result = wind_degrees_to_direction(degrees)
-            self.assertEqual(expected_direction, result, f"input degrees: {degrees}")
+            with self.subTest(f"Wind direction test for {degrees} degrees."):
+                self.assertEqual(expected_direction, result, f"input degrees: {degrees}")
 
     def test_state_code(self):
         """Ensure city_id returned by API request also matches up to city.list.json."""
@@ -46,7 +47,8 @@ class WeatherGetTests(unittest.TestCase):
             city_id = test[0]
             state_code = test[1]
             result = determine_state_code('city.list.json', city_id)
-            self.assertEqual(state_code, result, f"input city_id: {city_id}")
+            with self.subTest(f"State code test for {city_id}, {state_code}"):
+                self.assertEqual(state_code, result, f"input city_id: {city_id}")
 
     def test_api_data_responses(self):
         """
@@ -66,6 +68,7 @@ class WeatherGetTests(unittest.TestCase):
             by_name = request_weather_api(my_key, city_name)
             by_city_id = request_weather_api(my_key, city_name, city_id)
             # Assert both types of requests are accepted before we continue.
+            # No subtest manager since we should stop the tests here if we fail.
             self.assertEqual(by_name[0].status_code, by_city_id[0].status_code)
 
             # Save requests so we can examine WeatherAPIData class.
@@ -78,7 +81,7 @@ class WeatherGetTests(unittest.TestCase):
 
             # Assert relevant api data matches.
             for name_data, id_data in zip(name_api_response, id_api_response):
-                with self.subTest("API data points test."):
+                with self.subTest(f"API Test for {name_api_response.city_name} -> {name_data[0]}."):
                     self.assertEqual(
                         name_data,
                         id_data,
