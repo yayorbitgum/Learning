@@ -79,17 +79,19 @@ class WeatherGetTests(unittest.TestCase):
             # Assert relevant api data matches.
             for name_data, id_data in zip(name_api_response, id_api_response):
                 with self.subTest("API data points test."):
-                    self.assertEqual(name_data, id_data,
-                                     f"{name_data[0]} mismatch for {city_name}."
-                                     f" (id = {city_id})\n"
-                                     f"By name request returns {name_data[1]}, but"
-                                     f" by city id request returns {id_data[1]}.")
+                    self.assertEqual(
+                        name_data,
+                        id_data,
+                        f"{name_data[0]} mismatch for {city_name}."
+                        f" (id = {city_id})\n"
+                        f"By name request returns {name_data[1]}, but"
+                        f" by city id request returns {id_data[1]}.")
             # Through these tests I was able to determine openweathermap's api
             # does not return population data if you request directly by city_id.
             # These are made with different API calls.
             # "?id=" in the request URL for city ID, otherwise you use "?q=" for
-            # querying by location name. Are these returning two different
-            # json files?
+            # querying by location name. Are these referencing two different
+            # databases that (almost) have identical information? Why is there two?
 
 
 if __name__ == '__main__':
