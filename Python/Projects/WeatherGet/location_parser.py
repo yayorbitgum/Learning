@@ -115,7 +115,7 @@ def fuzz_ratio(city_input, territory_input, loc_city, loc_territory, loc_id):
     ratio = fuzz.token_set_ratio(loc_city, city_input)
 
     # Perfect match for city and state.
-    if ratio == ratio_best_match and loc_territory == territory_input:
+    if ratio == ratio_full_minimum and loc_territory == territory_input:
         # If we found the exact city and state with 100% ratio,
         # we know we don't need anything else found before this result.
         del choices
@@ -172,7 +172,8 @@ def fuzzy_find_city(loc=None) -> list:
             for location in locations[letter]:
                 # Perfect match means we don't need to search anymore.
                 if location['name'] == city and location['state'] == territory:
-                    return [f"{location['name']}, {location['state']}, {location['id']}"]
+                    perfect_match = [f"{location['name']}, {location['state']}, {location['id']}"]
+                    return perfect_match
                 else:
                     choices.update(
                         fuzz_ratio(
@@ -203,8 +204,7 @@ def fuzzy_find_city(loc=None) -> list:
     # Now we convert to list so we can sort the choices based on most likely match
     # to least likely match.
     sorted_choices = list(choices)
-    sorted_choices.sort()
-    sorted_choices.append("None of the above.")
+    sorted_choices.sort(reverse=True)
     return sorted_choices
 
 

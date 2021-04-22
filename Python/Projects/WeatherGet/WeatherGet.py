@@ -205,6 +205,8 @@ def request_weather_api(api_key: str, loc, api_city_id=None) -> (Response, str):
     # 401 "Forbidden".
     elif request.status_code == unauth_code:
         console.print(errors.message_forbidden, style='red')
+        initialize()
+        return request_weather_api(key, loc)
 
     # 404 "Not Found".
     elif request.status_code == not_found_code:
@@ -213,22 +215,25 @@ def request_weather_api(api_key: str, loc, api_city_id=None) -> (Response, str):
         # So let's do our own fuzzy matching!
         choices = fuzzy_find_city(location)
 
-        if len(choices) != 1:
+        if len(choices) == 1:
+            # Occurs when there's a perfect match for city and state based on input.
+            city, state, api_city_id = choices[0].split(',')
+            api_city_id = api_city_id.strip()
+            # Now that we've got the exact city id, let's request API again.
+            return request_weather_api(my_key, loc, api_city_id)
+
+        elif len(choices) > 1:
             console.print('[red][i]Did you mean...[/][/]')
             for index, choice in enumerate(choices):
                 console.print(f"{index}: {choice}")
 
             try:
-                selection = int(input('Choose option number: '))
+                selection = int(input('Choose option number and hit enter (leave blank to cancel): '))
                 location_string = choices[selection]
-                # If "None of the above."
-                if location_string == choices[-1]:
-                    initialize()
-                    return request_weather_api(key, loc)
 
             except (IndexError, ValueError):
-                # We'll default to first option for ease of use.
-                location_string = choices[0]
+                initialize()
+                return request_weather_api(key, loc)
 
             city, state, api_city_id = location_string.split(',')
             api_city_id = api_city_id.strip()
@@ -435,9 +440,17 @@ def create_json_folder():
 
 
 def get_user_input() -> str:
-    """ Ask for user input for location, title result and return."""
-    loc = input('Enter location: ').title()
-    return loc
+    """ Ask for user input for location, sanitizes input and returns titled string."""
+    loc = input('Enter location: ')
+    # This will also remove spaces, but with fuzzy matching that's okay.
+    sanitized = "".join(char for char in loc if char.isalnum() or char == ',')
+
+    # If the user is cheeky and enters multiple commas, clear out excess.
+    if sanitized.count(',') > 1:
+        # (count - 1) means we leave one comma for (city, state) search in location_parser.
+        sanitized = ''.join(sanitized.split(',', maxsplit=(sanitized.count(',') - 1)))
+
+    return sanitized.title()
 
 
 def set_json_path(loc) -> str:
