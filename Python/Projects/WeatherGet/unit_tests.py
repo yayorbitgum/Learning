@@ -81,7 +81,7 @@ class WeatherGetTests(unittest.TestCase):
 
             # Assert relevant api data matches.
             for name_data, id_data in zip(name_api_response, id_api_response):
-                with self.subTest(f"API Test for {name_api_response.city_name} -> {name_data[0]}."):
+                with self.subTest(f"API Test fail -> {name_api_response.city_name}: {name_data[0]}"):
                     self.assertEqual(
                         name_data,
                         id_data,
