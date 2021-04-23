@@ -1,9 +1,9 @@
 # Projects Coding Overview
 What to find examples of in each project!
-## WeatherGet
+## [WeatherGet](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/WeatherGet)
 - OOP structuring.
 - API requests.
-- Fuzzy matching.
+- [Fuzzy matching](https://towardsdatascience.com/fuzzy-string-matching-in-python-68f240d910fe).
 - Console-based UI.
 - Unit testing.
 - Work towards data structure optimization.
@@ -11,14 +11,14 @@ What to find examples of in each project!
 
 - *TODO: Website implementation.*
 
-## ShingekiScraper
+## [ShingekiScraper](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/ShingekiScraper)
 - Webscraping, requests.
 - BeautifulSoup.
   
 
 - *TODO: OOP refactor*.
 
-## SO2020Survey
+## [SO2020Survey](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/SO2020Survey)
 - Jupyter Notebook.
 - Pandas.
   
@@ -26,7 +26,7 @@ What to find examples of in each project!
 - *TODO: Matplotlib graphs and trends.*
 - *TODO: Database with multiple surveys.*
 
-## ISSTracker
+## [ISSTracker](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/ISSTracker)
 - OOP structuring.
 - API requests.
 - Database referencing for GPS coordinates based on location input.
