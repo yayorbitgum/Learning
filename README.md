@@ -1,4 +1,4 @@
-# Python work
+# Personal Projects
 This is a collection of all my projects, scripts and notes as I continue to learn Python (with C# and C++ next).
 
 - **Check out [WeatherGet](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/WeatherGet) for building things with API calls and using fuzzy matching for correcting user input.**
