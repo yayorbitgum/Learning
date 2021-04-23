@@ -3,7 +3,7 @@ What to find examples of in each project!
 ## [WeatherGet](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/WeatherGet)
 - OOP structuring.
 - API requests.
-- [Fuzzy matching](https://towardsdatascience.com/fuzzy-string-matching-in-python-68f240d910fe).
+- [Fuzzy matching](https://chairnerd.seatgeek.com/fuzzywuzzy-fuzzy-string-matching-in-python/).
 - Console-based UI.
 - Unit testing.
 - Work towards data structure optimization.
