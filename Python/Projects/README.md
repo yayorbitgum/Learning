@@ -21,9 +21,7 @@ What to find examples of in each project!
 ## [SO2020Survey](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/SO2020Survey)
 - Jupyter Notebook.
 - Pandas.
-  
-
-- *TODO: Matplotlib graphs and trends.*
+- Seaborn graphs.  
 - *TODO: Database with multiple surveys.*
 
 ## [ISSTracker](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/ISSTracker)
