@@ -20,6 +20,7 @@ tax_brackets = ((0.1, 9_875),
 
 # ------------------------------------------------------------------------------
 def get_user_input() -> float:
+    """Gets user input and returns annual income equivalent."""
     try:
         amt = input('Income: ')
         if ',' in amt:
