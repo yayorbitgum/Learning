@@ -109,13 +109,12 @@ def verify_alphabet_nesting(path):
         return False
 
 
-@lru_cache
 def fuzz_ratio(city_input, territory_input, loc_city, loc_territory, loc_id):
     choices = set()
     ratio = fuzz.token_set_ratio(loc_city, city_input)
 
     # Perfect match for city and state.
-    if ratio == ratio_full_minimum and loc_territory == territory_input:
+    if ratio == ratio_best_match and loc_territory == territory_input:
         # If we found the exact city and state with 100% ratio,
         # we know we don't need anything else found before this result.
         del choices

@@ -372,10 +372,9 @@ def create_ui(timestamp: datetime):
     """ Create our user interface within the console. Returns the rich Layout."""
     # https://rich.readthedocs.io/en/latest/index.html
     ui = Layout()
-    ui.split(
+    ui.split_row(
         Layout(name='left'),
-        Layout(name='right'),
-        direction='horizontal')
+        Layout(name='right'),)
 
     panel_now = weather_now.create_weather_panel()
     panel_3h = weather_03h.create_weather_panel()
@@ -386,17 +385,17 @@ def create_ui(timestamp: datetime):
     panel_info.renderable += f"\n[i]Press [red]CTRL-C[/red] for different location at any time.[/]"
 
     # Future forecast panels.
-    ui['right'].split(
+    ui['right'].split_column(
         Layout(panel_3h, name='3h'),
         Layout(panel_6h, name='6h'),
         Layout(panel_9h, name='9h'),
-        direction='vertical')
+    )
 
     # "now" and "info" panels.
-    ui['left'].split(
+    ui['left'].split_column(
         Layout(panel_now, name='now', ratio=3),
         Layout(panel_info, name='info'),
-        direction='vertical')
+    )
 
     # This does a good job of stopping the UI from clipping beyond console.
     ui.height = console.height - 1
@@ -442,8 +441,7 @@ def create_json_folder():
 def get_user_input() -> str:
     """ Ask for user input for location, sanitizes input and returns titled string."""
     loc = input('Enter location: ')
-    # This will also remove spaces, but with fuzzy matching that's okay.
-    sanitized = "".join(char for char in loc if char.isalnum() or char == ',')
+    sanitized = "".join(char for char in loc if char.isalnum() or char == ',' or char == ' ')
 
     # If the user is cheeky and enters multiple commas, clear out excess.
     if sanitized.count(',') > 1:
