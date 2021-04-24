@@ -1,4 +1,5 @@
 # Simple script to get amount of taxes owed/paid based on 2021 tax brackets.
+# Honestly just wanted to see if I could do this programmatically.
 # TODO: Get tax brackets automatically depending on the year, current and historical.
 # TODO: Find reliable site to scrape for the above.
 # ------------------------------------------------------------------------------
