@@ -41,6 +41,7 @@ df['YearsCodePro'] = df['YearsCodePro'].astype(float)
 
 # Filters ----------------------------------------------------------------------
 income = df['ConvertedComp'].between(40000, 150000)
+income_wide = df['ConvertedComp'].between(10000, 150000)
 usa = df['Country'] == 'United States'
 age = df['Age'].between(25, 45)
 python = df['LanguageWorkedWith'].str.contains('Python')
@@ -77,4 +78,30 @@ print(good_money_df[low_exp]['ConvertedComp'].mean())
 low_exp = (good_money_df['YearsCodePro'] < 1)
 print(good_money_df[low_exp]['ConvertedComp'].mean())
 
-print(good_money_df[low_exp])
+
+# ------------------------------------------------------------------------------
+# Here I'll find the average incomes of each country based on the following:
+#    - Countries with 25 or more surveys taken.
+#    - Between $10k to $150k annual USD converted income.
+#    - Age 25 to 45.
+#    - Python mentioned.
+#    - No college degree mentioned.
+global_money_filter = income_wide & age & python & no_degree
+
+globe_df = df[global_money_filter]
+income_results = {}
+countries = globe_df['Country'].unique()
+amount_of_surveys = globe_df['Country'].value_counts()
+
+for country in countries:
+    if amount_of_surveys[country] >= 25:
+        country_filter = globe_df['Country'] == country
+        country_df = globe_df[country_filter]
+        average_income = country_df['ConvertedComp'].mean()
+        # Add result to our new dictionary.
+        income_results[country] = average_income
+
+income = pd.Series(income_results, name='Income averages')
+income.index.name = 'Country'
+income.sort_values(inplace=True, ascending=False)
+print(income)
