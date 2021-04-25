@@ -104,6 +104,8 @@ def main():
           f"Annual income earned: ${income:,}\n"
           f"Taxes owed/paid: ${taxed_amt:,}\n"
           f"Net income: ${take_home:,}\n"
+          f"Monthly take-home: ${take_home // 12:,}\n"
+          f"Weekly: ${take_home // 48:,}\n"
           f"{divisor}\n")
 
 
