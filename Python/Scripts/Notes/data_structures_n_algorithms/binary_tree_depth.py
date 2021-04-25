@@ -23,7 +23,6 @@ class Solution:
             return depth_left + 1
 
 
-
 F = TreeNode(6, None, None)
 E = TreeNode(5, None, None)
 D = TreeNode(4, None, None)

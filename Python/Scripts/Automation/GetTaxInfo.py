@@ -98,14 +98,16 @@ def round_decimal(number) -> float:
 def main():
     income = round_decimal(get_user_input())
     take_home = round_decimal(get_take_home(income))
+    monthly = round_decimal(take_home // 12)
+    weekly = round_decimal(take_home // 48)
     taxed_amt = round_decimal(get_taxed_amt(income, take_home))
 
     print(f"\n{divisor}\n"
           f"Annual income earned: ${income:,}\n"
           f"Taxes owed/paid: ${taxed_amt:,}\n"
           f"Net income: ${take_home:,}\n"
-          f"Monthly take-home: ${take_home // 12:,}\n"
-          f"Weekly: ${take_home // 48:,}\n"
+          f"Monthly take-home: ${monthly:,}\n"
+          f"Weekly: ${weekly:,}\n"
           f"{divisor}\n")
 
 
