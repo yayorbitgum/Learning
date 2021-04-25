@@ -23,7 +23,7 @@ Brazil             $25,300.00
 Well now you know *where* you want to work!
 - Checking for relationship between compensation and age with a linear regression 
   graph with the same above filters. 
-  *Converted Comp* means compensation converted to USD:
+  *Converted Comp* means compensation converted to USD:  
 ![image](https://i.imgur.com/EQW5zv4.png)  
 
 So there definitely seems to be a consistent correlation between age/experience 
@@ -32,7 +32,7 @@ and pay increase, fairly dramatically so.
   We'll even color code based on if someone answered yes or no to 
   *"do you like to code as a hobby?"*,
    with a "no" definitely being a euphemism for "I'm only here because it pays well, 
-  don't call me after 6":
+  don't call me after 6":  
 ![image](https://i.imgur.com/evYXaf7.png)  
   
 But isn't that interesting? A divergence in pay from hobbyists as people get older! 
@@ -58,20 +58,20 @@ It's the same mindset, same anxiety.
 Anyway, let's keep going!
   
 - The previous graph was pay averages for all countries, but let's filter the 
-  above to USA only:
+  above to USA only:  
 ![usa only](https://i.imgur.com/uQaPQKW.png)  
   
 Considerably higher averages across the board as we might have expected. 
 We may not have health insurance in the US but at least we pay our developers well! Haha...
   
-- So, what's the population like in software development these days?
+- So, what's the population like in software development these days?  
 ![genders](https://i.imgur.com/K14GsEH.png)
   
 Probably unsurprising to most, but maybe not, is that the population is **overwhelmingly** 
 Male. Even sites like Reddit will have a more even split between male and female users
 closer to 50/50, but developers on Stack Overflow are **hugely** male.  
   
-- And for sexuality:
+- And for sexuality:  
 ![sexuality](https://i.imgur.com/gi0Li8V.png)
   
 Developers are overwhelmingly straight, though this particular difference is more 
@@ -83,7 +83,7 @@ some interesting comparisons.
 - Our sexual minorities in Stack Overflow 2020:  
 ![no_hetero](https://i.imgur.com/ek6VzVd.png)
   
-- And our gender minorities in Stack Overflow last year:
+- And our gender minorities in Stack Overflow last year:  
 ![non_binary](https://i.imgur.com/cZGn2kj.png)
   
 More cool stuff to come.
