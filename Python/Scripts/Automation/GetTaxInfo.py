@@ -35,10 +35,11 @@ def get_user_input() -> float:
 
 
 def convert_to_annual(amt: str) -> float:
-    """Convert input based on weekly or monthly indicators. Return annual equivalent."""
+    """Convert input based on key words. Return annual equivalent."""
     words = re.split('per|/| ', amt)
     monthly = ['month', 'mnth', 'mth', 'm']
     weekly = ['week', 'wk', 'w']
+    hourly = ['hour', 'hr']
     amt = float(words[0])
 
     if "biweekly" in words:
@@ -54,6 +55,10 @@ def convert_to_annual(amt: str) -> float:
         if word in words:
             amt *= 48
             return amt
+
+    for word in hourly:
+        if word in words:
+            amt *= 1920
 
     return amt
 
