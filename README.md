@@ -4,7 +4,7 @@ This is a collection of all my [active projects](https://github.com/yayorbitgum/
 -- --  
 - **Check out [WeatherGet](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/WeatherGet) for building things with API calls and using fuzzy matching for correcting user input.**  
   
-![WeatherGet screenshot](https://i.imgur.com/WALDlgt.png)  ![WeatherGet screenshot](https://i.imgur.com/EszvuZU.png)    
+![WeatherGet example](https://i.imgur.com/TXtpYcF.gif)   
   
 -- --  
 - **Check out the jupyter notebook for [Stack Overflow Survey 2020](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/SO2020Survey) where we explore the data and look for interesting relationships and trends!** (WIP)  
