@@ -2,7 +2,7 @@
 This is a collection of all my [active projects](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects), standalone [scripts](https://github.com/yayorbitgum/Personal/tree/master/Python/Scripts/Automation) and notes as I continue to learn Python (with C# and C++ next).
 
 -- --  
-- **Check out [WeatherGet](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/WeatherGet) for building things with API calls and using fuzzy matching for correcting user input.**  
+- **Check out [WeatherGet](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/WeatherGet) for a console-based short-term weather forecast. Involves building things with API calls, using fuzzy matching for correcting user input, and using a live UI method within the console.**  
 ![WeatherGet example](https://i.imgur.com/TXtpYcF.gif)   
   
 -- --  
