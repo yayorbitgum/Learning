@@ -400,14 +400,6 @@ def create_ui(timestamp: datetime):
         Layout(panel_info, name='info'),
     )
 
-    # This does a good job of stopping the UI from clipping beyond console.
-    # TODO: This no longer stops the UI from clipping the top of the console after
-    # rich update.
-    # size = shutil.get_terminal_size()
-    # console.options.update_dimensions(size.lines, size.columns)
-    # ui.height = console.height - 1
-    ui.size = 30
-
     return ui
 
 
@@ -522,8 +514,8 @@ if __name__ == '__main__':
             with Live(update_ui(), refresh_per_second=4) as live:
                 # We'll run this loop for 10 minutes because openweathermap API
                 # only updates once every 10 minutes.
-                for _ in range(api_delay_in_sec * 10):
-                    sleep(0.1)
+                for _ in range(api_delay_in_sec):
+                    sleep(1)
                     live.update(update_ui())
 
         except KeyboardInterrupt:
