@@ -6,7 +6,7 @@
 import re
 
 # ------------------------------------------------------------------------------
-with open('inputs\day07_input.txt', 'r') as file:
+with open('inputs/day07_input.txt', 'r') as file:
     file = file.read()
 
 all_bag_input = re.split('contain|\n', file)

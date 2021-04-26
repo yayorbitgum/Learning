@@ -8,7 +8,7 @@ slopes = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
 results = []
 
 # ------------------------------------------------------------------------------
-with open('inputs\day03_input.txt', 'r') as file:
+with open('inputs/day03_input.txt', 'r') as file:
     file_lines = file.readlines()
     line_count = len(file_lines)
     full_terrain = []

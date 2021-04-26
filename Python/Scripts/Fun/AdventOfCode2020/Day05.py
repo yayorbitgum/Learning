@@ -1,7 +1,7 @@
 # https://adventofcode.com/2020/day/5
 
 seat_ids = []
-with open('inputs\day05_input.txt', 'r') as file:
+with open('inputs/day05_input.txt', 'r') as file:
     file = file.readlines()
 
 for ticket in file:

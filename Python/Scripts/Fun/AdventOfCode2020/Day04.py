@@ -15,7 +15,7 @@ hgt_cm_max = 193
 hgt_in_min = 59
 hgt_in_max = 76
 
-with open('inputs\day04_input.txt', 'r') as file:
+with open('inputs/day04_input.txt', 'r') as file:
     file = file.read().strip()
 
 # Each passport is separated by a blank line in between.

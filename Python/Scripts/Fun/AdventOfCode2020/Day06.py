@@ -1,6 +1,6 @@
 # https://adventofcode.com/2020/day/6
 
-with open('inputs\day06_input.txt', 'r') as file:
+with open('inputs/day06_input.txt', 'r') as file:
     file = file.read()
 
 
