@@ -8,6 +8,9 @@
 # Imports ----------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 import os
+import shutil
+import sys
+
 import requests
 import json
 # Speed up any repeated calls with Least Recently Used cache.
@@ -45,7 +48,6 @@ unauth_code = 401
 not_found_code = 404
 
 json_folder_path = 'json_files'
-
 console = Console(color_system='truecolor')
 
 
@@ -349,7 +351,8 @@ def wind_degrees_to_direction(degrees: int) -> str:
     return direction
 
 
-# Might as well cache this if user searches same location again.
+# Cached for multiple searches. This would ultimately create a bottleneck
+# in create_ui() as far as not feeling snappy on load.
 @lru_cache
 def determine_state_code(city_list_file, weather_response_id) -> str:
     """
@@ -398,7 +401,12 @@ def create_ui(timestamp: datetime):
     )
 
     # This does a good job of stopping the UI from clipping beyond console.
-    ui.height = console.height - 1
+    # TODO: This no longer stops the UI from clipping the top of the console after
+    # rich update.
+    # size = shutil.get_terminal_size()
+    # console.options.update_dimensions(size.lines, size.columns)
+    # ui.height = console.height - 1
+    ui.size = 30
 
     return ui
 
@@ -440,7 +448,12 @@ def create_json_folder():
 
 def get_user_input() -> str:
     """ Ask for user input for location, sanitizes input and returns titled string."""
-    loc = input('Enter location: ')
+    try:
+        loc = input('Enter location: ')
+    except EOFError:
+        print("Exiting..")
+        sys.exit()
+
     sanitized = "".join(char for char in loc if char.isalnum() or char == ',' or char == ' ')
 
     # If the user is cheeky and enters multiple commas, clear out excess.
@@ -456,6 +469,11 @@ def set_json_path(loc) -> str:
     path = f'{json_folder_path}/{loc}.json'
     return path
 
+
+def update_ui():
+    current_time = datetime.now()
+    interface = create_ui(current_time)
+    return interface
 
 # ------------------------------------------------------------------------------
 def initialize():
@@ -499,18 +517,21 @@ if __name__ == '__main__':
         weather_06h = WeatherAPIData(weather_data, 2)
         weather_09h = WeatherAPIData(weather_data, 3)
 
-        current_time = datetime.now()
-        # create_ui() takes 0.8s to complete due to city_id json checks.
-        # @lru_cache was used to help here. Down to 0.0001s.
-        interface = create_ui(current_time)
-        console.print(interface)
-
         try:
-            for _ in range(api_delay_in_sec):
-                sleep(1)
+            # This is how the UI is updated as you resize the window.
+            with Live(update_ui(), refresh_per_second=4) as live:
+                # We'll run this loop for 10 minutes because openweathermap API
+                # only updates once every 10 minutes.
+                for _ in range(api_delay_in_sec * 10):
+                    sleep(0.1)
+                    live.update(update_ui())
+
         except KeyboardInterrupt:
+            # So we can enter a different location at any time.
             initialize()
             response = request_weather_api(key, location)
             city_id = response[1]
 
+        # Once the 10 minute delay timer expires, we request an updated forecast
+        # and re-enter the while loop with the same location.
         response = request_weather_api(key, location, city_id)
