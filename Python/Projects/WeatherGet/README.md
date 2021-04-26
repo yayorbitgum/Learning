@@ -1,8 +1,8 @@
 A console app that pulls from _openweathermap.org_ API for quick short-term weather forecasts for whatever location you enter.
 
 Your forecast is displayed in a neat console-based UI!  
-
-![WeatherGet screenshot](https://i.imgur.com/WALDlgt.png)  
+  
+  ![WeatherGet screenshot](https://i.imgur.com/TXtpYcF.gif)  
   
 Data is pulled from https://openweathermap.org/forecast5.
 
@@ -27,4 +27,6 @@ Data is pulled from https://openweathermap.org/forecast5.
 # TODO ->  
 - Have a _setup.py_ do all of this for you instead.
 - Better visualization of upcoming forecast differences.
-- Implement as a live website and skip all this mess.
+- Implement as a live website and skip all this setup mess!
+  - Setup city.list db on cloud.
+  - Rate limit openweather API requests per user (just in case someone likes using this).
