@@ -96,7 +96,8 @@ class WeatherAPIData:
                      "Humidity": self.humidity,
                      "Wind Speed": self.wind_speed,
                      "Wind Direction": self.wind_dir,
-                     "Visibility": self.visibility,}
+                     "Visibility": self.visibility,
+                     }
         # For our purposes, we'll always want fahrenheit so run update on init.
         self.update_k_to_f()
         # ----------------------------------------------------------------------
@@ -466,6 +467,7 @@ def update_ui():
     current_time = datetime.now()
     interface = create_ui(current_time)
     return interface
+
 
 # ------------------------------------------------------------------------------
 def initialize():

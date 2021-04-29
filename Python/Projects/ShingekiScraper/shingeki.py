@@ -40,6 +40,7 @@ def get_chapter_count(soup_obj: BeautifulSoup) -> int:
     Return chapter count.
     """
     ch = []
+
     for o in soup_obj.find_all('option'):
         if "chapter" in o['value']:
             ch.append(o)
