@@ -1,5 +1,5 @@
 # Personal Projects
-This is a collection of all my [active projects](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects), standalone [scripts](https://github.com/yayorbitgum/Personal/tree/master/Python/Scripts/Automation) and notes as I continue to learn Python (with C# and C++ next).
+This is a collection of all my [active projects](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects), standalone [scripts](https://github.com/yayorbitgum/Personal/tree/master/Python/Scripts/Automation) and notes as I continue to learn more about Python and C#.
 
 -- --  
 - **Check out [WeatherGet](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/WeatherGet) for a console-based short-term weather forecast. Involves building things with API calls, using fuzzy matching for correcting user input, and using a live UI method within the console.**  
@@ -10,7 +10,8 @@ This is a collection of all my [active projects](https://github.com/yayorbitgum/
 ![image](https://i.imgur.com/evYXaf7.png)  
 -- --  
   
-- Check out [Shingeki Scraper](https://github.com/yayorbitgum/Personal/blob/master/Python/Projects/ShingekiScraper/shingeki.py) for scraping a site to grab all "Attack on Titan" manga pages and structuring them locally for on-demand backup.**  
+- **Check out [Flashing Lights](https://github.com/yayorbitgum/Personal/blob/master/Python/Projects/ShingekiScraper/shingeki.py) for cool Unity scripts and logic.**  
+[![clip](https://i.imgur.com/sWWdew1.png)](https://www.youtube.com/watch?v=6qoxhPN5TA0 "Clip")
 -- --  
-- *For all current projects and larger scripts, check [Python/Projects](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects).*  
-- *For smaller scripts and automation, check [Python/Scripts/Automation](https://github.com/yayorbitgum/Personal/tree/master/Python/Scripts/Automation).*  
+- *For all current Python projects and larger scripts, check [Python/Projects](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects).*  
+- *For smaller Python scripts and automation, check [Python/Scripts/Automation](https://github.com/yayorbitgum/Personal/tree/master/Python/Scripts/Automation).*  
