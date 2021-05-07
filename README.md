@@ -7,7 +7,7 @@ This is a collection of all my [active projects](https://github.com/yayorbitgum/
   
 -- --  
 - **Check out [Flashing Lights](https://github.com/yayorbitgum/Personal/blob/master/Python/Projects/ShingekiScraper/shingeki.py) for cool Unity scripts and logic (nothing playable yet!)**  
-[![clip](https://i.imgur.com/sWWdew1.png)](https://www.youtube.com/watch?v=6qoxhPN5TA0 "Clip")
+[![clip](https://i.imgur.com/sWWdew1.png)](https://www.youtube.com/watch?v=SYpMdoNOiD0 "Clip")
 -- --  
 - **Check out the jupyter notebook for [Stack Overflow Survey 2020](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/SO2020Survey) where we explore the data and look for interesting relationships and trends!** (WIP)  
 ![image](https://i.imgur.com/evYXaf7.png)  
