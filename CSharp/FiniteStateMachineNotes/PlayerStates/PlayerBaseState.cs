@@ -20,5 +20,6 @@ public abstract class PlayerBaseState
 {
     public abstract void EnterState(PlayerControllerFSM player);
     public abstract void Update(PlayerControllerFSM player);
-    public abstract void OnCollisionEnter(PlayerControllerFSM player);
+    // We'd want to be able to know what we're colliding with, as well as reference the Player.
+    public abstract void OnCollisionEnter(PlayerControllerFSM player, Collision other);
 }

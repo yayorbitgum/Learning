@@ -6,15 +6,30 @@ using UnityEngine;
 
 public class PlayerIdleState : PlayerBaseState
 {
-    public override void EnterState(PlayerControllerFSM player){
-        throw new System.NotImplementedException();
+    // -----------------------------------------------------------------
+    // Upon entering the idle state..
+    public override void EnterState(PlayerControllerFSM player)
+    {
+        player.spinMultiplier = 1;
+        player.SetFacialExpression(player.idleSprite);
     }
 
-    public override void Update(PlayerControllerFSM player){
-        throw new System.NotImplementedException();
+    // -----------------------------------------------------------------
+    public override void Update(PlayerControllerFSM player)
+    {
+        if (Input.GetButtonDown("Jump")){
+            player.TransitionToState(player.jumping);
+        }
+
+        if (Input.GetButton("Duck")){
+            player.SetFacialExpression(player.duckingSprite);
+            player.TransitionToState(player.ducking);
+        }
     }
 
-    public override void OnCollisionEnter(PlayerControllerFSM player){
-        throw new System.NotImplementedException();
+    // -----------------------------------------------------------------
+    public override void OnCollisionEnter(PlayerControllerFSM player, Collision other)
+    {
+        
     }
 }

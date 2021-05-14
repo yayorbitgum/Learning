@@ -6,15 +6,22 @@ using UnityEngine;
 
 public class PlayerSpinningState : PlayerBaseState
 {
-    public override void EnterState(PlayerControllerFSM player){
-        throw new System.NotImplementedException();
+    public override void EnterState(PlayerControllerFSM player)
+    {
+        player.SetFacialExpression(player.spinningSprite);
+        player.SpinMove();
     }
 
-    public override void Update(PlayerControllerFSM player){
-        throw new System.NotImplementedException();
+    public override void Update(PlayerControllerFSM player)
+    {
+        if (Input.GetButtonDown("Duck")){
+            // Keep hitting duck for boost!
+            player.SpinMove();
+        }
     }
 
-    public override void OnCollisionEnter(PlayerControllerFSM player){
-        throw new System.NotImplementedException();
+    public override void OnCollisionEnter(PlayerControllerFSM player, Collision other)
+    {
+        player.TransitionToState(player.idle);
     }
 }
