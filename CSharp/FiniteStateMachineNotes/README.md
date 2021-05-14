@@ -1,0 +1,3 @@
+For use in Unity, particularly for controlling player behavior such as input/animation/etc.
+
+Example of implementation could be attacking/defending decisions with AI in Dark Souls or Sekiro, player attack/defend animations and balance decisions with weapon swings, damage, timing, etc, RPG systems with branching story lines based on decisions made, basic player controls and handling, game states like main menu or loading or paused, different game modes entirely, etc.
