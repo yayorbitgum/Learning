@@ -38,6 +38,8 @@ int main()
     delete p;
     // So make sure to reassign it, or that p will just be a dangling pointer pointing to nothing.
     p = new int(10);
+    // Alternatively, you can get rid of dangling pointers by assigning them to NULL or 0, or "nullptr".
+    p = nullptr;
 
     std::cout << p;
 
