@@ -1,4 +1,5 @@
 /* https://www.youtube.com/watch?v=W0aE-w61Cb8
+ * https://www.youtube.com/watch?v=CSVRA4_xOkw
  *
  * Uses of pointers:
  * - Refer to new memory reserved during execution.
@@ -35,6 +36,7 @@ int main()
     // can't be accessed anymore, so it's just garbage! Memory leaks SUCK.
     // So before the next line, we should do "delete p" to delete that now unused memory.
     delete p;
+    // So make sure to reassign it, or that p will just be a dangling pointer pointing to nothing.
     p = new int(10);
 
     std::cout << p;
