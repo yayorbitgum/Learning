@@ -104,14 +104,14 @@ void UItemGrabber::DebugLineStuff()
 	FColor Color;
 
 	DrawDebugLine(
-		GetWorld(),				 // InWorld.
+		GetWorld(),		 // InWorld.
 		PlayerView.Location,	 // LineStart.
-		LineTraceEnd,			 // LineEnd.
+		LineTraceEnd,		 // LineEnd.
 		Color.FromHex("00FF15"), // Color.
-		false,					 // PersistentLines.
-		1,						 // LifeTime.
-		0,						 // DepthPriority
-		2						 // Thickness.
+		false,			 // PersistentLines.
+		1,			 // LifeTime.
+		0,			 // DepthPriority
+		2			 // Thickness.
 	);
 
 	// Checking if GrabbableHit has an actor yet,
