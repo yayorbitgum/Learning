@@ -1,6 +1,10 @@
 # Personal Projects
 This is a collection of all my [active projects](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects), standalone [scripts](https://github.com/yayorbitgum/Personal/tree/master/Python/Scripts/Automation) and notes as I continue to learn more about Python and C#.
 
+-- --
+- **Check out [neat stuff in C++ in Unreal Engine](https://github.com/yayorbitgum/Escape)!**  
+  
+  [Magnetic Ball Swarm examples](https://www.youtube.com/watch?v=_C3mTcqNjAg)  
 -- --  
 - **Check out [WeatherGet](https://github.com/yayorbitgum/Personal/tree/master/Python/Projects/WeatherGet) for a console-based short-term weather forecast. Involves building things with API calls, using fuzzy matching for correcting user input, and using a live UI method within the console.**  
 ![WeatherGet example](https://i.imgur.com/TXtpYcF.gif)   
