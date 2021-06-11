@@ -3,7 +3,7 @@
 # To install:  
 - Clone/Download .icls file.  
   
-- In IDE: 
+- In Rider/PyCharm/etc: 
     - **File | Settings | Editor | Color Scheme** for Windows and Linux, or  
     - **IntelliJ IDEA | Preferences | Editor | Color Scheme** for macOS, or  
     - **Ctrl+Alt+S** default shortcut.  
